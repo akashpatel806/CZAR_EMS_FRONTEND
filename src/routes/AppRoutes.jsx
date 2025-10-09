@@ -7,9 +7,11 @@ import HolidayCalendarPage from "../pages/HolidayCalendar/HolidayCalendarPage";
 import SettingsPage from "../pages/Settings/SettingsPage";
 import ErrorComponent from "../components/ErrorComponent";
 
+
+
 export default function AppRoutes() {
   return (
-       <BrowserRouter>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<DashboardPage />} />
@@ -17,8 +19,7 @@ export default function AppRoutes() {
           <Route path="leave-request" element={<LeaveRequestPage />} />
           <Route path="holiday-calendar" element={<HolidayCalendarPage />} />
           <Route path="settings" element={<SettingsPage />} />
-          {/* 404 Fallback */}
-          <Route path="*" element={<ErrorComponent message="Page not found!" />} />
+          <Route path="*" element={<ErrorComponent message="Page not found" />} />
         </Route>
       </Routes>
     </BrowserRouter>
