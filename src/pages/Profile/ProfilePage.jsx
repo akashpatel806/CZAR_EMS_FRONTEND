@@ -54,7 +54,7 @@ const ProfilePage = () => {
   const handleCancel = () => setIsEditing(false);
 
   return (
-    <div className="w-full mx-auto mt-10 bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+    <div className="w-full mx-auto  bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white flex flex-col sm:flex-row sm:items-center gap-6">
         <div className="w-24 h-24 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex-shrink-0 shadow-md">
