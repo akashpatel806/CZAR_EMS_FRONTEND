@@ -7,34 +7,46 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored login data
+    // 🔍 Restore login session from localStorage
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
 
     if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (err) {
+        console.error("Failed to parse user:", err);
+        localStorage.removeItem("user");
+      }
     }
     setLoading(false);
   }, []);
 
+  // ✅ Login: store user + token
   const login = (userData, token) => {
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", token);
     setUser(userData);
   };
 
+  // ✅ Logout: clear session
   const logout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setUser(null);
   };
 
+  // ✅ Extract role safely (default: "Employee")
+  const role = user?.role?.toLowerCase() || "employee";
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, role, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook for accessing context
+// ✅ Custom hook for accessing context
 export const useAuth = () => useContext(AuthContext);
+
