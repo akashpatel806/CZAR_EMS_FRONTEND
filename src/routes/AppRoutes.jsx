@@ -9,11 +9,25 @@ import ErrorComponent from "../components/ErrorComponent";
 import Login from "../pages/Login/Login";
 import PrivateRoute from "./PrivateRoute";
 import { AuthProvider } from "../context/AuthContext";
+import { Toaster } from "react-hot-toast";
 
 export default function AppRoutes() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            success: {
+              style: { background: "#d1fae5", color: "#065f46" }, // green
+              iconTheme: { primary: "#059669", secondary: "#ffffff" },
+            },
+            error: {
+              style: { background: "#fee2e2", color: "#991b1b" }, // red
+              iconTheme: { primary: "#dc2626", secondary: "#ffffff" },
+            },
+          }}
+        />
         <Routes>
           {/* Public Route */}
           <Route path="/login" element={<Login />} />
