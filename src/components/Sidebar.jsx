@@ -56,7 +56,7 @@ const Sidebar = () => {
     { id: "settings", label: "Settings", icon: "⚙️", path: "/settings" },
 
     // 👇 Admin-only items
-    { id: "add-employee", label: "Add Employee", icon: "➕", path: "/admin/add-employee", role: "admin" },
+    { id: "add-employee", label: "Employees", icon: "➕", path: "/admin/add-employee", role: "admin" },
     { id: "manage-holidays", label: "Manage Holidays", icon: "🗓️", path: "/admin/manage-holidays", role: "admin" },
   ];
 
