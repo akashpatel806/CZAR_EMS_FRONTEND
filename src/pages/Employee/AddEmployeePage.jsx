@@ -50,15 +50,20 @@ const AddEmployeePage = () => {
   return (
     <div className="max-w-full mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 p-10 mt-2">
       {/* Header */}
-      <div className="mb-8 border-b pb-4">
+     <div className="flex flex-row justify-between items-center">
+         <div className="mb-8 pb-4">
         <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
           👤 Add New Employee
         </h2>
         <p className="text-gray-500 mt-1">
           Fill in the employee details below.
         </p>
+     
       </div>
-
+        <div>
+        <button className="px-8 py-3 rounded-lg font-semibold text-white transition bg-blue-900 hover:bg-blue-800 shadow-md">View All</button>
+      </div>
+     </div>
       {/* Form */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[
