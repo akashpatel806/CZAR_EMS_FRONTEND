@@ -1,41 +1,48 @@
 import React, { useState } from "react";
+import { useEmployeeProfile } from "../../hooks/useEmployeeProfile"; // 👈 Import custom hook
+import axiosInstance from "../../api/axiosInstance";
 
 const ProfilePage = () => {
-  // 🧩 Dummy Employee Data
-  const [employeeProfile, setEmployeeProfile] = useState({
-    name: "John Doe",
-    employeeId: "EMP123",
-    position: "Software Engineer",
-    department: "Development",
-    availableLeaves: 12,
-    dateOfJoining: "2019-06-12",
-    dateOfBirth: "1995-08-25",
-    email: "john.doe@example.com",
-    phone: "+91 9876543210",
-    profilePhoto: "",
-  });
+  const { profile: employeeProfile, setProfile: setEmployeeProfile, loading } = useEmployeeProfile();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
 
-  const [myLeaveRequests] = useState([
-    { id: 1, status: "approved" },
-    { id: 2, status: "pending" },
-    { id: 3, status: "approved" },
-  ]);
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-600">
+        Loading profile...
+      </div>
+    );
+  }
+
+  if (!employeeProfile) {
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-600">
+        No profile found.
+      </div>
+    );
+  }
 
   // 🧩 Derived Stats
   const yearsOfService = employeeProfile.dateOfJoining
-    ? Math.floor((new Date() - new Date(employeeProfile.dateOfJoining)) / (1000 * 60 * 60 * 24 * 365))
+    ? Math.floor(
+        (new Date() - new Date(employeeProfile.dateOfJoining)) /
+          (1000 * 60 * 60 * 24 * 365)
+      )
     : 0;
 
   const age = employeeProfile.dateOfBirth
-    ? Math.floor((new Date() - new Date(employeeProfile.dateOfBirth)) / (1000 * 60 * 60 * 24 * 365))
+    ? Math.floor(
+        (new Date() - new Date(employeeProfile.dateOfBirth)) /
+          (1000 * 60 * 60 * 24 * 365)
+      )
     : 0;
 
-  const approvedLeaves = myLeaveRequests.filter((r) => r.status === "approved").length;
+  const approvedLeaves =
+    employeeProfile.leaveRequests?.filter((r) => r.status === "Approved")
+      .length || 0;
 
-  // 🧩 Form State
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(employeeProfile);
-
+  // 🧩 Handlers
   const handleEditProfile = () => {
     setFormData(employeeProfile);
     setIsEditing(true);
@@ -46,15 +53,22 @@ const ProfilePage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    setEmployeeProfile(formData);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      await axiosInstance.put(`/admin/employee/${employeeProfile._id}`, formData);
+      setEmployeeProfile(formData);
+      setIsEditing(false);
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Update profile error:", error);
+      alert("Failed to update profile.");
+    }
   };
 
   const handleCancel = () => setIsEditing(false);
 
   return (
-    <div className="w-full mx-auto  bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+    <div className="w-full mx-auto bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white flex flex-col sm:flex-row sm:items-center gap-6">
         <div className="w-24 h-24 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex-shrink-0 shadow-md">
@@ -76,7 +90,9 @@ const ProfilePage = () => {
           <p className="text-blue-100 text-sm mb-1">
             {employeeProfile.position} • {employeeProfile.department}
           </p>
-          <p className="text-blue-200 text-sm">Employee ID: {employeeProfile.employeeId}</p>
+          <p className="text-blue-200 text-sm">
+            Employee ID: {employeeProfile.employeeId}
+          </p>
         </div>
       </div>
 
@@ -88,20 +104,20 @@ const ProfilePage = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-700">
           <div>
-            <p className="font-medium text-gray-500">📧 Email</p>
-            <p>{employeeProfile.email}</p>
+            <p className="font-medium text-gray-500">📧 Work Email</p>
+            <p>{employeeProfile.workEmail}</p>
           </div>
           <div>
             <p className="font-medium text-gray-500">📞 Phone</p>
-            <p>{employeeProfile.phone}</p>
+            <p>{employeeProfile.phone || "N/A"}</p>
           </div>
           <div>
             <p className="font-medium text-gray-500">📅 Date of Joining</p>
-            <p>{employeeProfile.dateOfJoining}</p>
+            <p>{new Date(employeeProfile.dateOfJoining).toLocaleDateString()}</p>
           </div>
           <div>
             <p className="font-medium text-gray-500">🎂 Date of Birth</p>
-            <p>{employeeProfile.dateOfBirth}</p>
+            <p>{new Date(employeeProfile.dateOfBirth).toLocaleDateString()}</p>
           </div>
         </div>
       </div>
@@ -109,7 +125,11 @@ const ProfilePage = () => {
       {/* Stats Section */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-8 bg-white border-t">
         {[
-          { title: "Available Leaves", value: employeeProfile.availableLeaves, color: "text-blue-600" },
+          {
+            title: "Available Leaves",
+            value: employeeProfile.availableLeaves,
+            color: "text-blue-600",
+          },
           { title: "Years of Service", value: yearsOfService, color: "text-green-600" },
           { title: "Age", value: age, color: "text-purple-600" },
           { title: "Approved Leaves", value: approvedLeaves, color: "text-orange-600" },
@@ -133,7 +153,7 @@ const ProfilePage = () => {
           ✏️ Edit Profile
         </button>
         <button
-          onClick={() => alert('Change Password clicked!')}
+          onClick={() => alert("Change Password clicked!")}
           className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-sm"
         >
           🔒 Change Password
@@ -153,19 +173,16 @@ const ProfilePage = () => {
                 { label: "Name", name: "name" },
                 { label: "Position", name: "position" },
                 { label: "Department", name: "department" },
-                { label: "Email", name: "email" },
                 { label: "Phone", name: "phone" },
-                { label: "Date of Joining", name: "dateOfJoining", type: "date" },
-                { label: "Date of Birth", name: "dateOfBirth", type: "date" },
               ].map((field, i) => (
                 <div key={i} className="flex flex-col">
                   <label className="text-sm font-medium text-gray-600 mb-1">
                     {field.label}
                   </label>
                   <input
-                    type={field.type || "text"}
+                    type="text"
                     name={field.name}
-                    value={formData[field.name]}
+                    value={formData[field.name] || ""}
                     onChange={handleChange}
                     className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                   />
