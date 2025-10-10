@@ -35,6 +35,8 @@ export default function Login() {
         : { email: formData.email, password: formData.password };
 
       const response = await axios.post(endpoint, payload);
+      console.log("response :",response);
+      
 
       login(response.data.user, response.data.token);
 
