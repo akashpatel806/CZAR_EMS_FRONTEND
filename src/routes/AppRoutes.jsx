@@ -76,6 +76,7 @@ import { Toaster } from "react-hot-toast";
 
 // ✅ Admin Pages
 import AddEmployeePage from "../pages/Employee/AddEmployeePage";
+import EmployeeListPage from "../pages/Employee/EmployeeListPage";
 
 export default function AppRoutes() {
   return (
@@ -133,8 +134,14 @@ export default function AppRoutes() {
                 </PrivateRoute>
               }
             />
-
-            {/* ❌ Catch-all inside MainLayout */}
+            <Route
+              path="admin/all-employees"
+              element={
+                <PrivateRoute allowedRoles={["admin"]}>
+                  <EmployeeListPage />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="*"
               element={<ErrorComponent message="Page not found" />}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { addNewEmployee } from "../../hooks/useEmployeeProfile";
+import { useNavigate } from "react-router-dom";
 
 const AddEmployeePage = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +13,7 @@ const AddEmployeePage = () => {
     employeeId: "",
     role: "Employee",
   });
-
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   // ✅ Handle input change
@@ -61,7 +62,12 @@ const AddEmployeePage = () => {
      
       </div>
         <div>
-        <button className="px-8 py-3 rounded-lg font-semibold text-white transition bg-blue-900 hover:bg-blue-800 shadow-md">View All</button>
+        <button 
+            className="px-8 py-3 rounded-lg font-semibold text-white transition bg-blue-900 hover:bg-blue-800 shadow-md"
+            onClick={()=>{
+                navigate("/admin/all-employees")
+            }}
+            >View All</button>
       </div>
      </div>
       {/* Form */}

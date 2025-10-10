@@ -1,38 +1,4 @@
-// import { useEffect, useState } from "react";
-// import axiosInstance from "../api/axiosInstance";
-
-// export const useEmployeeProfile = () => {
-//   const [profile, setProfile] = useState(null);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchProfile = async () => {
-//       try {
-//         const res = await axiosInstance.get("/employee/profile");
-//         setProfile(res.data);
-//         console.log(res.data);
-        
-//       } catch (error) {
-//         console.error("Error fetching employee profile:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchProfile();
-//   }, []);
-
-//   return { profile, loading, setProfile };
-// };
-
-// export const addNewEmployee = (formData) => {
-//   try{
-
-//   }catch(error){
-
-//   }
-// }
-
+// 📂 src/hooks/useEmployeeProfile.js
 
 import { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
@@ -48,27 +14,25 @@ export const useEmployeeProfile = () => {
       try {
         const res = await axiosInstance.get("/employee/profile");
         setProfile(res.data);
-        console.log("Fetched profile:", res.data);
       } catch (error) {
         console.error("Error fetching employee profile:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchProfile();
   }, []);
 
   return { profile, loading, setProfile };
 };
 
-// ✅ Utility to add a new employee
+// ✅ Add New Employee
 export const addNewEmployee = async (formData) => {
   try {
-    const res = await axiosInstance.post("/admin/employees", formData,{
-      headers:{
-        Authorization: localStorage.getItem('token')
-      }
+    const res = await axiosInstance.post("/admin/employees", formData, {
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
     });
     toast.success(res.data.message || "Employee created successfully");
     return res.data;
@@ -77,4 +41,32 @@ export const addNewEmployee = async (formData) => {
     toast.error(error.response?.data?.message || "Failed to create employee");
     throw error;
   }
+};
+
+// ✅ Fetch All Employees (Admin)
+export const useEmployeeList = () => {
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchEmployees = async () => {
+    try {
+      const res = await axiosInstance.get("/admin/users", {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      });
+      setEmployees(res.data);
+    } catch (error) {
+      console.error("Error fetching employee list:", error);
+      toast.error("Failed to load employee list");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  return { employees, loading, refresh: fetchEmployees };
 };
