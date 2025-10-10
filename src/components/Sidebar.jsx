@@ -14,7 +14,7 @@ const Sidebar = () => {
   return (
     <div className="w-64 fixed h-screen shadow-lg bg-white border-r border-gray-200">
       <div className="p-6">
-        <h2 className="text-xl font-bold text-blue-600 mb-8">CzarCore</h2>
+        <h2 className="text-xl font-bold text-blue-600 mb-8">CZAR EMS</h2>
         <nav className="space-y-2">
           {menuItems.map((item) => (
             <NavLink
