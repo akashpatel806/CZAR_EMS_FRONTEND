@@ -47,7 +47,7 @@ export default function Login() {
 
       setTimeout(() => {
         if (response.data.user.role === "admin") navigate("/admin");
-        else navigate("/employee");
+        else navigate("/");
       }, 800);
     } catch (error) {
       setMessage(error.response?.data?.message || "Something went wrong");

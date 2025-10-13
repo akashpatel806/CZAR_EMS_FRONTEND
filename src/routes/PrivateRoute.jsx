@@ -30,7 +30,7 @@ export default function PrivateRoute({ children, allowedRoles = [] }) {
 
   // 🚫 Not logged in
   if (!user) {
-    toast.error("Please log in to continue");
+    // toast.error("Please log in to continue");
     return <Navigate to="/login" replace />;
   }
 
