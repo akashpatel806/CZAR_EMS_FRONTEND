@@ -88,7 +88,6 @@
 import React, { useState } from "react";
 import { Search, UserPlus, Filter } from "lucide-react";
 
-// Mock hook for demo - replace with your actual hook
 const useEmployeeList = () => {
   const employees = [
     {
@@ -177,7 +176,9 @@ const EmployeeListPage = () => {
             {filteredEmployees.length} of {employees.length} employees
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition" onClick={()=>{
+
+        }}> 
           <UserPlus size={18} />
           Add Employee
         </button>
