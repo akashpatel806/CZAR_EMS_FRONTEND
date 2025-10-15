@@ -9,7 +9,7 @@ const DashboardPage = () => {
   const { profile: employeeProfile, loading } = useEmployeeProfile();
   const { role } = useAuth();
 
-  // ✅ Admin stats state
+
   const [adminStats, setAdminStats] = useState({
     totalEmployees: 0,
     onLeaveToday: 0,
