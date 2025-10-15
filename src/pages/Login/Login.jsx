@@ -181,7 +181,7 @@ export default function Login() {
         )}
 
         {/* Toggle Link */}
-        <div className="mt-8 text-center text-sm text-gray-600">
+        {/* <div className="mt-8 text-center text-sm text-gray-600">
           {isSignUp ? "Already have an account?" : "Don’t have an account?"}{" "}
           <button
             onClick={toggleMode}
@@ -189,7 +189,7 @@ export default function Login() {
           >
             {isSignUp ? "Sign In" : "Sign Up"}
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
