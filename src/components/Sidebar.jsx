@@ -50,8 +50,8 @@ const Sidebar = () => {
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: "📊", path: "/" },
     { id: "profile", label: "My Profile", icon: "👤", path: "/profile" },
-    { id: "leave-request", label: "Leave Request", icon: "📝", path: "/leave-request" },
     { id: "payroll", label: "My Payroll", icon: "💰", path: "/payroll" },
+    { id: "leave-request", label: "Leave Request", icon: "📝", path: "/leave-request" },
     { id: "holidays", label: "Holiday Calendar", icon: "📅", path: "/holiday-calendar" },
     { id: "settings", label: "Settings", icon: "⚙️", path: "/settings" },
 

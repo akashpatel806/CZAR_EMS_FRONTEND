@@ -22,7 +22,7 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/admin/dashboard`);
+        const response = await axios.get(`${BASE_URL}/api/admin/admin-dashboard`);
         setAdminStats(response.data);
       } catch (err) {
         console.error("Error fetching admin dashboard data:", err);
