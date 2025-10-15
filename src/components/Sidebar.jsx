@@ -8,14 +8,12 @@ const Sidebar = () => {
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: "📊", path: "/" },
     { id: "profile", label: "My Profile", icon: "👤", path: "/profile" },
-    { id: "payroll", label: "My Payroll", icon: "💰", path: "/payroll" },
     { id: "leave-request", label: "Leave Request", icon: "📝", path: "/leave-request" },
     { id: "holidays", label: "Holiday Calendar", icon: "📅", path: "/holiday-calendar" },
     { id: "settings", label: "Settings", icon: "⚙️", path: "/settings" },
 
     // 👇 Admin-only items
     { id: "add-employee", label: "Employees", icon: "➕", path: "/admin/add-employee", role: "admin" },
-    { id: "manage-holidays", label: "Manage Holidays", icon: "🗓️", path: "/admin/manage-holidays", role: "admin" },
   ];
 
   const filtered = menuItems.filter((item) => !item.role || item.role === role);
