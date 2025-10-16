@@ -264,7 +264,7 @@ const [formData, setFormData] = useState({
                         onClick={() => handleDeleteHoliday(holiday._id)}
                         className="text-xs bg-red-500 text-white rounded px-1 hover:bg-red-600"
                       >
-                        ❌
+                        x
                       </button>
                     </div>
                   )}

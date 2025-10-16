@@ -242,6 +242,8 @@ const ProfilePage = () => {
         const res = await axiosInstance.get(`/admin/get-admin-details?id=${user._id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log("server response : ",res);
+        
         setAdminProfile(res.data.admin);
       } catch (error) {
         console.error("Error fetching admin details:", error);
