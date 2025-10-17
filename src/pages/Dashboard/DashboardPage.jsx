@@ -22,9 +22,15 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/admin/admin-dashboard`);
+        const response = await axios.get(`${BASE_URL}/api/admin/admin-dashboard`,{
+          headers:{
+            Authorization:`Bearer ${localStorage.getItem('token')}`
+          }
+        });
         setAdminStats(response.data);
       } catch (err) {
+        console.log(err?.response?.data);
+        
         console.error("Error fetching admin dashboard data:", err);
       }
     };
