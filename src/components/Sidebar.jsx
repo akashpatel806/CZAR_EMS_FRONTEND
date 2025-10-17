@@ -10,7 +10,7 @@ const Sidebar = () => {
     { id: "profile", label: "My Profile", icon: "👤", path: "/profile" },
     { id: "leave-request", label: "Leave Request", icon: "📝", path: "/leave-request" },
     { id: "holidays", label: "Holiday Calendar", icon: "📅", path: "/holiday-calendar" },
-    { id: "settings", label: "Settings", icon: "⚙️", path: "/settings" },
+    { id: "attendance", label: "Attendance", icon: "⚙️", path: "/attendance" },
 
     // 👇 Admin-only items
     { id: "add-employee", label: "Employees", icon: "➕", path: "/admin/add-employee", role: "admin" },

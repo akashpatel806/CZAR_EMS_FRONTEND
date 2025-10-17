@@ -71,48 +71,69 @@ const AddEmployeePage = () => {
       </div>
      </div>
       {/* Form */}
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[
-          { name: "name", label: "Full Name", placeholder: "Enter employee name" },
-          { name: "personalEmail", label: "Personal Email", type: "email", placeholder: "Enter personal email" },
-          { name: "employeeId", label: "Employee ID", placeholder: "Ex: EMP001" },
-          { name: "department", label: "Department", placeholder: "Ex: Engineering" },
-          { name: "position", label: "Position", placeholder: "Ex: Software Engineer" },
-          { name: "dateOfBirth", label: "Date of Birth", type: "date" },
-          { name: "dateOfJoining", label: "Date of Joining", type: "date" },
-        ].map((f) => (
-          <div key={f.name}>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              {f.label}
-            </label>
-            <input
-              type={f.type || "text"}
-              name={f.name}
-              value={formData[f.name]}
-              onChange={handleChange}
-              placeholder={f.placeholder}
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
-            />
-          </div>
-        ))}
+   <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {[
+    { name: "name", label: "Full Name", placeholder: "Enter employee name" },
+    { name: "personalEmail", label: "Personal Email", type: "email", placeholder: "Enter personal email" },
+    { name: "employeeId", label: "Employee ID", placeholder: "Ex: EMP001" },
+    { name: "position", label: "Position", placeholder: "Ex: Software Engineer" },
+    { name: "dateOfBirth", label: "Date of Birth", type: "date" },
+    { name: "dateOfJoining", label: "Date of Joining", type: "date" },
+  ].map((f) => (
+    <div key={f.name}>
+      <label className="block text-sm font-medium text-gray-600 mb-1">
+        {f.label}
+      </label>
+      <input
+        type={f.type || "text"}
+        name={f.name}
+        value={formData[f.name]}
+        onChange={handleChange}
+        placeholder={f.placeholder}
+        required
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
+      />
+    </div>
+  ))}
 
-        {/* Role Select */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Role
-          </label>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
-          >
-            <option value="Employee">Employee</option>
-            <option value="Admin">Admin</option>
-          </select>
-        </div>
-      </form>
+  {/* ✅ Department Select */}
+  <div>
+    <label className="block text-sm font-medium text-gray-600 mb-1">
+      Department
+    </label>
+    <select
+      name="department"
+      value={formData.department}
+      onChange={handleChange}
+      required
+      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
+    >
+      <option value="">Select Department</option>
+      {["HR", "IT", "SALES", "FINANCE", "MARKETING", "OPERATIONS", "SUPPORT", 'RESEARCH AND DEVELOPMENT','PRODUCTION'].map((dept) => (
+        <option key={dept} value={dept}>
+          {dept}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  {/* Role Select */}
+  <div>
+    <label className="block text-sm font-medium text-gray-600 mb-1">
+      Role
+    </label>
+    <select
+      name="role"
+      value={formData.role}
+      onChange={handleChange}
+      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
+    >
+      <option value="Employee">Employee</option>
+      <option value="Admin">Admin</option>
+    </select>
+  </div>
+</form>
+
 
       {/* Submit Button */}
       <div className="mt-10 flex justify-end">
