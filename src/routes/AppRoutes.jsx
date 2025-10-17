@@ -73,10 +73,12 @@ import Login from "../pages/Login/Login";
 import PrivateRoute from "./PrivateRoute";
 import { AuthProvider } from "../context/AuthContext";
 import { Toaster } from "react-hot-toast";
+import AllLeaveRequests from "../pages/LeaveRequest/AllLeaveRequest"
 
 // ✅ Admin Pages
 import AddEmployeePage from "../pages/Employee/AddEmployeePage";
 import EmployeeListPage from "../pages/Employee/EmployeeListPage";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 export default function AppRoutes() {
   return (
@@ -96,6 +98,7 @@ export default function AppRoutes() {
             },
           }}
         />
+        <ErrorBoundary>
 
         <Routes>
           {/* 🌐 Public Routes */}
@@ -116,6 +119,7 @@ export default function AppRoutes() {
             <Route path="leave-request" element={<LeaveRequestPage />} />
             <Route path="holiday-calendar" element={<HolidayCalendarPage />} />
             <Route path="attendance" element={<Attendance />} />
+            <Route path="all-requests" element={<AllLeaveRequests/>}/>
 
             {/* 👑 Admin-only Pages */}
             <Route
@@ -151,6 +155,8 @@ export default function AppRoutes() {
           {/* 🔁 Redirect unknown routes to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
+        </ErrorBoundary>
+
       </BrowserRouter>
     </AuthProvider>
   );
