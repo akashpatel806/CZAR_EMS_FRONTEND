@@ -336,7 +336,6 @@ const AllLeaveRequests = () => {
                 <th className="p-3 text-left">To</th>
                 <th className="p-3 text-left">Reason</th>
                 <th className="p-3 text-left">Status</th>
-                {role === "admin" && <th className="p-3 text-left">Action</th>}
               </tr>
             </thead>
             <tbody>
@@ -372,22 +371,7 @@ const AllLeaveRequests = () => {
                       {req.status}
                     </span>
                   </td>
-                  {role === "admin" && req.status === "Pending" && (
-                    <td className="p-3 flex gap-2">
-                      <button
-                        onClick={() => handleReview(req._id, "Approved")}
-                        className="px-3 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleReview(req._id, "Rejected")}
-                        className="px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700"
-                      >
-                        Reject
-                      </button>
-                    </td>
-                  )}
+                 
                 </tr>
               ))}
             </tbody>
