@@ -12,10 +12,11 @@ export const useEmployeeProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axiosInstance.get("/employee/profile");
+        const res = await axiosInstance.get("/employee/me");
         setProfile(res.data);
       } catch (error) {
         console.error("Error fetching employee profile:", error);
+        setProfile(null);
       } finally {
         setLoading(false);
       }

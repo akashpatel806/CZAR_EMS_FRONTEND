@@ -6,6 +6,7 @@ const AddEmployeePage = () => {
   const [formData, setFormData] = useState({
     name: "",
     personalEmail: "",
+    phone :"",
     dateOfBirth: "",
     dateOfJoining: "",
     department: "",
@@ -33,6 +34,7 @@ const AddEmployeePage = () => {
       setFormData({
         name: "",
         personalEmail: "",
+        phone :"",
         dateOfBirth: "",
         dateOfJoining: "",
         department: "",
@@ -74,7 +76,8 @@ const AddEmployeePage = () => {
    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
   {[
     { name: "name", label: "Full Name", placeholder: "Enter employee name" },
-    { name: "personalEmail", label: "Personal Email", type: "email", placeholder: "Enter personal email" },
+    { name: "personalEmail", label: "Personal Email", type: "email", placeholder: "Enter personal email",  },
+    { name: "phone", label: "Phone Number", placeholder: "Ex: +1234567890" },
     { name: "employeeId", label: "Employee ID", placeholder: "Ex: EMP001" },
     { name: "position", label: "Position", placeholder: "Ex: Software Engineer" },
     { name: "dateOfBirth", label: "Date of Birth", type: "date" },

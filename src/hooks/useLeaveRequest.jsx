@@ -40,7 +40,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const BASE_URL = "http://localhost:5000"; // ⚙️ adjust for production
+const BASE_URL = "http://localhost:5002"; // ⚙️ adjust for production
 
 export const useLeaveRequest = () => {
   const [leaveRequests, setLeaveRequests] = useState([]);

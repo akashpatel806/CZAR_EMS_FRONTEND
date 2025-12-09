@@ -229,7 +229,13 @@ const ProfilePage = () => {
 
   const [adminProfile, setAdminProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [formData, setFormData] = useState({});
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(true);
 
   // ✅ Fetch admin profile when role = admin
@@ -304,7 +310,7 @@ const ProfilePage = () => {
       const endpoint =
         role === "admin"
           ? `/admin/update/${profile._id}`
-          : `/admin/employee/${profile._id}`;
+          : `/employee/profile`;
       await axiosInstance.put(endpoint, formData);
       if (role === "employee") setEmployeeProfile(formData);
       if (role === "admin") setAdminProfile(formData);
@@ -318,10 +324,52 @@ const ProfilePage = () => {
 
   const handleCancel = () => setIsEditing(false);
 
+  // ✅ Change Password Handlers
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleChangePassword = async () => {
+    try {
+      if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+        alert('All fields are required');
+        return;
+      }
+
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        alert('New passwords do not match');
+        return;
+      }
+
+      if (passwordData.newPassword.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+      }
+
+      const endpoint = role === "admin" ? `/admin/change-password` : `/employee/change-password`;
+      await axiosInstance.put(endpoint, {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      alert('Password changed successfully!');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setIsChangingPassword(false);
+    } catch (error) {
+      console.error('Change password error:', error);
+      alert(error.response?.data?.message || 'Failed to change password');
+    }
+  };
+
+  const handleCancelPassword = () => {
+    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setIsChangingPassword(false);
+  };
+
   // 🧱 UI starts here
   return (
     <div className="w-full mx-auto bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-      {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white flex flex-col sm:flex-row sm:items-center gap-6">
         <div className="w-24 h-24 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex-shrink-0 shadow-md">
           {profile.profilePhoto ? (
@@ -356,23 +404,54 @@ const ProfilePage = () => {
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-700">
+          {/* Email */}
           <div>
             <p className="font-medium text-gray-500">📧 Email</p>
-            <p>{profile.email}</p>
+            <p>{role === "admin" ? profile.email : profile.personalEmail}</p>
           </div>
+
+          {/* Phone */}
           <div>
             <p className="font-medium text-gray-500">📞 Phone</p>
             <p>{profile.phone || "N/A"}</p>
           </div>
+
+          {/* Admin-specific fields */}
+          {role === "admin" && (
+            <>
+              <div>
+                <p className="font-medium text-gray-500">🏢 Department</p>
+                <p>{profile.department || "N/A"}</p>
+              </div>
+            </>
+          )}
+
+          {/* Employee-specific fields */}
           {role === "employee" && (
             <>
               <div>
+                <p className="font-medium text-gray-500">🏢 Department</p>
+                <p>{profile.department || "N/A"}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-500">💼 Position</p>
+                <p>{profile.position || "N/A"}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-500">🆔 Employee ID</p>
+                <p>{profile.employeeId || "N/A"}</p>
+              </div>
+              <div>
                 <p className="font-medium text-gray-500">📅 Date of Joining</p>
-                <p>{new Date(profile.dateOfJoining).toLocaleDateString()}</p>
+                <p>{profile.dateOfJoining ? new Date(profile.dateOfJoining).toLocaleDateString() : "N/A"}</p>
               </div>
               <div>
                 <p className="font-medium text-gray-500">🎂 Date of Birth</p>
-                <p>{new Date(profile.dateOfBirth).toLocaleDateString()}</p>
+                <p>{profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : "N/A"}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-500">📬 Work Email</p>
+                <p>{profile.workEmail || "N/A"}</p>
               </div>
             </>
           )}
@@ -408,7 +487,7 @@ const ProfilePage = () => {
           ✏️ Edit Profile
         </button>
         <button
-          onClick={() => alert("Change Password clicked!")}
+          onClick={() => setIsChangingPassword(true)}
           className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-sm"
         >
           🔒 Change Password
@@ -425,13 +504,13 @@ const ProfilePage = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { label: "Name", name: "name" },
-                { label: "Department", name: "department" },
-                { label: "Phone", name: "phone" },
+                { label: "Name", name: "name", type: "text" },
+                { label: "Department", name: "department", type: "text" },
+                { label: "Phone", name: "phone", type: "text" },
                 ...(role === "employee"
                   ? [
-                      { label: "Position", name: "position" },
-                      { label: "Date of Birth", name: "dateOfBirth" },
+                      { label: "Position", name: "position", type: "text" },
+                      { label: "Date of Birth", name: "dateOfBirth", type: "date" },
                     ]
                   : []),
               ].map((field, i) => (
@@ -439,13 +518,27 @@ const ProfilePage = () => {
                   <label className="text-sm font-medium text-gray-600 mb-1">
                     {field.label}
                   </label>
-                  <input
-                    type="text"
-                    name={field.name}
-                    value={formData[field.name] || ""}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                  />
+                  {field.type === "date" ? (
+                    <input
+                      type="date"
+                      name={field.name}
+                      value={
+                        formData[field.name]
+                          ? new Date(formData[field.name]).toISOString().split("T")[0]
+                          : ""
+                      }
+                      onChange={handleChange}
+                      className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      name={field.name}
+                      value={formData[field.name] || ""}
+                      onChange={handleChange}
+                      className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -462,6 +555,76 @@ const ProfilePage = () => {
                 className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {isChangingPassword && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 relative">
+            <h3 className="text-2xl font-semibold mb-6 text-green-700 border-b pb-2">
+              Change Password
+            </h3>
+
+            <div className="space-y-4">
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-gray-600 mb-2">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Enter your current password"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-gray-600 mb-2">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Enter new password (min 6 chars)"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-gray-600 mb-2">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Confirm your new password"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-8">
+              <button
+                onClick={handleCancelPassword}
+                className="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleChangePassword}
+                className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+              >
+                Change Password
               </button>
             </div>
           </div>

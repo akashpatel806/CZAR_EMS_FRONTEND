@@ -3,7 +3,7 @@ import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "http://localhost:5002";
 
 const DashboardPage = () => {
   const { profile: employeeProfile, loading } = useEmployeeProfile();
