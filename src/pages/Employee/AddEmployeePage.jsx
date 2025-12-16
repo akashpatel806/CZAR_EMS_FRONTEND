@@ -6,146 +6,335 @@ const AddEmployeePage = () => {
   const [formData, setFormData] = useState({
     name: "",
     personalEmail: "",
+    workEmail: "",
+    phone: "",
     dateOfBirth: "",
     dateOfJoining: "",
     department: "",
     position: "",
     employeeId: "",
+    leaveBalance: "",
     role: "Employee",
   });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  // ✅ Validate phone number (10 digits, can start with +)
+  const validatePhone = (phone) => {
+    const phoneRegex = /^[+]?[0-9]{10}$/;
+    return phoneRegex.test(phone.replace(/\s|-/g, ""));
+  };
+
+  // ✅ Validate email
+  const validateEmail = (email) => {
+    // Ensure no consecutive dots or dot immediately before @
+    const emailRegex = /^[a-zA-Z0-9._%+-]+[^.]@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
 
   // ✅ Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  // ✅ Validate form before submit
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.personalEmail.trim()) newErrors.personalEmail = "Personal Email is required";
+    if (!validateEmail(formData.personalEmail)) newErrors.personalEmail = "Invalid email format";
+    if (!formData.workEmail.trim()) newErrors.workEmail = "Work Email is required";
+    if (!validateEmail(formData.workEmail)) newErrors.workEmail = "Invalid email format";
+    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
+    if (!validatePhone(formData.phone)) newErrors.phone = "Phone must be 10 digits";
+    if (!formData.employeeId.trim()) newErrors.employeeId = "Employee ID is required";
+    if (!formData.position.trim()) newErrors.position = "Position is required";
+    if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of Birth is required";
+    if (!formData.dateOfJoining) newErrors.dateOfJoining = "Date of Joining is required";
+    if (!formData.department) newErrors.department = "Department is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   // ✅ Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
     setLoading(true);
 
     try {
-      await addNewEmployee(formData); // 🧩 Handles toast internally
+      // Prepare data with ISO date strings
+      // Sanitize work email: Remove dots before @
+      const sanitizedWorkEmail = formData.workEmail.replace(/\.+@/, "@");
+
+      const preparedData = {
+        ...formData,
+        workEmail: sanitizedWorkEmail,
+        dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : null,
+        dateOfJoining: formData.dateOfJoining ? new Date(formData.dateOfJoining).toISOString() : null,
+      };
+      await addNewEmployee(preparedData);
       // Reset form after success
       setFormData({
         name: "",
+        name: "",
         personalEmail: "",
+        workEmail: "",
+        phone: "",
         dateOfBirth: "",
         dateOfJoining: "",
         department: "",
         position: "",
         employeeId: "",
+        leaveBalance: "",
         role: "Employee",
       });
+      setErrors({});
     } catch (error) {
       console.error("Error creating employee:", error);
-      // ❌ no need for extra toast — handled inside the hook
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-full mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 p-10 mt-2">
+    <div className="max-w-full mx-auto bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 md:p-8 lg:p-10 mt-2">
       {/* Header */}
-     <div className="flex flex-row justify-between items-center">
-         <div className="mb-8 pb-4">
-        <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
-          👤 Add New Employee
-        </h2>
-        <p className="text-gray-500 mt-1">
-          Fill in the employee details below.
-        </p>
-     
-      </div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 pb-4 gap-4">
         <div>
-        <button 
-            className="px-8 py-3 rounded-lg font-semibold text-white transition bg-blue-900 hover:bg-blue-800 shadow-md"
-            onClick={()=>{
-                navigate("/admin/all-employees")
-            }}
-            >View All</button>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+            👤 Add New Employee
+          </h2>
+          <p className="text-sm sm:text-base text-gray-500 mt-1">
+            Fill in the employee details below.
+          </p>
+        </div>
+        <button
+          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base text-white transition bg-blue-900 hover:bg-blue-800 shadow-md"
+          onClick={() => navigate("/admin/all-employees")}
+        >
+          View All
+        </button>
       </div>
-     </div>
+
       {/* Form */}
-   <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  {[
-    { name: "name", label: "Full Name", placeholder: "Enter employee name" },
-    { name: "personalEmail", label: "Personal Email", type: "email", placeholder: "Enter personal email" },
-    { name: "employeeId", label: "Employee ID", placeholder: "Ex: EMP001" },
-    { name: "position", label: "Position", placeholder: "Ex: Software Engineer" },
-    { name: "dateOfBirth", label: "Date of Birth", type: "date" },
-    { name: "dateOfJoining", label: "Date of Joining", type: "date" },
-  ].map((f) => (
-    <div key={f.name}>
-      <label className="block text-sm font-medium text-gray-600 mb-1">
-        {f.label}
-      </label>
-      <input
-        type={f.type || "text"}
-        name={f.name}
-        value={formData[f.name]}
-        onChange={handleChange}
-        placeholder={f.placeholder}
-        required
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
-      />
-    </div>
-  ))}
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+        {/* Full Name */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Full Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter employee name"
+            className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+              }`}
+          />
+          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+        </div>
 
-  {/* ✅ Department Select */}
-  <div>
-    <label className="block text-sm font-medium text-gray-600 mb-1">
-      Department
-    </label>
-    <select
-      name="department"
-      value={formData.department}
-      onChange={handleChange}
-      required
-      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
-    >
-      <option value="">Select Department</option>
-      {["HR", "IT", "SALES", "FINANCE", "MARKETING", "OPERATIONS", "SUPPORT", 'RESEARCH AND DEVELOPMENT','PRODUCTION'].map((dept) => (
-        <option key={dept} value={dept}>
-          {dept}
-        </option>
-      ))}
-    </select>
-  </div>
+        {/* Personal Email */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Personal Email <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            name="personalEmail"
+            value={formData.personalEmail}
+            onChange={handleChange}
+            placeholder="Enter personal email"
+            className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.personalEmail ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+              }`}
+          />
+          {errors.personalEmail && <p className="text-red-500 text-xs mt-1">{errors.personalEmail}</p>}
+        </div>
 
-  {/* Role Select */}
-  <div>
-    <label className="block text-sm font-medium text-gray-600 mb-1">
-      Role
-    </label>
-    <select
-      name="role"
-      value={formData.role}
-      onChange={handleChange}
-      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
-    >
-      <option value="Employee">Employee</option>
-      <option value="Admin">Admin</option>
-    </select>
-  </div>
-</form>
+        {/* Work Email */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Work Email <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            name="workEmail"
+            value={formData.workEmail}
+            onChange={handleChange}
+            placeholder="Enter work email"
+            className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.workEmail ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+              }`}
+          />
+          {errors.workEmail && <p className="text-red-500 text-xs mt-1">{errors.workEmail}</p>}
+        </div>
 
+        {/* Phone Number */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Phone Number <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="tel"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="Enter phone number (10-13 digits)"
+            className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.phone ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+              }`}
+          />
+          {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+        </div>
+
+        {/* Employee ID */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Employee ID <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="employeeId"
+            value={formData.employeeId}
+            onChange={handleChange}
+            placeholder="Ex: EMP001"
+            className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.employeeId ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+              }`}
+          />
+          {errors.employeeId && <p className="text-red-500 text-xs mt-1">{errors.employeeId}</p>}
+        </div>
+
+        {/* Position */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Position <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="position"
+            value={formData.position}
+            onChange={handleChange}
+            placeholder="Ex: Software Engineer"
+            className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.position ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+              }`}
+          />
+          {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position}</p>}
+        </div>
+
+        {/* Date of Birth */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Date of Birth <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            name="dateOfBirth"
+            value={formData.dateOfBirth}
+            onChange={handleChange}
+            className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.dateOfBirth ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+              }`}
+          />
+          {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>}
+        </div>
+
+        {/* Date of Joining */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Date of Joining <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            name="dateOfJoining"
+            value={formData.dateOfJoining}
+            onChange={handleChange}
+            className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.dateOfJoining ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+              }`}
+          />
+          {errors.dateOfJoining && <p className="text-red-500 text-xs mt-1">{errors.dateOfJoining}</p>}
+        </div>
+
+        {/* Department */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Department <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="department"
+            value={formData.department}
+            onChange={handleChange}
+            className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.department ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+              }`}
+          >
+            <option value="">Select Department</option>
+            {["HR", "IT", "SALES", "FINANCE", "MARKETING", "OPERATIONS", "SUPPORT", "RESEARCH AND DEVELOPMENT", "PRODUCTION"].map((dept) => (
+              <option key={dept} value={dept}>
+                {dept}
+              </option>
+            ))}
+          </select>
+          {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department}</p>}
+        </div>
+
+        {/* Leave Balance */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Leave Balance
+          </label>
+          <input
+            type="number"
+            name="leaveBalance"
+            value={formData.leaveBalance}
+            onChange={handleChange}
+            placeholder="Enter leave balance (days)"
+            min="0"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
+          />
+        </div>
+
+        {/* Role */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Role
+          </label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
+          >
+            <option value="Employee">Employee</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+      </form>
 
       {/* Submit Button */}
-      <div className="mt-10 flex justify-end">
+      <div className="mt-6 sm:mt-8 md:mt-10 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+        <button
+          type="button"
+          onClick={() => navigate("/admin/all-employees")}
+          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base text-gray-700 transition border border-gray-300 hover:bg-gray-50 order-2 sm:order-1"
+        >
+          Cancel
+        </button>
         <button
           type="submit"
           onClick={handleSubmit}
           disabled={loading}
-          className={`px-8 py-3 rounded-lg font-semibold text-white transition ${
-            loading
-              ? "bg-blue-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 shadow-md"
-          }`}
+          className={`w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base text-white transition order-1 sm:order-2 ${loading
+            ? "bg-blue-400 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700 shadow-md"
+            }`}
         >
           {loading ? "Adding..." : "Add Employee"}
         </button>

@@ -190,6 +190,7 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 
+
 const AllLeaveRequests = () => {
   const { role, token } = useAuth();
   const [leaveRequests, setLeaveRequests] = useState([]);
@@ -197,6 +198,8 @@ const AllLeaveRequests = () => {
   const [month, setMonth] = useState("");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedReason, setSelectedReason] = useState(null);
+
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -236,7 +239,7 @@ const AllLeaveRequests = () => {
 
     if (search.trim() !== "") {
       filteredData = filteredData.filter((req) =>
-        req.employeeId?.name
+        (req.employeeId?.userId?.name || req.employeeId?.name)
           ?.toLowerCase()
           .includes(search.trim().toLowerCase())
       );
@@ -257,11 +260,38 @@ const AllLeaveRequests = () => {
       setLeaveRequests((prev) =>
         prev.map((req) => (req._id === id ? res.data.leaveRequest : req))
       );
+
+      // ✅ If approved, update available leaves
+      if (status === "Approved") {
+        const req = leaveRequests.find((r) => r._id === id);
+        if (req) {
+          // Calculate number of days
+          const fromDate = new Date(req.fromDate);
+          const toDate = new Date(req.toDate);
+          const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24)) + 1;
+
+          // Fetch current employee details
+          const empRes = await axiosInstance.get(`/admin/employee/${req.employeeId._id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const currentLeaves = empRes.data.availableLeaves || 0;
+          const newLeaves = Math.max(0, currentLeaves - daysDiff); // Prevent negative
+
+          // Update employee's available leaves
+          await axiosInstance.put(
+            `/admin/update/${req.employeeId._id}`,
+            { availableLeaves: newLeaves },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        }
+      }
     } catch (error) {
       console.error("Error reviewing leave request:", error);
       alert("Failed to update leave request.");
     }
   };
+
+
 
   // ✅ Loading UI
   if (loading) {
@@ -290,9 +320,9 @@ const AllLeaveRequests = () => {
 
   // ✅ Main UI when data exists
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-xl shadow-lg flex flex-col sm:flex-row justify-between items-center">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-xl shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold">All Leave Requests</h1>
           <p className="text-blue-100">View and filter all leave requests.</p>
@@ -301,10 +331,10 @@ const AllLeaveRequests = () => {
 
       {/* Filters */}
       {leaveRequests.length > 0 && (
-        <div className="flex flex-wrap gap-4 bg-white p-4 rounded-xl shadow-md border border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl shadow-md border border-gray-200">
           <input
             type="month"
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:w-auto focus:ring-2 focus:ring-indigo-500 outline-none"
             onChange={(e) => {
               const monthNum = e.target.value.split("-")[1];
               setMonth(monthNum);
@@ -315,7 +345,7 @@ const AllLeaveRequests = () => {
             placeholder="Search by employee name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm flex-1"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:flex-1 focus:ring-2 focus:ring-indigo-500 outline-none"
           />
         </div>
       )}
@@ -330,12 +360,22 @@ const AllLeaveRequests = () => {
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
               <tr>
-                <th className="p-3 text-left">Employee</th>
-                <th className="p-3 text-left">Leave Type</th>
-                <th className="p-3 text-left">From</th>
-                <th className="p-3 text-left">To</th>
-                <th className="p-3 text-left">Reason</th>
-                <th className="p-3 text-left">Status</th>
+                {[
+                  "Employee",
+                  "Leave Type",
+                  "Leave Reason Type",
+                  "From",
+                  "From Time",
+                  "To",
+                  "To Time",
+                  "Reason",
+                  "Status",
+                ].map((head) => (
+                  <th key={head} className="p-3 text-left whitespace-nowrap">
+                    {head}
+                  </th>
+                ))}
+                {role === "admin" && <th className="p-3 text-left whitespace-nowrap">Action</th>}
               </tr>
             </thead>
             <tbody>
@@ -344,38 +384,96 @@ const AllLeaveRequests = () => {
                   key={req._id}
                   className="border-t hover:bg-gray-50 transition duration-150"
                 >
-                  <td className="p-3">
-                    {req.employeeId?.name || "Unknown"} <br />
+                  <td className="p-3 whitespace-nowrap">
+                    {req.employeeId?.userId?.name || req.employeeId?.name || "Unknown"} <br />
                     <span className="text-xs text-gray-400">
                       {req.employeeId?.department || ""}
                     </span>
                   </td>
-                  <td className="p-3 capitalize">{req.leaveType}</td>
-                  <td className="p-3">
+                  <td className="p-3 capitalize whitespace-nowrap">{req.leaveType}</td>
+                  <td className="p-3 capitalize whitespace-nowrap">{req.leaveReasonType}</td>
+                  <td className="p-3 whitespace-nowrap">
                     {new Date(req.fromDate).toLocaleDateString()}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 whitespace-nowrap">{req.fromTime || "N/A"}</td>
+                  <td className="p-3 whitespace-nowrap">
                     {new Date(req.toDate).toLocaleDateString()}
                   </td>
-                  <td className="p-3">{req.reason}</td>
-                  <td className="p-3">
+                  <td className="p-3 whitespace-nowrap">{req.toTime || "N/A"}</td>
+                  <td
+                    className="p-3 max-w-[300px] cursor-pointer"
+                    onClick={() => setSelectedReason(req.reason)}
+                  >
+                    <div className="line-clamp-2 hover:text-blue-600 transition-colors" title="Click to view full reason">
+                      {req.reason}
+                    </div>
+                  </td>
+                  <td className="p-3 whitespace-nowrap">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        req.status === "Approved"
-                          ? "bg-green-100 text-green-700"
-                          : req.status === "Rejected"
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${req.status === "Approved"
+                        ? "bg-green-100 text-green-700"
+                        : req.status === "Rejected"
                           ? "bg-red-100 text-red-700"
                           : "bg-yellow-100 text-yellow-700"
-                      }`}
+                        }`}
                     >
                       {req.status}
                     </span>
                   </td>
-                 
+                  {role === "admin" && req.status === "Pending" && (
+                    <td className="p-3 flex gap-2 whitespace-nowrap">
+                      <button
+                        onClick={() => handleReview(req._id, "Approved")}
+                        className="px-3 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleReview(req._id, "Rejected")}
+                        className="px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700"
+                      >
+                        Reject
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Reason Modal */}
+      {selectedReason && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+          onClick={() => setSelectedReason(null)}
+        >
+          <div
+            className="bg-white rounded-lg p-6 max-w-lg w-full shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+              onClick={() => setSelectedReason(null)}
+            >
+              &times;
+            </button>
+            <h3 className="text-xl font-bold mb-4 text-gray-800">
+              Full Reason
+            </h3>
+            <div className="max-h-[60vh] overflow-y-auto text-gray-700 whitespace-pre-wrap leading-relaxed">
+              {selectedReason}
+            </div>
+            <div className="mt-6 text-right">
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                onClick={() => setSelectedReason(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

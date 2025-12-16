@@ -9,32 +9,31 @@ export const useEmployeeProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchProfile = async () => {
+    try {
+      const res = await axiosInstance.get("/employee/profile");
+      // Handle different response structures
+      const profileData = res.data?.employee || res.data?.data || res.data;
+      setProfile(profileData);
+    } catch (error) {
+      console.error("Error fetching employee profile:", error);
+      setProfile(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axiosInstance.get("/employee/me");
-        setProfile(res.data);
-      } catch (error) {
-        console.error("Error fetching employee profile:", error);
-        setProfile(null);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProfile();
   }, []);
 
-  return { profile, loading, setProfile };
+  return { profile, loading, setProfile, refreshProfile: fetchProfile };
 };
 
 // ✅ Add New Employee
 export const addNewEmployee = async (formData) => {
   try {
-    const res = await axiosInstance.post("/admin/employees", formData, {
-      headers: {
-        Authorization: localStorage.getItem("token"),
-      },
-    });
+    const res = await axiosInstance.post("/admin/employees", formData);
     toast.success(res.data.message || "Employee created successfully");
     return res.data;
   } catch (error) {
