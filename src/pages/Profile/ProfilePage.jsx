@@ -173,18 +173,21 @@ const ProfilePage = () => {
   return (
     <div className="w-full mx-auto bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border border-gray-100">
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 sm:p-6 md:p-8 text-white flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex-shrink-0 shadow-md mx-auto sm:mx-0">
-          {profile.profilePhoto ? (
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex-shrink-0 shadow-md mx-auto sm:mx-0 relative">
+          {profile.profilePhoto && (
             <img
-              src={profile.profilePhoto}
+              src={`http://localhost:5002/uploads/${profile.profilePhoto}`}
               alt="profile"
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
             />
-          ) : (
-            <div className="flex justify-center items-center h-full text-3xl sm:text-4xl font-bold">
-              {profile.name?.[0]?.toUpperCase()}
-            </div>
           )}
+          <div className={`absolute inset-0 flex justify-center items-center text-3xl sm:text-4xl font-bold ${profile.profilePhoto ? 'hidden' : ''}`}>
+            {profile.name?.[0]?.toUpperCase()}
+          </div>
         </div>
 
         <div className="text-center sm:text-left">

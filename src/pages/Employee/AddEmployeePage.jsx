@@ -15,6 +15,7 @@ const AddEmployeePage = () => {
     employeeId: "",
     leaveBalance: "",
     role: "Employee",
+    profilephoto: null,
   });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -35,8 +36,12 @@ const AddEmployeePage = () => {
 
   // ✅ Handle input change
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, files } = e.target;
+    if (type === "file") {
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
     // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -77,16 +82,25 @@ const AddEmployeePage = () => {
       // Sanitize work email: Remove dots before @
       const sanitizedWorkEmail = formData.workEmail.replace(/\.+@/, "@");
 
-      const preparedData = {
-        ...formData,
-        workEmail: sanitizedWorkEmail,
-        dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : null,
-        dateOfJoining: formData.dateOfJoining ? new Date(formData.dateOfJoining).toISOString() : null,
-      };
+      const preparedData = new FormData();
+      preparedData.append("name", formData.name);
+      preparedData.append("personalEmail", formData.personalEmail);
+      preparedData.append("workEmail", sanitizedWorkEmail);
+      preparedData.append("phone", formData.phone);
+      preparedData.append("dateOfBirth", formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : null);
+      preparedData.append("dateOfJoining", formData.dateOfJoining ? new Date(formData.dateOfJoining).toISOString() : null);
+      preparedData.append("department", formData.department);
+      preparedData.append("position", formData.position);
+      preparedData.append("employeeId", formData.employeeId);
+      preparedData.append("leaveBalance", formData.leaveBalance);
+      preparedData.append("role", formData.role);
+      if (formData.profilephoto) {
+        preparedData.append("profilephoto", formData.profilephoto);
+      }
+
       await addNewEmployee(preparedData);
       // Reset form after success
       setFormData({
-        name: "",
         name: "",
         personalEmail: "",
         workEmail: "",
@@ -98,6 +112,7 @@ const AddEmployeePage = () => {
         employeeId: "",
         leaveBalance: "",
         role: "Employee",
+        profilephoto: null,
       });
       setErrors({});
     } catch (error) {
@@ -315,6 +330,20 @@ const AddEmployeePage = () => {
             <option value="Employee">Employee</option>
             <option value="Admin">Admin</option>
           </select>
+        </div>
+
+        {/* Profile Photo */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">
+            Profile Photo
+          </label>
+          <input
+            type="file"
+            name="profilephoto"
+            accept="image/*"
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition"
+          />
         </div>
       </form>
 

@@ -203,19 +203,21 @@
 //         </div>
 //       )}
 //     </div>
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import { Search, UserPlus, Filter, Edit, X } from "lucide-react";
+import useDebounce from "../../hooks/useDebounce";
 import toast from "react-hot-toast";
 
 const EmployeeListPage = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
+  const searchInputRef = useRef(null);
   const [employees, setEmployees] = useState([]);
-  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
   const [filterDept, setFilterDept] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -234,46 +236,49 @@ const EmployeeListPage = () => {
     role: "",
   });
 
-  // ✅ Fetch employees from backend
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const res = await axiosInstance.get("/admin/all-employees", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log(res);
+  // ✅ Fetch employees from backend with search
+  const fetchEmployees = async () => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get("/admin/all-employees", {
+        params: { search: debouncedSearch },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(res);
 
-        setEmployees(res.data || []);
-        setFilteredEmployees(res.data.employees || []);
-      } catch (err) {
-        console.error("Error fetching employees:", err);
-        setError("Failed to fetch employee data.");
-        toast.error("Failed to load employees");
-      } finally {
-        setLoading(false);
+      setEmployees(res.data.employees || []);
+      // Keep the search input focused after search
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
       }
-    };
+    } catch (err) {
+      console.error("Error fetching employees:", err);
+      setError("Failed to fetch employee data.");
+      toast.error("Failed to load employees");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchEmployees();
-  }, [token]);
+  }, [token, debouncedSearch]);
+
+  // Keep the search input focused after search results are loaded
+  useEffect(() => {
+    if (searchTerm && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [employees]);
 
   // ✅ Get unique departments
   const departments = ["all", ...new Set(employees.map((emp) => emp.department))];
 
-  // ✅ Apply search and filter dynamically
-  useEffect(() => {
-    const filtered = employees.filter((emp) => {
-      const matchesSearch =
-        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.workEmail.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesDept = filterDept === "all" || emp.department === filterDept;
-
-      return matchesSearch && matchesDept;
-    });
-    setFilteredEmployees(filtered);
-  }, [searchTerm, filterDept, employees]);
+  // ✅ Apply department filter client-side
+  const filteredEmployees = employees.filter((emp) => {
+    const matchesDept = filterDept === "all" || emp.department === filterDept;
+    return matchesDept;
+  });
 
   // ✅ Handle edit modal
   const openModal = (employee) => {
@@ -386,6 +391,7 @@ const EmployeeListPage = () => {
             size={18}
           />
           <input
+            ref={searchInputRef}
             type="text"
             placeholder="Search by name, ID, or email..."
             value={searchTerm}
