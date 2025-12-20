@@ -1,218 +1,15 @@
-// import React, { useState } from "react";
-// import { Search, UserPlus, Filter } from "lucide-react";
-
-// const useEmployeeList = () => {
-//   const employees = [
-//     {
-//       "_id": "68e8c16bde0cf59c719518b8",
-//       "employeeId": "ET-007",
-//       "name": "shuchi",
-//       "personalEmail": "shuchi@gmail.com",
-//       "workEmail": "shuchi@company.com",
-//       "dateOfBirth": "2001-04-18T00:00:00.000Z",
-//       "dateOfJoining": "2023-12-15T00:00:00.000Z",
-//       "availableLeaves": 20,
-//       "department": "Engineering",
-//       "position": "Embedded Developer",
-//       "role": "Employee",
-//       "userId": "68e8c16bde0cf59c719518b6",
-//       "updatedAt": "2025-10-10T08:18:51.564Z",
-//       "__v": 0
-//     },
-//     {
-//       "_id": "68e8f1542962aa2ef344054f",
-//       "employeeId": "ET-004",
-//       "name": "JAGDISH",
-//       "personalEmail": "jagdish@gmail.com",
-//       "workEmail": "jagdish@company.com",
-//       "dateOfBirth": "1995-07-21T00:00:00.000Z",
-//       "dateOfJoining": "2022-11-17T00:00:00.000Z",
-//       "availableLeaves": 20,
-//       "department": "PRODUCTION",
-//       "position": "PRODUCTION MANAGER",
-//       "role": "Employee",
-//       "userId": "68e8f1542962aa2ef344054d",
-//       "updatedAt": "2025-10-10T11:43:16.348Z",
-//       "__v": 0
-//     }
-//   ];
-
-//   return { employees, loading: false, error: null };
-// };
-
-// const EmployeeListPage = () => {
-//   const { employees, loading, error } = useEmployeeList();
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [filterDept, setFilterDept] = useState("all");
-
-//   // Get unique departments
-//   const departments = ["all", ...new Set(employees.map(emp => emp.department))];
-
-//   // Filter employees
-//   const filteredEmployees = employees.filter(emp => {
-//     const matchesSearch = 
-//       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//       emp.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//       emp.workEmail.toLowerCase().includes(searchTerm.toLowerCase());
-
-//     const matchesDept = filterDept === "all" || emp.department === filterDept;
-
-//     return matchesSearch && matchesDept;
-//   });
-
-//   if (loading) {
-//     return (
-//       <div className="flex flex-col justify-center items-center h-screen">
-//         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-//         <p className="text-gray-500">Loading employees...</p>
-//       </div>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <div className="flex justify-center items-center h-screen">
-//         <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-//           <h3 className="text-red-800 font-semibold mb-2">Error Loading Employees</h3>
-//           <p className="text-red-600 text-sm">{error}</p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-//       <div className="flex justify-between items-center mb-6">
-//         <div>
-//           <h2 className="text-2xl font-bold text-gray-800">👥 Employees </h2>
-//           <p className="text-gray-500 text-sm mt-1">
-//             {filteredEmployees.length} of {employees.length} employees
-//           </p>
-//         </div>
-//         <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition" onClick={()=>{
-
-//         }}> 
-//           <UserPlus size={18} />
-//           Add Employee
-//         </button>
-//       </div>
-
-//       {/* Search and Filter */}
-//       <div className="flex gap-4 mb-6">
-//         <div className="flex-1 relative">
-//           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-//           <input
-//             type="text"
-//             placeholder="Search by name, ID, or email..."
-//             value={searchTerm}
-//             onChange={(e) => setSearchTerm(e.target.value)}
-//             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-//           />
-//         </div>
-
-//         <div className="relative">
-//           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-//           <select
-//             value={filterDept}
-//             onChange={(e) => setFilterDept(e.target.value)}
-//             className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
-//           >
-//             {departments.map(dept => (
-//               <option key={dept} value={dept}>
-//                 {dept === "all" ? "All Departments" : dept}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-//       </div>
-
-//       <div className="overflow-x-auto rounded-lg border border-gray-200">
-//         <table className="w-full text-sm">
-//           <thead className="bg-gray-50 border-b border-gray-200">
-//             <tr>
-//               {[
-//                 "Employee ID",
-//                 "Name",
-//                 "Work Email",
-//                 "Department",
-//                 "Position",
-//                 "Role",
-//                 "Date of Joining",
-//               ].map((head) => (
-//                 <th
-//                   key={head}
-//                   className="p-3 text-left font-semibold text-gray-700 whitespace-nowrap"
-//                 >
-//                   {head}
-//                 </th>
-//               ))}
-//             </tr>
-//           </thead>
-//           <tbody className="divide-y divide-gray-200">
-//             {filteredEmployees.length > 0 ? (
-//               filteredEmployees.map((emp) => (
-//                 <tr key={emp._id} className="hover:bg-gray-50 transition">
-//                   <td className="p-3 font-mono text-xs text-gray-600">{emp.employeeId}</td>
-//                   <td className="p-3 font-medium text-gray-900 capitalize">{emp.name.toLowerCase()}</td>
-//                   <td className="p-3 text-gray-700">{emp.workEmail}</td>
-//                   <td className="p-3 text-gray-700">{emp.department}</td>
-//                   <td className="p-3 text-gray-700">{emp.position}</td>
-//                   <td className="p-3">
-//                     <span
-//                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-//                         emp.role === "Admin"
-//                           ? "bg-blue-100 text-blue-700"
-//                           : "bg-green-100 text-green-700"
-//                       }`}
-//                     >
-//                       {emp.role}
-//                     </span>
-//                   </td>
-//                   <td className="p-3 text-gray-700">
-//                     {new Date(emp.dateOfJoining).toLocaleDateString('en-US', {
-//                       year: 'numeric',
-//                       month: 'short',
-//                       day: 'numeric'
-//                     })}
-//                   </td>
-//                 </tr>
-//               ))
-//             ) : (
-//               <tr>
-//                 <td
-//                   colSpan="7"
-//                   className="text-center py-12"
-//                 >
-//                   <div className="flex flex-col items-center">
-//                     <div className="bg-gray-100 rounded-full p-4 mb-3">
-//                       <Search className="text-gray-400" size={24} />
-//                     </div>
-//                     <p className="text-gray-500 font-medium">No employees found</p>
-//                     <p className="text-gray-400 text-sm">Try adjusting your search or filter</p>
-//                   </div>
-//                 </td>
-//               </tr>
-//             )}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {filteredEmployees.length > 0 && (
-//         <div className="mt-4 text-sm text-gray-500 text-center">
-//           Showing {filteredEmployees.length} employee{filteredEmployees.length !== 1 ? 's' : ''}
-//         </div>
-//       )}
-//     </div>
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import { Search, UserPlus, Filter, Edit, X } from "lucide-react";
 import useDebounce from "../../hooks/useDebounce";
+import useDocumentManagement from "../../hooks/useDocumentManagement";
+import DocumentUploadSection from "../../components/DocumentUploadSection";
 import toast from "react-hot-toast";
 
 const EmployeeListPage = () => {
-  const { token } = useAuth();
+  const { token, user, role } = useAuth();
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
   const [employees, setEmployees] = useState([]);
@@ -221,8 +18,9 @@ const EmployeeListPage = () => {
   const [filterDept, setFilterDept] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [activeTab, setActiveTab] = useState("edit");
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -231,10 +29,44 @@ const EmployeeListPage = () => {
     dateOfJoining: "",
     allocatedLeaves: "",
     department: "",
-    department: "",
     position: "",
     role: "",
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const employeesPerPage = 10;
+
+  // Use the document management hook
+  const {
+    documents,
+    salarySlips,
+    currentUploadType,
+    setCurrentUploadType,
+    uploading,
+    isDragOver,
+    salaryFromMonth,
+    setSalaryFromMonth,
+    salaryToMonth,
+    setSalaryToMonth,
+    isDocumentPreviewOpen,
+    previewDocument,
+    fileInputRef,
+    fetchDocs,
+    handleFileUpload,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleViewDocument,
+    closeDocumentPreview,
+    handleDeleteDocument,
+  } = useDocumentManagement(selectedEmployee, token, activeTab === "salarySlips");
+
+  // Fetch documents when employee is selected or tab changes
+  useEffect(() => {
+    if (selectedEmployee && (activeTab === "documents" || activeTab === "salarySlips")) {
+      fetchDocs();
+    }
+  }, [selectedEmployee, activeTab, fetchDocs]);
 
   // ✅ Fetch employees from backend with search
   const fetchEmployees = async () => {
@@ -271,8 +103,17 @@ const EmployeeListPage = () => {
     }
   }, [employees]);
 
+  // Reset to first page on search or filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, filterDept]);
+
+
+
   // ✅ Get unique departments
   const departments = ["all", ...new Set(employees.map((emp) => emp.department))];
+
+
 
   // ✅ Apply department filter client-side
   const filteredEmployees = employees.filter((emp) => {
@@ -280,8 +121,14 @@ const EmployeeListPage = () => {
     return matchesDept;
   });
 
+  // Pagination calculations
+  const indexOfLastEmployee = currentPage * employeesPerPage;
+  const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
+  const paginatedEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
+
   // ✅ Handle edit modal
-  const openModal = (employee) => {
+  const openEditModal = (employee) => {
     setSelectedEmployee(employee);
     setFormData({
       name: employee.name || "",
@@ -291,15 +138,15 @@ const EmployeeListPage = () => {
       dateOfJoining: employee.dateOfJoining ? new Date(employee.dateOfJoining).toISOString().split('T')[0] : "",
       allocatedLeaves: employee.allocatedLeaves || employee.availableLeaves || "",
       department: employee.department || "",
-      department: employee.department || "",
       position: employee.position || "",
       role: employee.role || "Employee",
     });
-    setIsModalOpen(true);
+
+    setIsEditModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
     setSelectedEmployee(null);
     setFormData({
       name: "",
@@ -308,7 +155,6 @@ const EmployeeListPage = () => {
       dateOfBirth: "",
       dateOfJoining: "",
       allocatedLeaves: "",
-      department: "",
       department: "",
       position: "",
       role: "",
@@ -327,46 +173,18 @@ const EmployeeListPage = () => {
       );
       toast.success("Employee profile updated successfully");
       // Update the employees list
-      setEmployees((prev) =>
-        prev.map((emp) =>
-          emp._id === selectedEmployee._id ? res.data.employee : emp
-        )
-      );
-      closeModal();
+      fetchEmployees();
+      closeEditModal();
     } catch (err) {
       console.error("Error updating employee:", err);
-      toast.error("Failed to update employee profile");
+      toast.error("Failed to update employee");
     }
   };
-
-  // ✅ Loading State
-  if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-gray-500">Loading employees...</p>
-      </div>
-    );
-  }
-
-  // ✅ Error State
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-          <h3 className="text-red-800 font-semibold mb-2">
-            Error Loading Employees
-          </h3>
-          <p className="text-red-600 text-sm">{error}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4" >
         <div>
           <h2 className="text-2xl font-bold text-gray-800">👥 Employees</h2>
           <p className="text-gray-500 text-sm mt-1">
@@ -383,9 +201,9 @@ const EmployeeListPage = () => {
       </div>
 
       {/* Search & Filter Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6" >
         {/* Search Input */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative" >
           <Search
             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
             size={18}
@@ -431,8 +249,8 @@ const EmployeeListPage = () => {
                 "Work Email",
                 "Department",
                 "Position",
-                "Actions",
                 "Date of Joining",
+                "Actions",
               ].map((head) => (
                 <th
                   key={head}
@@ -444,8 +262,8 @@ const EmployeeListPage = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {filteredEmployees.length > 0 ? (
-              filteredEmployees.map((emp) => (
+            {paginatedEmployees.length > 0 ? (
+              paginatedEmployees.map((emp) => (
                 <tr key={emp._id} className="hover:bg-gray-50 transition">
                   <td className="p-3 font-mono text-xs text-gray-600 whitespace-nowrap">
                     {emp.employeeId}
@@ -456,21 +274,22 @@ const EmployeeListPage = () => {
                   <td className="p-3 text-gray-700 whitespace-nowrap">{emp.workEmail}</td>
                   <td className="p-3 text-gray-700 whitespace-nowrap">{emp.department}</td>
                   <td className="p-3 text-gray-700 whitespace-nowrap">{emp.position}</td>
-                  <td className="p-3 whitespace-nowrap">
-                    <button
-                      onClick={() => openModal(emp)}
-                      className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-xs"
-                    >
-                      <Edit size={14} />
-                      Edit
-                    </button>
-                  </td>
                   <td className="p-3 text-gray-700 whitespace-nowrap">
                     {new Date(emp.dateOfJoining).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
+                  </td>
+                  <td className="p-3 whitespace-nowrap">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openEditModal(emp)}
+                        className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-xs"
+                      >
+                        <Edit size={14} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -493,167 +312,280 @@ const EmployeeListPage = () => {
         </table>
       </div>
 
-      {/* Summary Footer */}
+      {/* Summary and Pagination Footer */}
       {filteredEmployees.length > 0 && (
-        <div className="mt-4 text-sm text-gray-500 text-center">
-          Showing {filteredEmployees.length} employee
-          {filteredEmployees.length !== 1 ? "s" : ""}
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <span className="text-sm text-gray-500">
+              {(() => {
+                const start = indexOfFirstEmployee + 1;
+                const end = Math.min(indexOfLastEmployee, filteredEmployees.length);
+                return `Showing ${start} to ${end} of ${filteredEmployees.length} entries`;
+              })()}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1 || totalPages <= 1}
+                className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-700">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages || totalPages <= 1}
+                className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-800">Edit Employee</h3>
-              <button
-                onClick={closeModal}
-                className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition"
-              >
-                <X size={24} />
-              </button>
+      {
+        isEditModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+              <div className="flex gap-4">
+                  <button
+                    onClick={() => setActiveTab("edit")}
+                    className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "edit"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    Edit Employee
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("documents")}
+                    className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "documents"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    Employee Documents
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("salarySlips")}
+                    className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "salarySlips"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                  >
+                    Salary Slips
+                  </button>
+                </div>
+                <button
+                  onClick={closeEditModal}
+                  className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {activeTab === "edit" && (
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Personal Email
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.personalEmail}
+                      onChange={(e) =>
+                        setFormData({ ...formData, personalEmail: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={(e) =>
+                        setFormData({ ...formData, dateOfBirth: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Date of Joining
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.dateOfJoining}
+                      onChange={(e) =>
+                        setFormData({ ...formData, dateOfJoining: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Allocated Leaves
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.allocatedLeaves}
+                      onChange={(e) =>
+                        setFormData({ ...formData, allocatedLeaves: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Department
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.department}
+                      onChange={(e) =>
+                        setFormData({ ...formData, department: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Position
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.position}
+                      onChange={(e) =>
+                        setFormData({ ...formData, position: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Role
+                    </label>
+                    <select
+                      value={formData.role}
+                      onChange={(e) =>
+                        setFormData({ ...formData, role: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Employee">Employee</option>
+                      <option value="Admin">Admin</option>
+                    </select>
+                  </div>
+
+                  <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={closeEditModal}
+                      className="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition"
+                    >
+                      Update Employee
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {activeTab === "documents" && (
+                <DocumentUploadSection
+                  selectedEmployee={selectedEmployee}
+                  token={token}
+                  documents={documents}
+                  salarySlips={salarySlips}
+                  currentUploadType={currentUploadType}
+                  setCurrentUploadType={setCurrentUploadType}
+                  uploading={uploading}
+                  isDragOver={isDragOver}
+                  salaryFromMonth={salaryFromMonth}
+                  setSalaryFromMonth={setSalaryFromMonth}
+                  salaryToMonth={salaryToMonth}
+                  setSalaryToMonth={setSalaryToMonth}
+                  fileInputRef={fileInputRef}
+                  handleFileUpload={handleFileUpload}
+                  handleDragOver={handleDragOver}
+                  handleDragLeave={handleDragLeave}
+                  handleDrop={handleDrop}
+                  handleViewDocument={handleViewDocument}
+                  handleDeleteDocument={handleDeleteDocument}
+                  fetchDocs={fetchDocs}
+                  showOnlySalarySlips={false}
+                />
+              )}
+
+              {activeTab === "salarySlips" && (
+                <DocumentUploadSection
+                  selectedEmployee={selectedEmployee}
+                  token={token}
+                  documents={documents}
+                  salarySlips={salarySlips}
+                  currentUploadType={currentUploadType}
+                  setCurrentUploadType={setCurrentUploadType}
+                  uploading={uploading}
+                  isDragOver={isDragOver}
+                  salaryFromMonth={salaryFromMonth}
+                  setSalaryFromMonth={setSalaryFromMonth}
+                  salaryToMonth={salaryToMonth}
+                  setSalaryToMonth={setSalaryToMonth}
+                  fileInputRef={fileInputRef}
+                  handleFileUpload={handleFileUpload}
+                  handleDragOver={handleDragOver}
+                  handleDragLeave={handleDragLeave}
+                  handleDrop={handleDrop}
+                  handleViewDocument={handleViewDocument}
+                  handleDeleteDocument={handleDeleteDocument}
+                  fetchDocs={fetchDocs}
+                  showOnlySalarySlips={true}
+                />
+              )}
             </div>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
-                <input
-                  type="text"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Personal Email
-                </label>
-                <input
-                  type="email"
-                  value={formData.personalEmail}
-                  onChange={(e) =>
-                    setFormData({ ...formData, personalEmail: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  value={formData.dateOfBirth}
-                  onChange={(e) =>
-                    setFormData({ ...formData, dateOfBirth: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of Joining
-                </label>
-                <input
-                  type="date"
-                  value={formData.dateOfJoining}
-                  onChange={(e) =>
-                    setFormData({ ...formData, dateOfJoining: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Allocated Leaves
-                </label>
-                <input
-                  type="number"
-                  value={formData.allocatedLeaves}
-                  onChange={(e) =>
-                    setFormData({ ...formData, allocatedLeaves: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Department
-                </label>
-                <input
-                  type="text"
-                  value={formData.department}
-                  onChange={(e) =>
-                    setFormData({ ...formData, department: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Position
-                </label>
-                <input
-                  type="text"
-                  value={formData.position}
-                  onChange={(e) =>
-                    setFormData({ ...formData, position: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Role
-                </label>
-                <select
-                  value={formData.role}
-                  onChange={(e) =>
-                    setFormData({ ...formData, role: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Employee">Employee</option>
-                  <option value="Admin">Admin</option>
-                </select>
-              </div>
-              <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition"
-                >
-                  Update Employee
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+        )}
+
+
     </div>
   );
 };
