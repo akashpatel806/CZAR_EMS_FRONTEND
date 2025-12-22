@@ -1,220 +1,4 @@
-// import React, { useState } from "react";
-// import { useEmployeeProfile } from "../../hooks/useEmployeeProfile"; // 👈 Import custom hook
-// import axiosInstance from "../../api/axiosInstance";
-// import { useAuth } from "../../context/AuthContext";
 
-
-// const ProfilePage = () => {
-//   const { profile: employeeProfile, setProfile: setEmployeeProfile, loading } = useEmployeeProfile();
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [formData, setFormData] = useState({});
-//   const { role } = useAuth();
-
-//   if (loading) {
-//     return (
-//       <div className="flex justify-center items-center h-screen text-gray-600">
-//         Loading profile...
-//       </div>
-//     );
-//   }
-
-//   if (!employeeProfile) {
-//     return (
-//       <div className="flex justify-center items-center h-screen text-gray-600">
-//         No profile found.
-//       </div>
-//     );
-//   }
-
-//   // 🧩 Derived Stats
-//   const yearsOfService = employeeProfile.dateOfJoining
-//     ? Math.floor(
-//         (new Date() - new Date(employeeProfile.dateOfJoining)) /
-//           (1000 * 60 * 60 * 24 * 365)
-//       )
-//     : 0;
-
-//   const age = employeeProfile.dateOfBirth
-//     ? Math.floor(
-//         (new Date() - new Date(employeeProfile.dateOfBirth)) /
-//           (1000 * 60 * 60 * 24 * 365)
-//       )
-//     : 0;
-
-//   const approvedLeaves =
-//     employeeProfile.leaveRequests?.filter((r) => r.status === "Approved")
-//       .length || 0;
-
-//   // 🧩 Handlers
-//   const handleEditProfile = () => {
-//     setFormData(employeeProfile);
-//     setIsEditing(true);
-//   };
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({ ...prev, [name]: value }));
-//   };
-
-//   const handleSave = async () => {
-//     try {
-//       await axiosInstance.put(`/admin/employee/${employeeProfile._id}`, formData);
-//       setEmployeeProfile(formData);
-//       setIsEditing(false);
-//       alert("Profile updated successfully!");
-//     } catch (error) {
-//       console.error("Update profile error:", error);
-//       alert("Failed to update profile.");
-//     }
-//   };
-
-//   const handleCancel = () => setIsEditing(false);
-
-//   return (
-//     <div className="w-full mx-auto bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-//       {/* Header Section */}
-//       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white flex flex-col sm:flex-row sm:items-center gap-6">
-//         <div className="w-24 h-24 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex-shrink-0 shadow-md">
-//           {employeeProfile.profilePhoto ? (
-//             <img
-//               src={employeeProfile.profilePhoto}
-//               alt="profile"
-//               className="w-full h-full object-cover"
-//             />
-//           ) : (
-//             <div className="flex justify-center items-center h-full text-4xl font-bold">
-//               {employeeProfile.name?.[0]?.toUpperCase()}
-//             </div>
-//           )}
-//         </div>
-
-//         <div>
-//           <h2 className="text-3xl font-bold mb-1">{employeeProfile.name}</h2>
-//           <p className="text-blue-100 text-sm mb-1">
-//             {employeeProfile.position} • {employeeProfile.department}
-//           </p>
-//           <p className="text-blue-200 text-sm">
-//             Employee ID: {employeeProfile.employeeId}
-//           </p>
-//         </div>
-//       </div>
-
-//       {/* Profile Details */}
-//       <div className="p-8 bg-gray-50">
-//         <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">
-//           Personal Information
-//         </h3>
-
-//         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-700">
-//           <div>
-//             <p className="font-medium text-gray-500">📧 Work Email</p>
-//             <p>{employeeProfile.workEmail}</p>
-//           </div>
-//           <div>
-//             <p className="font-medium text-gray-500">📞 Phone</p>
-//             <p>{employeeProfile.phone || "N/A"}</p>
-//           </div>
-//           <div>
-//             <p className="font-medium text-gray-500">📅 Date of Joining</p>
-//             <p>{new Date(employeeProfile.dateOfJoining).toLocaleDateString()}</p>
-//           </div>
-//           <div>
-//             <p className="font-medium text-gray-500">🎂 Date of Birth</p>
-//             <p>{new Date(employeeProfile.dateOfBirth).toLocaleDateString()}</p>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Stats Section */}
-//       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-8 bg-white border-t">
-//         {[
-//           {
-//             title: "Available Leaves",
-//             value: employeeProfile.availableLeaves,
-//             color: "text-blue-600",
-//           },
-//           { title: "Years of Service", value: yearsOfService, color: "text-green-600" },
-//           { title: "Age", value: age, color: "text-purple-600" },
-//           { title: "Approved Leaves", value: approvedLeaves, color: "text-orange-600" },
-//         ].map((stat, i) => (
-//           <div
-//             key={i}
-//             className="p-5 rounded-xl bg-gray-50 shadow-sm text-center hover:shadow-md transition-all duration-200 border border-gray-100"
-//           >
-//             <div className={`text-3xl font-bold ${stat.color}`}>{stat.value}</div>
-//             <p className="text-sm text-gray-500 mt-1">{stat.title}</p>
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* Action Buttons */}
-//       <div className="flex justify-center gap-4 p-6 border-t bg-gray-50">
-//         <button
-//           onClick={handleEditProfile}
-//           className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm"
-//         >
-//           ✏️ Edit Profile
-//         </button>
-//         <button
-//           onClick={() => alert("Change Password clicked!")}
-//           className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-sm"
-//         >
-//           🔒 Change Password
-//         </button>
-//       </div>
-
-//       {/* 🧩 Edit Form Modal */}
-//       {isEditing && (
-//         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm">
-//           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 relative">
-//             <h3 className="text-2xl font-semibold mb-6 text-blue-700 border-b pb-2">
-//               Edit Profile
-//             </h3>
-
-//             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-//               {[
-//                 { label: "Name", name: "name" },
-//                 { label: "Position", name: "position" },
-//                 { label: "Department", name: "department" },
-//                 { label: "Phone", name: "phone" },
-//               ].map((field, i) => (
-//                 <div key={i} className="flex flex-col">
-//                   <label className="text-sm font-medium text-gray-600 mb-1">
-//                     {field.label}
-//                   </label>
-//                   <input
-//                     type="text"
-//                     name={field.name}
-//                     value={formData[field.name] || ""}
-//                     onChange={handleChange}
-//                     className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-//                   />
-//                 </div>
-//               ))}
-//             </div>
-
-//             <div className="flex justify-end gap-3 mt-8">
-//               <button
-//                 onClick={handleCancel}
-//                 className="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
-//               >
-//                 Cancel
-//               </button>
-//               <button
-//                 onClick={handleSave}
-//                 className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-//               >
-//                 Save Changes
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default ProfilePage;
 
 
 
@@ -222,14 +6,30 @@ import React, { useEffect, useState } from "react";
 import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
+import Button from "../../components/Button";
 
 const ProfilePage = () => {
-  const { profile: employeeProfile, setProfile: setEmployeeProfile, loading } = useEmployeeProfile();
+  const { profile: employeeProfile, loading } = useEmployeeProfile();
   const { user, role, token } = useAuth();
 
   const [adminProfile, setAdminProfile] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({});
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [profileData, setProfileData] = useState({
+    name: '',
+    phone: '',
+    department: '',
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(true);
 
   // ✅ Fetch admin profile when role = admin
@@ -238,12 +38,12 @@ const ProfilePage = () => {
       if (role !== "admin" || !user?._id) return;
       try {
         console.log("id : ", user._id);
-        
+
         const res = await axiosInstance.get(`/admin/get-admin-details?id=${user._id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("server response : ",res);
-        
+        console.log("server response : ", res);
+
         setAdminProfile(res.data.admin);
       } catch (error) {
         console.error("Error fetching admin details:", error);
@@ -274,195 +74,424 @@ const ProfilePage = () => {
     );
   }
 
-  // 🧮 Derived Stats (only for employees)
-  const yearsOfService =
-    profile.dateOfJoining
-      ? Math.floor((new Date() - new Date(profile.dateOfJoining)) / (1000 * 60 * 60 * 24 * 365))
-      : 0;
 
-  const age =
-    profile.dateOfBirth
-      ? Math.floor((new Date() - new Date(profile.dateOfBirth)) / (1000 * 60 * 60 * 24 * 365))
-      : 0;
-
-  const approvedLeaves =
-    profile.leaveRequests?.filter((r) => r.status === "Approved").length || 0;
 
   // 🧩 Handlers
-  const handleEditProfile = () => {
-    setFormData(profile);
-    setIsEditing(true);
-  };
 
-  const handleChange = (e) => {
+  // ✅ Change Password Handlers
+  const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
+  const handleChangePassword = async () => {
     try {
-      const endpoint =
-        role === "admin"
-          ? `/admin/update/${profile._id}`
-          : `/admin/employee/${profile._id}`;
-      await axiosInstance.put(endpoint, formData);
-      if (role === "employee") setEmployeeProfile(formData);
-      if (role === "admin") setAdminProfile(formData);
-      setIsEditing(false);
-      alert("Profile updated successfully!");
+      if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+        alert('All fields are required');
+        return;
+      }
+
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        alert('New passwords do not match');
+        return;
+      }
+
+      if (passwordData.newPassword.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+      }
+
+      const endpoint = role === "admin" ? `/admin/change-password` : `/employee/change-password`;
+      await axiosInstance.put(endpoint, {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      alert('Password changed successfully!');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setIsChangingPassword(false);
     } catch (error) {
-      console.error("Update profile error:", error);
-      alert("Failed to update profile.");
+      console.error('Change password error:', error);
+      alert(error.response?.data?.message || 'Failed to change password');
     }
   };
 
-  const handleCancel = () => setIsEditing(false);
+  const handleCancelPassword = () => {
+    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setIsChangingPassword(false);
+  };
+
+  // ✅ Password Visibility Toggle Handlers
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  // ✅ Edit Profile Handlers
+  const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditProfile = () => {
+    setProfileData({
+      name: profile.name || '',
+      phone: profile.phone || '',
+      department: profile.department || '',
+    });
+    setIsEditingProfile(true);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      if (!profileData.name.trim()) {
+        alert('Name is required');
+        return;
+      }
+
+      await axiosInstance.put(`/admin/update/${profile._id}`, profileData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      alert('Profile updated successfully!');
+      setIsEditingProfile(false);
+      // Refresh admin profile
+      const res = await axiosInstance.get(`/admin/get-admin-details?id=${user._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAdminProfile(res.data.admin);
+    } catch (error) {
+      console.error('Update profile error:', error);
+      alert(error.response?.data?.message || 'Failed to update profile');
+    }
+  };
+
+  const handleCancelProfile = () => {
+    setProfileData({ name: '', phone: '', department: '' });
+    setIsEditingProfile(false);
+  };
 
   // 🧱 UI starts here
   return (
-    <div className="w-full mx-auto bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white flex flex-col sm:flex-row sm:items-center gap-6">
-        <div className="w-24 h-24 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex-shrink-0 shadow-md">
-          {profile.profilePhoto ? (
+    <div className="w-full mx-auto bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 sm:p-6 md:p-8 text-white flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex-shrink-0 shadow-md mx-auto sm:mx-0 relative">
+          {profile.profilePhoto && (
             <img
-              src={profile.profilePhoto}
+              src={`http://localhost:5002/uploads/${profile.profilePhoto}`}
               alt="profile"
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
             />
-          ) : (
-            <div className="flex justify-center items-center h-full text-4xl font-bold">
-              {profile.name?.[0]?.toUpperCase()}
-            </div>
           )}
+          <div className={`absolute inset-0 flex justify-center items-center text-3xl sm:text-4xl font-bold ${profile.profilePhoto ? 'hidden' : ''}`}>
+            {profile.name?.[0]?.toUpperCase()}
+          </div>
         </div>
 
-        <div>
-          <h2 className="text-3xl font-bold mb-1">{profile.name}</h2>
-          <p className="text-blue-100 text-sm mb-1">
+        <div className="text-center sm:text-left">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1">{profile.name}</h2>
+          <p className="text-blue-100 text-xs sm:text-sm mb-1">
             {role === "admin" && "admin"}
           </p>
-          <p className="text-blue-200 text-sm">
-           {role === "employee" && "employee"}
-          
+          <p className="text-blue-200 text-xs sm:text-sm">
+            {role === "employee" && "employee"}
+
           </p>
         </div>
       </div>
 
       {/* Profile Details */}
-      <div className="p-8 bg-gray-50">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">
+      <div className="p-4 sm:p-6 md:p-8 bg-gray-50">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4 border-b pb-2">
           Personal Information
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-700">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6 text-gray-700">
+          {/* Email */}
           <div>
-            <p className="font-medium text-gray-500">📧 Email</p>
-            <p>{profile.email}</p>
+            <p className="font-medium text-gray-500 text-xs sm:text-sm mb-1">📧 Email</p>
+            <p className="text-sm sm:text-base break-words">{role === "admin" ? profile.email : profile.personalEmail}</p>
           </div>
+
+          {/* Phone */}
           <div>
-            <p className="font-medium text-gray-500">📞 Phone</p>
-            <p>{profile.phone || "N/A"}</p>
+            <p className="font-medium text-gray-500 text-xs sm:text-sm mb-1">📞 Phone</p>
+            <p className="text-sm sm:text-base">{profile.phone || "N/A"}</p>
           </div>
+
+          {/* Admin-specific fields */}
+          {role === "admin" && (
+            <>
+              <div>
+                <p className="font-medium text-gray-500 text-xs sm:text-sm mb-1">🏢 Department</p>
+                <p className="text-sm sm:text-base">{profile.department || "N/A"}</p>
+              </div>
+            </>
+          )}
+
+          {/* Employee-specific fields */}
           {role === "employee" && (
             <>
               <div>
-                <p className="font-medium text-gray-500">📅 Date of Joining</p>
-                <p>{new Date(profile.dateOfJoining).toLocaleDateString()}</p>
+                <p className="font-medium text-gray-500 text-xs sm:text-sm mb-1">🏢 Department</p>
+                <p className="text-sm sm:text-base">{profile.department || "N/A"}</p>
               </div>
               <div>
-                <p className="font-medium text-gray-500">🎂 Date of Birth</p>
-                <p>{new Date(profile.dateOfBirth).toLocaleDateString()}</p>
+                <p className="font-medium text-gray-500 text-xs sm:text-sm mb-1">💼 Position</p>
+                <p className="text-sm sm:text-base">{profile.position || "N/A"}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-500 text-xs sm:text-sm mb-1">🆔 Employee ID</p>
+                <p className="text-sm sm:text-base">{profile.employeeId || "N/A"}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-500 text-xs sm:text-sm mb-1">📅 Date of Joining</p>
+                <p className="text-sm sm:text-base">{profile.dateOfJoining ? new Date(profile.dateOfJoining).toLocaleDateString() : "N/A"}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-500 text-xs sm:text-sm mb-1">🎂 Date of Birth</p>
+                <p className="text-sm sm:text-base">{profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : "N/A"}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-500 text-xs sm:text-sm mb-1">📬 Work Email</p>
+                <p className="text-sm sm:text-base break-words">{profile.workEmail || "N/A"}</p>
               </div>
             </>
           )}
         </div>
       </div>
 
-      {/* Stats Section — Only for Employee */}
-      {role === "employee" && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-8 bg-white border-t">
-          {[
-            { title: "Available Leaves", value: profile.availableLeaves, color: "text-blue-600" },
-            { title: "Years of Service", value: yearsOfService, color: "text-green-600" },
-            { title: "Age", value: age, color: "text-purple-600" },
-            { title: "Approved Leaves", value: approvedLeaves, color: "text-orange-600" },
-          ].map((stat, i) => (
-            <div
-              key={i}
-              className="p-5 rounded-xl bg-gray-50 shadow-sm text-center hover:shadow-md transition-all duration-200 border border-gray-100"
+
+
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 p-4 sm:p-6 border-t bg-gray-50">
+        {role === "admin" && (
+          <Button
+            onClick={handleEditProfile}
+            variant="primary"
+            className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base shadow-sm"
+          >
+            ✏️ Edit Profile
+          </Button>
+        )}
+        <Button
+          onClick={() => setIsChangingPassword(true)}
+          variant="primary"
+          className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base shadow-sm"
+        >
+          🔒 Change Password
+        </Button>
+      </div>
+
+
+
+      {/* Change Password Modal */}
+      {isChangingPassword && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full p-5 sm:p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+            {/* Close Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCancelPassword}
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 hover:bg-transparent"
             >
-              <div className={`text-3xl font-bold ${stat.color}`}>{stat.value}</div>
-              <p className="text-sm text-gray-500 mt-1">{stat.title}</p>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </Button>
+
+            <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-blue-700 border-b pb-2 pr-8">
+              Change Password
+            </h3>
+
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPasswords.current ? "text" : "password"}
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Enter your current password"
+                    className="border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition w-full"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => togglePasswordVisibility('current')}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 h-full w-auto hover:bg-transparent"
+                  >
+                    {showPasswords.current ? (
+                      <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPasswords.new ? "text" : "password"}
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Enter new password (min 6 chars)"
+                    className="border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500 transition w-full"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => togglePasswordVisibility('new')}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 h-full w-auto hover:bg-transparent"
+                  >
+                    {showPasswords.new ? (
+                      <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPasswords.confirm ? "text" : "password"}
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Confirm your new password"
+                    className="border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500 transition w-full"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => togglePasswordVisibility('confirm')}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 h-full w-auto hover:bg-transparent"
+                  >
+                    {showPasswords.confirm ? (
+                      <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
-          ))}
+
+            <div className="flex justify-end gap-2 sm:gap-3 mt-6 sm:mt-8">
+              <Button
+                onClick={handleChangePassword}
+                variant="primary"
+                className="w-full sm:w-auto px-4 sm:px-5 py-2 text-sm sm:text-base"
+              >
+                Change Password
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="flex justify-center gap-4 p-6 border-t bg-gray-50">
-        <button
-          onClick={handleEditProfile}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm"
-        >
-          ✏️ Edit Profile
-        </button>
-        <button
-          onClick={() => alert("Change Password clicked!")}
-          className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-sm"
-        >
-          🔒 Change Password
-        </button>
-      </div>
-
-      {/* Edit Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 relative">
-            <h3 className="text-2xl font-semibold mb-6 text-blue-700 border-b pb-2">
+      {/* Edit Profile Modal */}
+      {isEditingProfile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full p-5 sm:p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-blue-700 border-b pb-2">
               Edit Profile
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { label: "Name", name: "name" },
-                { label: "Department", name: "department" },
-                { label: "Phone", name: "phone" },
-                ...(role === "employee"
-                  ? [
-                      { label: "Position", name: "position" },
-                      { label: "Date of Birth", name: "dateOfBirth" },
-                    ]
-                  : []),
-              ].map((field, i) => (
-                <div key={i} className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-600 mb-1">
-                    {field.label}
-                  </label>
-                  <input
-                    type="text"
-                    name={field.name}
-                    value={formData[field.name] || ""}
-                    onChange={handleChange}
-                    className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                  />
-                </div>
-              ))}
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={profileData.name}
+                  onChange={handleProfileChange}
+                  placeholder="Enter your name"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition w-full"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">
+                  Phone
+                </label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={profileData.phone}
+                  onChange={handleProfileChange}
+                  placeholder="Enter your phone number"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition w-full"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 mb-1.5 sm:mb-2">
+                  Department
+                </label>
+                <input
+                  type="text"
+                  name="department"
+                  value={profileData.department}
+                  onChange={handleProfileChange}
+                  placeholder="Enter your department"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition w-full"
+                />
+              </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-8">
-              <button
-                onClick={handleCancel}
-                className="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 mt-6 sm:mt-8">
+              <Button
+                onClick={handleCancelProfile}
+                variant="secondary"
+                className="w-full sm:w-auto px-4 sm:px-5 py-2 text-sm sm:text-base"
               >
                 Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              </Button>
+              <Button
+                onClick={handleSaveProfile}
+                variant="primary"
+                className="w-full sm:w-auto px-4 sm:px-5 py-2 text-sm sm:text-base"
               >
                 Save Changes
-              </button>
+              </Button>
             </div>
           </div>
         </div>

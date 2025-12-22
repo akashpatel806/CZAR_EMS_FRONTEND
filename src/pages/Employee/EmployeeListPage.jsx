@@ -36,7 +36,7 @@
 //       "__v": 0
 //     }
 //   ];
-  
+
 //   return { employees, loading: false, error: null };
 // };
 
@@ -54,9 +54,9 @@
 //       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 //       emp.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
 //       emp.workEmail.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
 //     const matchesDept = filterDept === "all" || emp.department === filterDept;
-    
+
 //     return matchesSearch && matchesDept;
 //   });
 
@@ -109,7 +109,7 @@
 //             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
 //           />
 //         </div>
-        
+
 //         <div className="relative">
 //           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
 //           <select
@@ -203,66 +203,139 @@
 //         </div>
 //       )}
 //     </div>
-//   );
-// };
-
-// export default EmployeeListPage;
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
-import { Search, UserPlus, Filter } from "lucide-react";
+import { Search, UserPlus, Filter, Edit, X } from "lucide-react";
+import useDebounce from "../../hooks/useDebounce";
 import toast from "react-hot-toast";
+import Button from "../../components/Button";
 
 const EmployeeListPage = () => {
   const { token } = useAuth();
+  const navigate = useNavigate();
+  const searchInputRef = useRef(null);
   const [employees, setEmployees] = useState([]);
-  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
   const [filterDept, setFilterDept] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    personalEmail: "",
+    dateOfBirth: "",
+    dateOfJoining: "",
+    allocatedLeaves: "",
+    department: "",
+    position: "",
+    role: "",
+  });
 
-  // ✅ Fetch employees from backend
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const res = await axiosInstance.get("/admin/all-employees", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log(res);
-        
-        setEmployees(res.data || []);
-        setFilteredEmployees(res.data.employees || []);
-      } catch (err) {
-        console.error("Error fetching employees:", err);
-        setError("Failed to fetch employee data.");
-        toast.error("Failed to load employees");
-      } finally {
-        setLoading(false);
+  // ✅ Fetch employees from backend with search
+  const fetchEmployees = async () => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get("/admin/all-employees", {
+        params: { search: debouncedSearch },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(res);
+
+      setEmployees(res.data.employees || []);
+      // Keep the search input focused after search
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
       }
-    };
+    } catch (err) {
+      console.error("Error fetching employees:", err);
+      setError("Failed to fetch employee data.");
+      toast.error("Failed to load employees");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchEmployees();
-  }, [token]);
+  }, [token, debouncedSearch]);
+
+  // Keep the search input focused after search results are loaded
+  useEffect(() => {
+    if (searchTerm && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [employees]);
 
   // ✅ Get unique departments
   const departments = ["all", ...new Set(employees.map((emp) => emp.department))];
 
-  // ✅ Apply search and filter dynamically
-  useEffect(() => {
-    const filtered = employees.filter((emp) => {
-      const matchesSearch =
-        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.workEmail.toLowerCase().includes(searchTerm.toLowerCase());
+  // ✅ Apply department filter client-side
+  const filteredEmployees = employees.filter((emp) => {
+    const matchesDept = filterDept === "all" || emp.department === filterDept;
+    return matchesDept;
+  });
 
-      const matchesDept = filterDept === "all" || emp.department === filterDept;
-
-      return matchesSearch && matchesDept;
+  // ✅ Handle edit modal
+  const openModal = (employee) => {
+    setSelectedEmployee(employee);
+    setFormData({
+      name: employee.name || "",
+      phone: employee.phone || "",
+      personalEmail: employee.personalEmail || "",
+      dateOfBirth: employee.dateOfBirth ? new Date(employee.dateOfBirth).toISOString().split('T')[0] : "",
+      dateOfJoining: employee.dateOfJoining ? new Date(employee.dateOfJoining).toISOString().split('T')[0] : "",
+      allocatedLeaves: employee.allocatedLeaves || employee.availableLeaves || "",
+      department: employee.department || "",
+      position: employee.position || "",
+      role: employee.role || "Employee",
     });
-    setFilteredEmployees(filtered);
-  }, [searchTerm, filterDept, employees]);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedEmployee(null);
+    setFormData({
+      name: "",
+      phone: "",
+      personalEmail: "",
+      dateOfBirth: "",
+      dateOfJoining: "",
+      allocatedLeaves: "",
+      department: "",
+      position: "",
+      role: "",
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axiosInstance.put(
+        `/admin/update-employee/${selectedEmployee.employeeId}`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("Employee profile updated successfully");
+      // Update the employees list
+      setEmployees((prev) =>
+        prev.map((emp) =>
+          emp._id === selectedEmployee._id ? res.data.employee : emp
+        )
+      );
+      closeModal();
+    } catch (err) {
+      console.error("Error updating employee:", err);
+      toast.error("Failed to update employee profile");
+    }
+  };
 
   // ✅ Loading State
   if (loading) {
@@ -278,7 +351,7 @@ const EmployeeListPage = () => {
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h3 className="text-red-800 font-semibold mb-2">
             Error Loading Employees
           </h3>
@@ -291,20 +364,21 @@ const EmployeeListPage = () => {
   return (
     <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">👥 Employees</h2>
           <p className="text-gray-500 text-sm mt-1">
             {filteredEmployees.length} of {employees.length} employees
           </p>
         </div>
-        <button
-          onClick={() => toast("Add employee feature coming soon!")}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        <Button
+          onClick={() => navigate("/admin/add-employee")}
+          variant="primary"
+          className="flex items-center gap-2 px-4 py-2 w-full sm:w-auto justify-center"
         >
           <UserPlus size={18} />
           Add Employee
-        </button>
+        </Button>
       </div>
 
       {/* Search & Filter Controls */}
@@ -316,6 +390,7 @@ const EmployeeListPage = () => {
             size={18}
           />
           <input
+            ref={searchInputRef}
             type="text"
             placeholder="Search by name, ID, or email..."
             value={searchTerm}
@@ -333,7 +408,7 @@ const EmployeeListPage = () => {
           <select
             value={filterDept}
             onChange={(e) => setFilterDept(e.target.value)}
-            className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+            className="w-full sm:w-auto pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
           >
             {departments.map((dept) => (
               <option key={dept} value={dept}>
@@ -355,7 +430,7 @@ const EmployeeListPage = () => {
                 "Work Email",
                 "Department",
                 "Position",
-                "Role",
+                "Actions",
                 "Date of Joining",
               ].map((head) => (
                 <th
@@ -371,27 +446,27 @@ const EmployeeListPage = () => {
             {filteredEmployees.length > 0 ? (
               filteredEmployees.map((emp) => (
                 <tr key={emp._id} className="hover:bg-gray-50 transition">
-                  <td className="p-3 font-mono text-xs text-gray-600">
+                  <td className="p-3 font-mono text-xs text-gray-600 whitespace-nowrap">
                     {emp.employeeId}
                   </td>
-                  <td className="p-3 font-medium text-gray-900 capitalize">
+                  <td className="p-3 font-medium text-gray-900 capitalize whitespace-nowrap">
                     {emp.name}
                   </td>
-                  <td className="p-3 text-gray-700">{emp.workEmail}</td>
-                  <td className="p-3 text-gray-700">{emp.department}</td>
-                  <td className="p-3 text-gray-700">{emp.position}</td>
-                  <td className="p-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        emp.role === "Admin"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
+                  <td className="p-3 text-gray-700 whitespace-nowrap">{emp.workEmail}</td>
+                  <td className="p-3 text-gray-700 whitespace-nowrap">{emp.department}</td>
+                  <td className="p-3 text-gray-700 whitespace-nowrap">{emp.position}</td>
+                  <td className="p-3 whitespace-nowrap">
+                    <Button
+                      onClick={() => openModal(emp)}
+                      variant="primary"
+                      size="sm"
+                      className="flex items-center gap-1 px-3 py-1 text-xs"
                     >
-                      {emp.role}
-                    </span>
+                      <Edit size={14} />
+                      Edit
+                    </Button>
                   </td>
-                  <td className="p-3 text-gray-700">
+                  <td className="p-3 text-gray-700 whitespace-nowrap">
                     {new Date(emp.dateOfJoining).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
@@ -424,6 +499,164 @@ const EmployeeListPage = () => {
         <div className="mt-4 text-sm text-gray-500 text-center">
           Showing {filteredEmployees.length} employee
           {filteredEmployees.length !== 1 ? "s" : ""}
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800">Edit Employee</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeModal}
+                className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition"
+              >
+                <X size={24} />
+              </Button>
+            </div>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone
+                </label>
+                <input
+                  type="text"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Personal Email
+                </label>
+                <input
+                  type="email"
+                  value={formData.personalEmail}
+                  onChange={(e) =>
+                    setFormData({ ...formData, personalEmail: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) =>
+                    setFormData({ ...formData, dateOfBirth: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date of Joining
+                </label>
+                <input
+                  type="date"
+                  value={formData.dateOfJoining}
+                  onChange={(e) =>
+                    setFormData({ ...formData, dateOfJoining: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Allocated Leaves
+                </label>
+                <input
+                  type="number"
+                  value={formData.allocatedLeaves}
+                  onChange={(e) =>
+                    setFormData({ ...formData, allocatedLeaves: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Department
+                </label>
+                <input
+                  type="text"
+                  value={formData.department}
+                  onChange={(e) =>
+                    setFormData({ ...formData, department: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Position
+                </label>
+                <input
+                  type="text"
+                  value={formData.position}
+                  onChange={(e) =>
+                    setFormData({ ...formData, position: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role
+                </label>
+                <select
+                  value={formData.role}
+                  onChange={(e) =>
+                    setFormData({ ...formData, role: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Employee">Employee</option>
+                  <option value="Admin">Admin</option>
+                </select>
+              </div>
+              <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={closeModal}
+                  className="px-6 py-2.5 font-medium transition"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="px-6 py-2.5 font-medium shadow-sm transition"
+                >
+                  Update Employee
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

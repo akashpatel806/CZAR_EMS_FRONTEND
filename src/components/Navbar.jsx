@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import LogoutModal from "./LogoutModal";
+import Button from "./Button";
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -14,22 +17,25 @@ const Navbar = () => {
   // Get initials for avatar
   const initials = user?.name
     ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
     : "U";
 
   return (
-    <header className="w-full bg-white shadow-sm border-b border-gray-200 flex items-center justify-end px-6 py-3">
-     
+    <header className="w-full bg-white shadow-sm border-b border-gray-200 flex items-center justify-between px-4 md:px-6 py-3">
+      {/* Left side: Hamburger (Mobile) */}
+      <Button onClick={onMenuClick} variant="ghost" size="icon" className="md:hidden text-gray-600 text-2xl">
+        ☰
+      </Button>
 
-      {/* Right side: User info */}
-      <div className="flex items-center gap-4">
+      {/* Right side: User info (Justify end on desktop, but we use justify-between for mobile layout) */}
+      <div className="flex items-center gap-4 ml-auto">
         {/* Notification */}
-        <button className="text-lg text-gray-600 hover:text-blue-600 transition">
+        <Button variant="ghost" size="icon" className="text-lg text-gray-600 hover:text-blue-600 transition">
           🔔
-        </button>
+        </Button>
 
         {/* User profile + logout */}
         <div className="flex items-center gap-3">
@@ -47,13 +53,21 @@ const Navbar = () => {
         </div>
 
         {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="text-sm font-medium text-red-600 border border-red-300 rounded-md px-3 py-1.5 hover:bg-red-50 transition"
+        <Button
+          onClick={() => setShowLogoutModal(true)}
+          variant="danger"
+          size="sm"
+          className="text-sm font-medium px-3 py-1.5 border-none"
         >
           Logout
-        </button>
+        </Button>
       </div>
+
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+      />
     </header>
   );
 };

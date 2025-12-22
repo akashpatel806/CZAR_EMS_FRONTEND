@@ -40,7 +40,20 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const BASE_URL = "http://localhost:5000"; // ⚙️ adjust for production
+// Dynamically determine BASE_URL based on current hostname
+const getBaseUrl = () => {
+  const hostname = window.location.hostname;
+
+  // If accessing via IP address (network), use the same IP for API
+  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    return `http://${hostname}:5002`;
+  }
+
+  // Default to localhost
+  return 'http://localhost:5002';
+};
+
+const BASE_URL = getBaseUrl();
 
 export const useLeaveRequest = () => {
   const [leaveRequests, setLeaveRequests] = useState([]);

@@ -1,100 +1,84 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
-
-const BASE_URL = "http://localhost:5000";
+import { Eye, EyeOff } from "lucide-react";
+import Button from "../../components/Button";
 
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [userType, setUserType] = useState("employee"); // admin | employee
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) =>
+    setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
+
+  const extractUserAndToken = (respData) => {
+    const user =
+      respData.user || respData.data?.user || respData.data || respData.userData || respData;
+    const token =
+      respData.token || respData.accessToken || respData.access_token || respData.access || null;
+    return { user, token };
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setMessageType("");
+    setLoading(true);
+
     try {
-      const endpoint =
-        userType === "admin"
-          ? `${BASE_URL}/api/auth/admin-login`
-          : `${BASE_URL}/api/auth/login`;
+      const response = await axiosInstance.post('/auth/login', {
+        email: formData.email,
+        password: formData.password
+      });
 
-      const response = await axios.post(endpoint, formData);
-      login(response.data.user, response.data.token);
+      const { user, token } = extractUserAndToken(response.data);
 
-      setMessage(`${userType} login successful! Redirecting...`);
+      if (!token) {
+        throw new Error("No token received from server");
+      }
+
+      login(user, token);
+      console.log("Login successful - token stored:", localStorage.getItem("token"));
+
+      setMessage("Login successful! Redirecting...");
       setMessageType("success");
 
-      setTimeout(() => {
-        if (userType === "admin") navigate("/admin");
-        else navigate("/");
-      }, 800);
+      setTimeout(() => navigate("/"), 600);
     } catch (error) {
-      console.log(error);
-      
-      setMessage(error.response?.data?.message || "Login failed");
+      console.error("Login error:", error);
+      const errorMessage = error.response?.data?.message || error.message || "Login failed: An unexpected error occurred";
+      setMessage(errorMessage);
       setMessageType("error");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
-        {/* Header */}
         <div className="text-center mb-6">
           <img src="/czar_logo.svg" alt="Logo" className="mx-auto w-20 mb-2" />
-          <h1 className="text-2xl font-bold text-gray-800">
-            {userType === "admin" ? "Admin Login" : "Employee Login"}
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-800">Sign In</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Sign in to continue to your dashboard
+            Enter your credentials to access your account
           </p>
         </div>
 
-        {/* Toggle Buttons */}
-        <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
-          <button
-            onClick={() => setUserType("employee")}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium ${
-              userType === "employee"
-                ? "bg-blue-600 text-white"
-                : "text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            Employee
-          </button>
-          <button
-            onClick={() => setUserType("admin")}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium ${
-              userType === "admin"
-                ? "bg-blue-600 text-white"
-                : "text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            Admin
-          </button>
-        </div>
-
-        {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email Address
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Email Address</label>
             <input
               type="email"
               name="email"
-              placeholder="you@example.com"
+              placeholder="you@company.com"
               value={formData.email}
               onChange={handleChange}
               required
@@ -103,36 +87,46 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="********"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            />
+            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <div className="relative mt-1">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 h-full w-auto hover:bg-transparent"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </Button>
+            </div>
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition-all"
+            isLoading={loading}
+            fullWidth
+            variant="primary"
           >
-            Sign In
-          </button>
+            {loading ? "Signing in..." : "Sign In"}
+          </Button>
         </form>
 
-        {/* Message */}
         {message && (
           <div
-            className={`mt-4 text-center text-sm px-3 py-2 rounded-lg ${
-              messageType === "success"
-                ? "bg-green-100 text-green-700 border border-green-300"
-                : "bg-red-100 text-red-700 border border-red-300"
-            }`}
+            className={`mt-4 text-center text-sm px-3 py-2 rounded-lg ${messageType === "success"
+              ? "bg-green-100 text-green-700 border border-green-300"
+              : "bg-red-100 text-red-700 border border-red-300"
+              }`}
           >
             {message}
           </div>

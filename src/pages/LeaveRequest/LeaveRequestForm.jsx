@@ -1,53 +1,99 @@
 import React, { useState } from "react";
 import { useLeaveRequest } from "../../hooks/useLeaveRequest"; // ✅ import your hook
+import { useEmployeeProfile } from "../../hooks/useEmployeeProfile"; // ✅ import profile hook
+import Button from "../../components/Button";
 
 const LeaveRequestForm = () => {
   const [formData, setFormData] = useState({
-    leaveType: "casual",
+    leaveType: "fullDay",
+    leaveReasonType: "casual",
     fromDate: "",
     toDate: "",
+    fromTime: "",
+    toTime: "",
     reason: "",
   });
 
   const { submitLeave, loading } = useLeaveRequest(); // ✅ use the custom hook
+  const { profile, refreshProfile } = useEmployeeProfile(); // ✅ get employee profile for availableLeaves
+
+  // ✅ Calculate number of leave days requested
+  const calculateLeaveDays = (fromDate, toDate) => {
+    if (!fromDate || !toDate) return 0;
+    const start = new Date(fromDate);
+    const end = new Date(toDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both dates
+    return diffDays;
+  };
+
+  const requestedDays = calculateLeaveDays(formData.fromDate, formData.toDate);
+  const availableLeaves = profile?.availableLeaves || 0;
+  const isInsufficientBalance = requestedDays > availableLeaves;
+  const canApplyLeave = !isInsufficientBalance;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await submitLeave(formData);
-      setFormData({ leaveType: "casual", fromDate: "", toDate: "", reason: "" });
+      setFormData({
+        leaveType: "fullDay",
+        leaveReasonType: "casual",
+        fromDate: "",
+        toDate: "",
+        fromTime: "",
+        toTime: "",
+        reason: "",
+      });
+      // Refresh profile to update available leaves after submission
+      await refreshProfile();
     } catch {
       // error handled inside hook (optional extra handling here)
     }
   };
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 max-w-full mx-auto mt-10">
+    <div className="bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 mx-auto mt-4 sm:mt-6 md:mt-10">
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6"
       >
         {/* Leave Type */}
         <div>
-          <label className="block text-sm font-medium mb-2">Leave Type</label>
+          <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-gray-700">Leave Type</label>
           <select
             value={formData.leaveType}
             onChange={(e) =>
               setFormData({ ...formData, leaveType: e.target.value })
             }
-            className="w-full p-3 border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2.5 sm:p-3 text-sm sm:text-base border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
-            {["casual", "sick", "annual", "emergency"].map((opt) => (
-              <option key={opt} value={opt}>
-                {opt.charAt(0).toUpperCase() + opt.slice(1)} Leave
-              </option>
-            ))}
+            <option value="fullDay">Full Day Leave</option>
+            <option value="halfDay">Half Day Leave</option>
+            <option value="shortDay">Short Day Leave</option>
+          </select>
+        </div>
+
+        {/* Leave Reason Type */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-gray-700">Leave Reason Type</label>
+          <select
+            value={formData.leaveReasonType}
+            onChange={(e) =>
+              setFormData({ ...formData, leaveReasonType: e.target.value })
+            }
+            className="w-full p-2.5 sm:p-3 text-sm sm:text-base border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+            <option value="medical">Medical Leave</option>
+            <option value="casual">Casual Leave</option>
+            <option value="emergency">Emergency Leave</option>
+            <option value="siteVisit">Site Visit Leave</option>
           </select>
         </div>
 
         {/* From Date */}
         <div>
-          <label className="block text-sm font-medium mb-2">From Date</label>
+          <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-gray-700">From Date</label>
           <input
             type="date"
             value={formData.fromDate}
@@ -55,13 +101,13 @@ const LeaveRequestForm = () => {
               setFormData({ ...formData, fromDate: e.target.value })
             }
             required
-            className="w-full p-3 border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2.5 sm:p-3 text-sm sm:text-base border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>
 
         {/* To Date */}
         <div>
-          <label className="block text-sm font-medium mb-2">To Date</label>
+          <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-gray-700">To Date</label>
           <input
             type="date"
             value={formData.toDate}
@@ -69,13 +115,39 @@ const LeaveRequestForm = () => {
               setFormData({ ...formData, toDate: e.target.value })
             }
             required
-            className="w-full p-3 border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2.5 sm:p-3 text-sm sm:text-base border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+        </div>
+
+        {/* From Time */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-gray-700">From Time</label>
+          <input
+            type="time"
+            value={formData.fromTime}
+            onChange={(e) =>
+              setFormData({ ...formData, fromTime: e.target.value })
+            }
+            className="w-full p-2.5 sm:p-3 text-sm sm:text-base border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+        </div>
+
+        {/* To Time */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-gray-700">To Time</label>
+          <input
+            type="time"
+            value={formData.toTime}
+            onChange={(e) =>
+              setFormData({ ...formData, toTime: e.target.value })
+            }
+            className="w-full p-2.5 sm:p-3 text-sm sm:text-base border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>
 
         {/* Reason */}
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium mb-2">Reason</label>
+        <div className="md:col-span-2">
+          <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-gray-700">Reason</label>
           <textarea
             value={formData.reason}
             onChange={(e) =>
@@ -84,23 +156,20 @@ const LeaveRequestForm = () => {
             rows="3"
             required
             placeholder="Enter reason for leave..."
-            className="w-full p-3 border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full p-2.5 sm:p-3 text-sm sm:text-base border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
           />
         </div>
 
         {/* Submit */}
-        <div className="sm:col-span-2 flex justify-end">
-          <button
+        <div className="md:col-span-2 flex justify-end">
+          <Button
             type="submit"
-            disabled={loading}
-            className={`px-8 py-3 rounded-lg shadow-md text-white transition-colors ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
+            isLoading={loading}
+            variant="primary"
+            className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base shadow-md"
           >
-            {loading ? "Submitting..." : "Submit Leave"}
-          </button>
+            Submit Leave
+          </Button>
         </div>
       </form>
     </div>
