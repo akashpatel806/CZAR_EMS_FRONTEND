@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
+import Button from "../../components/Button";
 
 const HolidayCalendarPage = () => {
   const { role, token } = useAuth();
@@ -180,12 +181,13 @@ const HolidayCalendarPage = () => {
             </p>
           </div>
           {role === "admin" && (
-            <button
+            <Button
               onClick={() => openModal()}
-              className="px-4 sm:px-5 py-2 sm:py-2.5 bg-white text-blue-700 rounded-lg shadow hover:bg-blue-100 w-full sm:w-auto text-sm sm:text-base font-medium transition-colors"
+              variant="secondary"
+              className="w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 bg-white text-blue-700 shadow hover:bg-blue-100 text-sm sm:text-base font-medium transition-colors border-none"
             >
               ➕ Add Holiday
-            </button>
+            </Button>
           )}
         </div>
 
@@ -196,19 +198,21 @@ const HolidayCalendarPage = () => {
         >
           {/* Calendar Header */}
           <div className="flex justify-between items-center mb-4 sm:mb-6">
-            <button
+            <Button
               onClick={prevMonth}
+              variant="ghost"
               className="px-2 sm:px-3 py-1 sm:py-2 rounded hover:bg-gray-200 text-gray-600 text-lg sm:text-xl transition-colors"
             >
               ◀
-            </button>
+            </Button>
             <h2 className="text-base sm:text-lg md:text-xl font-bold text-blue-600">{monthLabel}</h2>
-            <button
+            <Button
               onClick={nextMonth}
+              variant="ghost"
               className="px-2 sm:px-3 py-1 sm:py-2 rounded hover:bg-gray-200 text-gray-600 text-lg sm:text-xl transition-colors"
             >
               ▶
-            </button>
+            </Button>
           </div>
 
           {/* Calendar Grid */}
@@ -250,18 +254,21 @@ const HolidayCalendarPage = () => {
                   )}
                   {role === "admin" && holiday && (
                     <div className="absolute top-0.5 sm:top-1 right-0.5 sm:right-1 flex gap-0.5 sm:gap-1">
-                      <button
+                      <Button
                         onClick={() => openModal(holiday)}
-                        className="text-[10px] sm:text-xs bg-blue-500 text-white rounded px-1 py-0.5 hover:bg-blue-600 transition-colors"
+                        size="sm"
+                        className="text-[10px] sm:text-xs bg-blue-500 text-white rounded px-1 py-0.5 hover:bg-blue-600 transition-colors h-auto min-h-0"
                       >
                         ✏️
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => handleDeleteHoliday(holiday._id)}
-                        className="text-[10px] sm:text-xs bg-red-500 text-white rounded px-1 py-0.5 hover:bg-red-600 transition-colors"
+                        variant="danger"
+                        size="sm"
+                        className="text-[10px] sm:text-xs bg-red-500 text-white rounded px-1 py-0.5 hover:bg-red-600 transition-colors h-auto min-h-0 border-none"
                       >
                         ✕
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -278,16 +285,18 @@ const HolidayCalendarPage = () => {
           style={{ position: "fixed" }}
         >
           <div
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-5 sm:p-6 border border-gray-200 max-h-[90vh] overflow-y-auto"
+            className="relative bg-white rounded-2xl shadow-2xl w-full p-5 sm:p-6 border border-gray-200 max-h-[90vh] overflow-y-auto"
             style={{ zIndex: 60 }}
           >
             {/* Close Button */}
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={closeModal}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl sm:text-2xl w-8 h-8 flex items-center justify-center"
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl sm:text-2xl w-8 h-8 flex items-center justify-center hover:bg-transparent"
             >
               ✖
-            </button>
+            </Button>
 
             <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-blue-700 border-b pb-2 pr-8">
               {editHoliday ? "Edit Holiday" : "Add Holiday"}
@@ -364,19 +373,21 @@ const HolidayCalendarPage = () => {
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={closeModal}
-                  className="w-full sm:w-auto px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm sm:text-base font-medium transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 sm:py-2.5 text-sm sm:text-base font-medium transition-colors"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="w-full sm:w-auto px-4 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm sm:text-base font-medium transition-colors"
+                  variant="primary"
+                  className="w-full sm:w-auto px-4 py-2 sm:py-2.5 text-sm sm:text-base font-medium transition-colors"
                 >
                   Save
-                </button>
+                </Button>
               </div>
             </form>
           </div>
