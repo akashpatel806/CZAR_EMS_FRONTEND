@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Upload, ChevronDown } from 'lucide-react';
 import axios from 'axios';
+import Button from './Button';
 import MonthYearPicker from './MonthYearPicker'; // Sibling import
 import UploadModal from './UploadModal';         // Sibling import
 import EmployeeDetailLog from './EmployeeDetailLog'; // Sibling import
@@ -155,12 +156,12 @@ function AdminAttendanceManager() {
                 onUploadSuccess={(newVal) => { setIsUploadModalOpen(false); setCurrentMonthYear(newVal); fetchAttendanceData(); }}
             />
 
-            <div className="max-w-7xl mx-auto p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl shadow-lg mb-4 sm:mb-6">
+            <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl shadow-lg mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">Attendance Management</h2>
                 <p className="text-xs sm:text-sm opacity-90 mt-1">Review and manage all employee attendance records.</p>
             </div>
 
-            <div className="max-w-7xl mx-auto bg-white p-4 sm:p-6 rounded-xl shadow-md mb-4 sm:mb-6 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-4 sm:mb-6 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
                 <div className="flex-grow sm:min-w-[200px] relative">
                     <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <input
@@ -173,28 +174,29 @@ function AdminAttendanceManager() {
                 </div>
 
                 <div className="sm:min-w-[150px] relative" ref={pickerRef}>
-                    <button onClick={() => setIsPickerOpen(!isPickerOpen)} className="w-full border rounded-lg py-2 px-3 bg-white flex justify-between items-center hover:bg-gray-50 text-sm sm:text-base">
+                    <Button variant="secondary" onClick={() => setIsPickerOpen(!isPickerOpen)} className="w-full bg-white flex justify-between items-center hover:bg-gray-50 text-sm sm:text-base border-gray-200">
                         <span className="font-semibold">{displayDate}</span>
                         <ChevronDown size={16} />
-                    </button>
+                    </Button>
                     {isPickerOpen && <MonthYearPicker currentMonthYear={currentMonthYear} onChange={setCurrentMonthYear} onClose={() => setIsPickerOpen(false)} />}
                 </div>
 
-                <button onClick={() => setIsUploadModalOpen(true)} className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 flex items-center justify-center text-sm sm:text-base">
+                <Button variant="success" onClick={() => setIsUploadModalOpen(true)} className="flex items-center justify-center text-sm sm:text-base shadow-md">
                     <Upload size={18} className="mr-2" /> Bulk Upload
-                </button>
+                </Button>
             </div>
 
-            <div className="max-w-7xl mx-auto">
+            <div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                     <h3 className="text-lg sm:text-xl font-bold text-gray-700">Summary for {displayDate}</h3>
                     {attendanceData.length > 0 && (
-                        <button
+                        <Button
+                            variant="danger"
                             onClick={handleDeleteMonth}
-                            className="px-3 sm:px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 flex items-center transition w-full sm:w-auto justify-center"
+                            className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 flex items-center transition w-full sm:w-auto justify-center"
                         >
                             <span className="font-semibold text-xs sm:text-sm">Delete Month Data</span>
-                        </button>
+                        </Button>
                     )}
                 </div>
                 <div className="mb-4">
@@ -232,7 +234,7 @@ function AdminAttendanceManager() {
                                         </td>
                                         <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm hidden md:table-cell">{formatExcatTime(record.totalMonthlyOvertime || 0)}</td>
                                         <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-                                            <button onClick={() => setSelectedEmployeeRecord(record)} className="text-indigo-600 hover:text-indigo-800 font-medium text-xs sm:text-sm whitespace-nowrap">View Log</button>
+                                            <Button variant="ghost" size="sm" onClick={() => setSelectedEmployeeRecord(record)} className="text-indigo-600 hover:text-indigo-800 font-medium text-xs sm:text-sm whitespace-nowrap hover:bg-indigo-50">View Log</Button>
                                         </td>
                                     </tr>
                                 ))
@@ -248,21 +250,23 @@ function AdminAttendanceManager() {
                             Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredAttendanceData.length)} of {filteredAttendanceData.length} entries
                         </span>
                         <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-                            <button
+                            <Button
+                                variant="secondary"
+                                size="sm"
                                 onClick={() => handlePageChange(currentPage - 1)}
                                 disabled={currentPage === 1}
-                                className="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Previous
-                            </button>
+                            </Button>
                             <span className="text-sm font-medium text-gray-700">Page {currentPage} of {totalPages}</span>
-                            <button
+                            <Button
+                                variant="secondary"
+                                size="sm"
                                 onClick={() => handlePageChange(currentPage + 1)}
                                 disabled={currentPage === totalPages}
-                                className="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Next
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 )}

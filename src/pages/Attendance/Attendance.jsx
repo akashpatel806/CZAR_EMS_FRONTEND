@@ -1,6 +1,7 @@
 // import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 // import { Search, Upload, Clock, Calendar as CalendarIcon, ChevronDown, ChevronLeft, ChevronRight, XCircle, CheckCircle, X, LogIn, User } from 'lucide-react';
 // import axios from 'axios';
+import Button from '../../components/Button';
 
 // // ===============================================
 // // === 1. MOCK AUTHENTICATION HOOK ================
@@ -18,7 +19,7 @@
 //         return { role: null, isAuthenticated: false };
 //     }
 //     const user = JSON.parse(userString);
-    
+
 //     // Return the role so the UI knows which screen to show
 //     return { 
 //         role: user.role, // 'admin' or 'employee'
@@ -134,7 +135,7 @@
 //     const handleFileUpload = async () => {
 //         if (!file) return alert('Please select a file.');
 //         setUploading(true);
-        
+
 //         const formData = new FormData();
 //         formData.append('file', file);
 //         formData.append('month', selectedMonth);
@@ -158,11 +159,11 @@
 //     return (
 //         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-center z-50">
 //             <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-md relative">
-//                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={24} /></button>
+//                 <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={24} /></Button>
 //                 <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
 //                     <Upload size={24} className="mr-3 text-blue-600" /> Bulk Upload
 //                 </h3>
-                
+
 //                 {/* Selectors */}
 //                 <div className="flex space-x-4 mb-6">
 //                     <div className="flex-1">
@@ -217,7 +218,7 @@
 //         const date = new Date(year, month, i);
 //         const dayOfWeek = date.getDay();
 //         const record = recordsMap[i];
-        
+
 //         let status = 'Absent';
 //         if (record) {
 //             status = record.status;
@@ -242,7 +243,7 @@
 // const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
 //     // employeeRecord is the full document from MongoDB (containing 'attendance' array)
 //     const { month, year, attendance, name, employeeId } = employeeRecord;
-    
+
 //     // Convert 1-based month (from DB) to 0-based index for JS Date
 //     const monthIndex = month - 1; 
 //     const monthYearText = new Date(year, monthIndex).toLocaleString('en-US', { month: 'long', year: 'numeric' });
@@ -259,7 +260,7 @@
 //                     Attendance Log for {name} ({employeeId})
 //                 </h2>
 //             </div>
-            
+
 //             <div className="flex justify-center items-center mb-8 p-4 bg-gray-50 rounded-lg">
 //                 <h3 className="text-xl font-semibold text-gray-800 flex items-center">
 //                     <Clock size={20} className="mr-2 text-blue-600" />{monthYearText}
@@ -340,7 +341,7 @@
 //     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 //     const [isPickerOpen, setIsPickerOpen] = useState(false); 
 //     const pickerRef = useRef(null);
-    
+
 //     // REAL DATA STATES
 //     const [attendanceData, setAttendanceData] = useState([]);
 //     const [loading, setLoading] = useState(false);
@@ -404,7 +405,7 @@
 //             </div>
 //         );
 //     }
-    
+
 //     // RENDER SUMMARY VIEW
 //     return (
 //         <div className="min-h-screen bg-gray-50 p-4 sm:p-6"> 
@@ -466,7 +467,7 @@
 //                                             <span className="ml-2">{getLastLog(record)}</span>
 //                                         </td>
 //                                         <td className="px-6 py-4">
-//                                             <button onClick={() => setSelectedEmployeeRecord(record)} className="text-indigo-600 hover:text-indigo-800 font-medium">View Log</button>
+//                                             <Button variant="ghost" size="sm" onClick={() => setSelectedEmployeeRecord(record)} className="text-indigo-600 hover:text-indigo-800 font-medium hover:bg-indigo-50">View Log</Button>
 //                                         </td>
 //                                     </tr>
 //                                 ))
@@ -491,7 +492,7 @@
 //     // Default to current month/year
 //     const [currentMonthYear, setCurrentMonthYear] = useState(`${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`);
 //     const [isCalendarOpen, setIsCalendarOpen] = useState(true);
-    
+
 //     // Real Data State
 //     const [myRecord, setMyRecord] = useState(null);
 //     const [loading, setLoading] = useState(false);
@@ -511,7 +512,7 @@
 //                 params: { month: monthStr, year: yearStr },
 //                 headers: { 'Authorization': `Bearer ${token}` }
 //             });
-                
+
 //                 // Find logged-in user's record
 //                 if (response.data && response.data.length > 0) {
 //                 setMyRecord(response.data[0]);
@@ -555,16 +556,16 @@
 //                                 <User size={20} className="text-indigo-600" />
 //                                 <span>Total Hours: <strong>{myRecord ? myRecord.totalMonthlyHours : 0}h</strong></span>
 //                             </div>
-                            
+
 //                             <div className="flex items-center space-x-4">
-//                                 <button onClick={() => changeMonth(-1)} className="p-2 rounded-full hover:bg-gray-200 text-gray-700"><ChevronLeft size={24} /></button>
+//                                 <Button variant="ghost" size="icon" onClick={() => changeMonth(-1)} className="rounded-full hover:bg-gray-200 text-gray-700"><ChevronLeft size={24} /></Button>
 //                                 <div className="flex items-center">
 //                                     <h3 className="text-xl font-semibold text-gray-800 mr-2">{displayDate}</h3>
 //                                     <button onClick={() => setIsCalendarOpen(!isCalendarOpen)} className="p-1 rounded-full hover:bg-gray-200 text-gray-700">
 //                                         <CalendarIcon size={24} className="text-blue-600" />
 //                                     </button>
 //                                 </div>
-//                                 <button onClick={() => changeMonth(1)} className="p-2 rounded-full hover:bg-gray-200 text-gray-700"><ChevronRight size={24} /></button>
+//                                 <Button variant="ghost" size="icon" onClick={() => changeMonth(1)} className="rounded-full hover:bg-gray-200 text-gray-700"><ChevronRight size={24} /></Button>
 //                             </div>
 //                         </div>
 
@@ -651,7 +652,7 @@ import AdminAttendanceManager from '../../components/AdminAttendanceManager'; //
 import EmployeeAttendanceView from '../../components/EmployeeAttendanceView'; // Updated Path
 
 export default function AttendancePage() {
-    const { role, isAuthenticated } = useAuth(); 
+    const { role, isAuthenticated } = useAuth();
 
     if (!isAuthenticated) {
         return <div className="p-10 text-center text-gray-600 font-semibold">Please Log In to view attendance.</div>;

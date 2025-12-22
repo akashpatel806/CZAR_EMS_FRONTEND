@@ -210,6 +210,7 @@ import { useAuth } from "../../context/AuthContext";
 import { Search, UserPlus, Filter, Edit, X } from "lucide-react";
 import useDebounce from "../../hooks/useDebounce";
 import toast from "react-hot-toast";
+import Button from "../../components/Button";
 
 const EmployeeListPage = () => {
   const { token } = useAuth();
@@ -230,7 +231,6 @@ const EmployeeListPage = () => {
     dateOfBirth: "",
     dateOfJoining: "",
     allocatedLeaves: "",
-    department: "",
     department: "",
     position: "",
     role: "",
@@ -291,7 +291,6 @@ const EmployeeListPage = () => {
       dateOfJoining: employee.dateOfJoining ? new Date(employee.dateOfJoining).toISOString().split('T')[0] : "",
       allocatedLeaves: employee.allocatedLeaves || employee.availableLeaves || "",
       department: employee.department || "",
-      department: employee.department || "",
       position: employee.position || "",
       role: employee.role || "Employee",
     });
@@ -308,7 +307,6 @@ const EmployeeListPage = () => {
       dateOfBirth: "",
       dateOfJoining: "",
       allocatedLeaves: "",
-      department: "",
       department: "",
       position: "",
       role: "",
@@ -353,7 +351,7 @@ const EmployeeListPage = () => {
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h3 className="text-red-800 font-semibold mb-2">
             Error Loading Employees
           </h3>
@@ -373,13 +371,14 @@ const EmployeeListPage = () => {
             {filteredEmployees.length} of {employees.length} employees
           </p>
         </div>
-        <button
+        <Button
           onClick={() => navigate("/admin/add-employee")}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition w-full sm:w-auto justify-center"
+          variant="primary"
+          className="flex items-center gap-2 px-4 py-2 w-full sm:w-auto justify-center"
         >
           <UserPlus size={18} />
           Add Employee
-        </button>
+        </Button>
       </div>
 
       {/* Search & Filter Controls */}
@@ -457,13 +456,15 @@ const EmployeeListPage = () => {
                   <td className="p-3 text-gray-700 whitespace-nowrap">{emp.department}</td>
                   <td className="p-3 text-gray-700 whitespace-nowrap">{emp.position}</td>
                   <td className="p-3 whitespace-nowrap">
-                    <button
+                    <Button
                       onClick={() => openModal(emp)}
-                      className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-xs"
+                      variant="primary"
+                      size="sm"
+                      className="flex items-center gap-1 px-3 py-1 text-xs"
                     >
                       <Edit size={14} />
                       Edit
-                    </button>
+                    </Button>
                   </td>
                   <td className="p-3 text-gray-700 whitespace-nowrap">
                     {new Date(emp.dateOfJoining).toLocaleDateString("en-US", {
@@ -504,15 +505,17 @@ const EmployeeListPage = () => {
       {/* Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-6 w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-gray-800">Edit Employee</h3>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={closeModal}
                 className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition"
               >
                 <X size={24} />
-              </button>
+              </Button>
             </div>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -636,19 +639,21 @@ const EmployeeListPage = () => {
                 </select>
               </div>
               <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={closeModal}
-                  className="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition"
+                  className="px-6 py-2.5 font-medium transition"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition"
+                  variant="primary"
+                  className="px-6 py-2.5 font-medium shadow-sm transition"
                 >
                   Update Employee
-                </button>
+                </Button>
               </div>
             </form>
           </div>

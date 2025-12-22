@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Button from "./Button";
 
 const Sidebar = ({ isOpen, closeSidebar }) => {
   const { role } = useAuth();
@@ -28,9 +29,9 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-xl font-bold text-blue-600">CZAR EMS</h2>
           {/* Close button for mobile */}
-          <button onClick={closeSidebar} className="md:hidden text-gray-500 text-2xl">
+          <Button onClick={closeSidebar} variant="ghost" size="icon" className="md:hidden text-gray-500 text-2xl">
             ×
-          </button>
+          </Button>
         </div>
         <nav className="space-y-2 flex-grow">
           {filtered.map((item) => (

@@ -189,6 +189,7 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
+import Button from "../../components/Button";
 
 
 const AllLeaveRequests = () => {
@@ -401,7 +402,7 @@ const AllLeaveRequests = () => {
                   </td>
                   <td className="p-3 whitespace-nowrap">{req.toTime || "N/A"}</td>
                   <td
-                    className="p-3 max-w-[300px] cursor-pointer"
+                    className="p-3 cursor-pointer"
                     onClick={() => setSelectedReason(req.reason)}
                   >
                     <div className="line-clamp-2 hover:text-blue-600 transition-colors" title="Click to view full reason">
@@ -422,18 +423,22 @@ const AllLeaveRequests = () => {
                   </td>
                   {role === "admin" && req.status === "Pending" && (
                     <td className="p-3 flex gap-2 whitespace-nowrap">
-                      <button
+                      <Button
                         onClick={() => handleReview(req._id, "Approved")}
-                        className="px-3 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700"
+                        variant="success"
+                        size="sm"
+                        className="px-3 py-1 text-xs"
                       >
                         Approve
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => handleReview(req._id, "Rejected")}
-                        className="px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700"
+                        variant="danger"
+                        size="sm"
+                        className="px-3 py-1 text-xs"
                       >
                         Reject
-                      </button>
+                      </Button>
                     </td>
                   )}
                 </tr>
@@ -450,15 +455,17 @@ const AllLeaveRequests = () => {
           onClick={() => setSelectedReason(null)}
         >
           <div
-            className="bg-white rounded-lg p-6 max-w-lg w-full shadow-2xl relative"
+            className="bg-white rounded-lg p-6 w-full shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 h-8 w-8 text-2xl"
               onClick={() => setSelectedReason(null)}
             >
               &times;
-            </button>
+            </Button>
             <h3 className="text-xl font-bold mb-4 text-gray-800">
               Full Reason
             </h3>
@@ -466,12 +473,13 @@ const AllLeaveRequests = () => {
               {selectedReason}
             </div>
             <div className="mt-6 text-right">
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              <Button
+                variant="primary"
                 onClick={() => setSelectedReason(null)}
+                className="px-4 py-2 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>

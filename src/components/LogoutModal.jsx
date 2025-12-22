@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "./Button";
 
 const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
     if (!isOpen) return null;
@@ -12,18 +13,20 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
                 </p>
 
                 <div className="flex justify-end gap-3">
-                    <button
+                    <Button
                         onClick={onClose}
-                        className="px-4 py-2 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition font-medium"
+                        variant="secondary"
+                        className="px-4 py-2 font-medium"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={onConfirm}
-                        className="px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition font-medium shadow-md"
+                        variant="danger"
+                        className="px-4 py-2 font-medium shadow-md"
                     >
                         Yes, Logout
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
