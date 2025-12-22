@@ -1,13 +1,13 @@
-
-
-
-
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
+import { Filter, Eye } from "lucide-react";
+import SalarySlip from "../SalarySlips/SalarySlip";
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   const { profile: employeeProfile, loading } = useEmployeeProfile();
   const { user, role, token } = useAuth();
 
@@ -30,6 +30,21 @@ const ProfilePage = () => {
     confirm: false,
   });
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(true);
+  const [documents, setDocuments] = useState([]);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
+  const [salarySlips, setSalarySlips] = useState([]);
+  const [isLoadingSalarySlips, setIsLoadingSalarySlips] = useState(false);
+  const [selectedYear, setSelectedYear] = useState('all');
+  const [isViewingSalarySlips, setIsViewingSalarySlips] = useState(false);
+
+  // Group salary slips by year
+  const salarySlipsByYear = salarySlips.reduce((acc, slip) => {
+    const year = slip.toYear;
+    if (!acc[year]) acc[year] = [];
+    acc[year].push(slip);
+    return acc;
+  }, {});
+  const sortedYears = Object.keys(salarySlipsByYear).sort((a, b) => b - a);
 
   // ✅ Fetch admin profile when role = admin
   useEffect(() => {
@@ -53,6 +68,47 @@ const ProfilePage = () => {
     if (role === "admin") fetchAdminProfile();
   }, [role, user, token]);
 
+  // ✅ Fetch documents when role = employee
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      if (role !== "employee") return;
+      setIsLoadingDocuments(true);
+      try {
+        const res = await axiosInstance.get('/employee/documents');
+        setDocuments(res.data.documents);
+      } catch (error) {
+        console.error("Error fetching documents:", error);
+      } finally {
+        setIsLoadingDocuments(false);
+      }
+    };
+    fetchDocuments();
+  }, [role]);
+
+  // ✅ Fetch salary slips when role = employee
+  const fetchSalarySlips = async () => {
+    if (role !== "employee") return;
+    setIsLoadingSalarySlips(true);
+    try {
+      const res = await axiosInstance.get('/employee/salary-slips');
+      setSalarySlips(res.data.salarySlips);
+    } catch (error) {
+      console.error("Error fetching salary slips:", error);
+    } finally {
+      setIsLoadingSalarySlips(false);
+    }
+  };
+
+  useEffect(() => {
+    if (role === "employee") {
+      fetchSalarySlips();
+    }
+  }, [role]);
+
+
+
+
+
   // ✅ Loading states
   if ((role === "employee" && loading) || (role === "admin" && isLoadingAdmin)) {
     return (
@@ -72,8 +128,6 @@ const ProfilePage = () => {
       </div>
     );
   }
-
-
 
   // 🧩 Handlers
 
@@ -169,6 +223,8 @@ const ProfilePage = () => {
     setIsEditingProfile(false);
   };
 
+
+
   // 🧱 UI starts here
   return (
     <div className="w-full mx-auto bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border border-gray-100">
@@ -263,6 +319,72 @@ const ProfilePage = () => {
         </div>
       </div>
 
+      {/* Documents Section - Only for Employees */}
+      {role === "employee" && (
+        <div className="p-4 sm:p-6 md:p-8 bg-white border-t">
+          <div className="flex justify-between items-center mb-3 sm:mb-4 border-b pb-2">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-700">
+              📄 My Documents
+            </h3>
+            <button
+              onClick={() => {
+                fetchSalarySlips();
+                setIsViewingSalarySlips(true);
+              }}
+              className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition shadow-sm"
+            >
+              💰 View Salary Slips
+            </button>
+          </div>
+
+          {isLoadingDocuments ? (
+            <div className="text-center text-gray-600">Loading documents...</div>
+          ) : documents.length === 0 ? (
+            <div className="text-center text-gray-500">No documents found.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+              {documents.map((doc) => (
+                <div key={doc._id} className="bg-gray-50 border border-gray-200 rounded-lg p-2 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-gray-800 capitalize">{doc.type}</h4>
+                  </div>
+                  <a
+                    href={`http://localhost:5002/uploads/documents/${doc.filename}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                    title="View Document"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Salary Slips Modal */}
+      {isViewingSalarySlips && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl p-5 sm:p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+            {/* Close Button */}
+            <button
+              onClick={() => setIsViewingSalarySlips(false)}
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <SalarySlip />
+          </div>
+        </div>
+      )}
+
 
 
       {/* Action Buttons */}
@@ -282,8 +404,6 @@ const ProfilePage = () => {
           🔒 Change Password
         </button>
       </div>
-
-
 
       {/* Change Password Modal */}
       {isChangingPassword && (
@@ -413,6 +533,8 @@ const ProfilePage = () => {
         </div>
       )}
 
+
+
       {/* Edit Profile Modal */}
       {isEditingProfile && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm p-4">
@@ -482,6 +604,12 @@ const ProfilePage = () => {
           </div>
         </div>
       )}
+
+
+
+
+
+
     </div>
   );
 };

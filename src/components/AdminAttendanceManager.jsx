@@ -5,7 +5,7 @@ import MonthYearPicker from './MonthYearPicker'; // Sibling import
 import UploadModal from './UploadModal';         // Sibling import
 import EmployeeDetailLog from './EmployeeDetailLog'; // Sibling import
 import useDebounce from '../hooks/useDebounce'; // Custom hook
-import { API_BASE_URL, getStatusIcon, getStatusColor } from '../utils/attendanceUtils'; // Up one level to utils
+import { API_BASE_URL, getStatusIcon, getStatusColor } from '../utils/attendanceUtils.jsx'; // Up one level to utils
 
 function AdminAttendanceManager() {
     const today = new Date();

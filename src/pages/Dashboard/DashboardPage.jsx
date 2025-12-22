@@ -16,6 +16,11 @@ const DashboardPage = () => {
     attendanceSummary: { present: 0, absent: 0 },
   });
 
+  const [employeeDashboard, setEmployeeDashboard] = useState({
+    attendanceStatus: "present",
+    attendanceSummary: { present: 0, absent: 0 },
+  });
+
   // ✅ Fetch admin dashboard data (only if role = admin)
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -48,7 +53,7 @@ const DashboardPage = () => {
   }
 
   // ✅ Employee Summary (same as your current logic)
-  const { leaveSummary = {}, leaveRequests = [] } = employeeProfile || {};
+  const { leaveSummary = {}, leaveRequests = [], attendanceStatus = "present" } = employeeProfile || {};
   const summary =
     leaveSummary && Object.keys(leaveSummary).length > 0
       ? leaveSummary
@@ -59,7 +64,7 @@ const DashboardPage = () => {
       };
 
   // Calculate approved days from leave requests
-  const approvedDays = leaveRequests.filter((r) => r.status === "Approved").reduce((sum, r) => sum + (r.days || 0), 0);
+  const approvedDays = leaveRequests.filter((r) => r.status === "Approved" && (!r.leaveReasonType || r.leaveReasonType.toLowerCase() !== "sitevisit")).reduce((sum, r) => sum + (r.days || 0), 0);
 
   // ---------------- ADMIN DASHBOARD ----------------
   if (role === "admin") {
@@ -181,6 +186,8 @@ const DashboardPage = () => {
         </h2>
         <p className="text-sm sm:text-base text-gray-600">Welcome to your dashboard.</p>
       </div>
+
+
 
       {/* Leave Balance */}
       <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-lg border border-gray-100">

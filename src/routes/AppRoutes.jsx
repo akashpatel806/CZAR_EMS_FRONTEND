@@ -68,6 +68,7 @@ import ProfilePage from "../pages/Profile/ProfilePage";
 import LeaveRequestPage from "../pages/LeaveRequest/LeaveRequestPage";
 import HolidayCalendarPage from "../pages/HolidayCalendar/HolidayCalendarPage";
 import Attendance from "../pages/Attendance/Attendance";
+import SalarySlip from "../pages/SalarySlips/SalarySlip";
 import ErrorComponent from "../components/ErrorComponent";
 import Login from "../pages/Login/Login";
 import PrivateRoute from "./PrivateRoute";
@@ -120,6 +121,7 @@ export default function AppRoutes() {
             <Route path="holiday-calendar" element={<HolidayCalendarPage />} />
             <Route path="attendance" element={<Attendance />} />
             <Route path="all-requests" element={<AllLeaveRequests/>}/>
+            <Route path="salary-slips" element={<SalarySlip />} />
 
             {/* 👑 Admin-only Pages */}
             <Route
