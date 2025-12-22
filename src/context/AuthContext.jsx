@@ -39,9 +39,10 @@ export const AuthProvider = ({ children }) => {
 
   // ✅ Extract role safely (default: "Employee")
   const role = user?.role?.toLowerCase() || "employee";
+  const token = localStorage.getItem("token");
 
   return (
-    <AuthContext.Provider value={{ user, role, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, role, login, logout, loading, token }}>
       {children}
     </AuthContext.Provider>
   );

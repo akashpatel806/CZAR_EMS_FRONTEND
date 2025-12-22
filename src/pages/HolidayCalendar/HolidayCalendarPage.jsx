@@ -10,19 +10,16 @@ const HolidayCalendarPage = () => {
   const [date, setDate] = useState(new Date());
   const [holidays, setHolidays] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
-const [messageType, setMessageType] = useState(""); // 'success' or 'error'
-
 
   // Admin modal states
   const [showModal, setShowModal] = useState(false);
   const [editHoliday, setEditHoliday] = useState(null);
-const [formData, setFormData] = useState({
-  name: "",
-  fromDate: "",
-  toDate: "",
-  type: "National",
-});
+  const [formData, setFormData] = useState({
+    name: "",
+    fromDate: "",
+    toDate: "",
+    type: "",
+  });
 
 
   // Fetch holidays (based on year)
@@ -34,11 +31,9 @@ const [formData, setFormData] = useState({
           role === "admin"
             ? `/holidays/${year}`
             : `/holidays/${year}`; // same for both
-        const res = await axiosInstance.get(endpoint, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axiosInstance.get(endpoint);
         console.log(res);
-        
+
         setHolidays(res.data);
       } catch (error) {
         console.error("Error fetching holidays:", error);
@@ -62,58 +57,60 @@ const [formData, setFormData] = useState({
   const prevMonth = () => setDate(new Date(date.getFullYear(), date.getMonth() - 1));
 
   const getHoliday = (d) => {
-  const currentDate = new Date(date.getFullYear(), date.getMonth(), d);
-  currentDate.setHours(0, 0, 0, 0);
+    const currentDate = new Date(date.getFullYear(), date.getMonth(), d);
+    currentDate.setHours(0, 0, 0, 0);
 
-  return holidays.find((h) => {
-    const start = new Date(h.fromDate);
-    const end = new Date(h.toDate);
-    start.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
-    return currentDate.getTime() >= start.getTime() && currentDate.getTime() <= end.getTime();
-  });
-};
+    return holidays.find((h) => {
+      const start = new Date(h.fromDate);
+      const end = new Date(h.toDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+      return currentDate.getTime() >= start.getTime() && currentDate.getTime() <= end.getTime();
+    });
+  };
 
 
   // 🧩 Admin CRUD Functions
   const handleAddOrUpdateHoliday = async (e) => {
     e.preventDefault();
 
-    console.log(formData);
-    
+    // Calculate year from fromDate
+    const year = new Date(formData.fromDate).getFullYear();
+    const dataToSend = { ...formData, year };
+
+    console.log("Sending data:", dataToSend);
+
     try {
       if (editHoliday) {
         // Update existing
-        await axiosInstance.put(`/holidays/${editHoliday._id}`, formData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axiosInstance.put(`/holidays/${editHoliday._id}`, dataToSend);
       } else {
         // Add new
-        await axiosInstance.post(`/holidays/addHoliday`, formData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axiosInstance.post(`/holidays/addHoliday`, dataToSend);
       }
 
       setShowModal(false);
       setEditHoliday(null);
 
-      
-      setFormData({ name: "", date: "", type: "National" });
-      
+
+      setFormData({ name: "", fromDate: "", toDate: "", type: "National" });
+
       const res = await axiosInstance.get(`/holidays/${date.getFullYear()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setHolidays(res.data);
 
-      toast.success("success",{
-        duration:1500
+      toast.success("success", {
+        duration: 1500
       })
       setShowModal(false)
     } catch (error) {
-      // console.log();
-      
       console.error("Error saving holiday:", error);
-      alert("Failed to save holiday.");
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+
+      const errorMessage = error.response?.data?.message || error.message || "Failed to save holiday.";
+      alert(`Failed to save holiday: ${errorMessage}`);
     }
   };
 
@@ -126,6 +123,7 @@ const [formData, setFormData] = useState({
       setHolidays((prev) => prev.filter((h) => h._id !== id));
     } catch (error) {
       console.error("Error deleting holiday:", error);
+      alert(`Failed to delete holiday: ${error.response?.data?.message || error.message}`);
     }
   };
 
@@ -138,20 +136,20 @@ const [formData, setFormData] = useState({
     // );
 
     setFormData(
-  holiday
-    ? {
-        name: holiday.name,
-        fromDate: holiday.fromDate?.split("T")[0] || "",
-        toDate: holiday.toDate?.split("T")[0] || "",
-        type: holiday.type || "National",
-      }
-    : {
-        name: "",
-        fromDate: "",
-        toDate: "",
-        type: "National",
-      }
-);
+      holiday
+        ? {
+          name: holiday.name,
+          fromDate: holiday.fromDate?.split("T")[0] || "",
+          toDate: holiday.toDate?.split("T")[0] || "",
+          type: holiday.type || "National",
+        }
+        : {
+          name: "",
+          fromDate: "",
+          toDate: "",
+          type: "National",
+        }
+    );
 
     setShowModal(true);
   };
@@ -172,19 +170,19 @@ const [formData, setFormData] = useState({
   return (
     <div className="flex flex-col h-full">
       {/* Page Content */}
-      <div className="flex-1 p-6 bg-gray-50">
+      <div className="flex-1 p-3 sm:p-4 md:p-6 bg-gray-50">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-xl shadow-lg mb-10 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">Holiday Calendar</h1>
-            <p className="text-blue-100">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 sm:p-5 md:p-6 rounded-xl shadow-lg mb-6 md:mb-10 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+          <div className="text-center sm:text-left w-full sm:w-auto">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Holiday Calendar</h1>
+            <p className="text-sm sm:text-base text-blue-100 mt-1">
               View all upcoming holidays and plan your leaves effectively.
             </p>
           </div>
           {role === "admin" && (
             <button
               onClick={() => openModal()}
-              className="px-5 py-2 bg-white text-blue-700 rounded-lg shadow hover:bg-blue-100"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 bg-white text-blue-700 rounded-lg shadow hover:bg-blue-100 w-full sm:w-auto text-sm sm:text-base font-medium transition-colors"
             >
               ➕ Add Holiday
             </button>
@@ -193,33 +191,32 @@ const [formData, setFormData] = useState({
 
         {/* Calendar Container */}
         <div
-          className={`${
-            theme === "dark" ? "bg-gray-800" : "bg-white"
-          } p-8 rounded-xl shadow-lg border border-gray-100`}
+          className={`${theme === "dark" ? "bg-gray-800" : "bg-white"
+            } p-3 sm:p-5 md:p-8 rounded-xl shadow-lg border border-gray-100`}
         >
           {/* Calendar Header */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
             <button
               onClick={prevMonth}
-              className="px-3 py-1 rounded hover:bg-gray-200 text-gray-600"
+              className="px-2 sm:px-3 py-1 sm:py-2 rounded hover:bg-gray-200 text-gray-600 text-lg sm:text-xl transition-colors"
             >
               ◀
             </button>
-            <h2 className="text-xl font-bold text-blue-600">{monthLabel}</h2>
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-blue-600">{monthLabel}</h2>
             <button
               onClick={nextMonth}
-              className="px-3 py-1 rounded hover:bg-gray-200 text-gray-600"
+              className="px-2 sm:px-3 py-1 sm:py-2 rounded hover:bg-gray-200 text-gray-600 text-lg sm:text-xl transition-colors"
             >
               ▶
             </button>
           </div>
 
           {/* Calendar Grid */}
-          <div className="grid grid-cols-7 text-center gap-2">
+          <div className="grid grid-cols-7 text-center gap-1 sm:gap-2">
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
               <div
                 key={d}
-                className="font-semibold text-gray-500 border-b border-gray-200 pb-2"
+                className="font-semibold text-gray-500 border-b border-gray-200 pb-1 sm:pb-2 text-xs sm:text-sm"
               >
                 {d}
               </div>
@@ -240,31 +237,30 @@ const [formData, setFormData] = useState({
               return (
                 <div
                   key={day}
-                  className={`relative p-3 rounded-lg text-sm transition-all cursor-pointer ${
-                    holiday
-                      ? "bg-red-100 text-red-700 font-semibold shadow-sm"
-                      : isSunday
+                  className={`relative p-1.5 sm:p-2 md:p-3 rounded-lg text-xs sm:text-sm transition-all cursor-pointer min-h-[50px] sm:min-h-[60px] md:min-h-[70px] flex flex-col ${holiday
+                    ? "bg-red-100 text-red-700 font-semibold shadow-sm"
+                    : isSunday
                       ? "bg-purple-100 text-purple-700 font-medium"
                       : "hover:bg-gray-100 text-gray-700"
-                  }`}
+                    }`}
                 >
-                  <div>{day}</div>
+                  <div className="font-semibold">{day}</div>
                   {holiday && (
-                    <div className="text-xs font-medium mt-1">{holiday.name}</div>
+                    <div className="text-[9px] sm:text-[10px] md:text-xs font-medium mt-0.5 sm:mt-1 line-clamp-2 leading-tight">{holiday.name}</div>
                   )}
                   {role === "admin" && holiday && (
-                    <div className="absolute top-1 right-1 flex gap-1">
+                    <div className="absolute top-0.5 sm:top-1 right-0.5 sm:right-1 flex gap-0.5 sm:gap-1">
                       <button
                         onClick={() => openModal(holiday)}
-                        className="text-xs bg-blue-500 text-white rounded px-1 hover:bg-blue-600"
+                        className="text-[10px] sm:text-xs bg-blue-500 text-white rounded px-1 py-0.5 hover:bg-blue-600 transition-colors"
                       >
                         ✏️
                       </button>
                       <button
                         onClick={() => handleDeleteHoliday(holiday._id)}
-                        className="text-xs bg-red-500 text-white rounded px-1 hover:bg-red-600"
+                        className="text-[10px] sm:text-xs bg-red-500 text-white rounded px-1 py-0.5 hover:bg-red-600 transition-colors"
                       >
-                        x
+                        ✕
                       </button>
                     </div>
                   )}
@@ -275,120 +271,120 @@ const [formData, setFormData] = useState({
         </div>
       </div>
 
-  {/* 🧩 Modal for Add/Edit Holiday (Admin Only) */}
-{showModal && (
-  <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-    style={{ position: "fixed" }}
-  >
-    <div
-      className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 mx-4 border border-gray-200"
-      style={{ zIndex: 60 }}
-    >
-      {/* Close Button (optional) */}
-      <button
-        onClick={closeModal}
-        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-      >
-        ✖
-      </button>
+      {/* 🧩 Modal for Add/Edit Holiday (Admin Only) */}
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          style={{ position: "fixed" }}
+        >
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-5 sm:p-6 border border-gray-200 max-h-[90vh] overflow-y-auto"
+            style={{ zIndex: 60 }}
+          >
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl sm:text-2xl w-8 h-8 flex items-center justify-center"
+            >
+              ✖
+            </button>
 
-      <h3 className="text-2xl font-semibold mb-6 text-blue-700 border-b pb-2">
-        {editHoliday ? "Edit Holiday" : "Add Holiday"}
-      </h3>
+            <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-blue-700 border-b pb-2 pr-8">
+              {editHoliday ? "Edit Holiday" : "Add Holiday"}
+            </h3>
 
-      <form onSubmit={handleAddOrUpdateHoliday} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-600">
-            Holiday Name
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
-            required
-            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-        </div>
+            <form onSubmit={handleAddOrUpdateHoliday} className="space-y-3 sm:space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Holiday Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 sm:py-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm sm:text-base"
+                />
+              </div>
 
-        {/* Date Range (From → To) */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-600">
-              From Date
-            </label>
-            <input
-              type="date"
-              name="fromDate"
-              value={formData.fromDate}
-              onChange={(e) =>
-                setFormData({ ...formData, fromDate: e.target.value })
-              }
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-            />
+              {/* Date Range (From → To) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                    From Date
+                  </label>
+                  <input
+                    type="date"
+                    name="fromDate"
+                    value={formData.fromDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, fromDate: e.target.value })
+                    }
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 sm:py-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm sm:text-base"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                    To Date
+                  </label>
+                  <input
+                    type="date"
+                    name="toDate"
+                    value={formData.toDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, toDate: e.target.value })
+                    }
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 sm:py-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm sm:text-base"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Type
+                </label>
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={(e) =>
+                    setFormData({ ...formData, type: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 sm:py-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm sm:text-base"
+                >
+                  <option value="National">National</option>
+                  <option value="Festival">Festival</option>
+                  <option value="Optional">Optional</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="w-full sm:w-auto px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm sm:text-base font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-4 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm sm:text-base font-medium transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600">
-              To Date
-            </label>
-            <input
-              type="date"
-              name="toDate"
-              value={formData.toDate}
-              onChange={(e) =>
-                setFormData({ ...formData, toDate: e.target.value })
-              }
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-          </div>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600">
-            Type
-          </label>
-          <select
-            name="type"
-            value={formData.type}
-            onChange={(e) =>
-              setFormData({ ...formData, type: e.target.value })
-            }
-            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-          >
-            <option value="National">National</option>
-            <option value="Festival">Festival</option>
-            <option value="Optional">Optional</option>
-          </select>
-        </div>
-
-        <div className="flex justify-end gap-3 pt-4">
-          <button
-            type="button"
-            onClick={closeModal}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Save
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
+      )}
 
     </div>
   );
 };
 
-export default HolidayCalendarPage;
+export default HolidayCalendarPage
