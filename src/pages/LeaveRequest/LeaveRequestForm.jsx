@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLeaveRequest } from "../../hooks/useLeaveRequest"; // ✅ import your hook
 import { useEmployeeProfile } from "../../hooks/useEmployeeProfile"; // ✅ import profile hook
+import Button from "../../components/Button";
 
 const LeaveRequestForm = () => {
   const [formData, setFormData] = useState({
@@ -65,7 +66,7 @@ const LeaveRequestForm = () => {
   };
 
   return (
-    <div className="bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 max-w-full mx-auto mt-4 sm:mt-6 md:mt-10">
+    <div className="bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 mx-auto mt-4 sm:mt-6 md:mt-10">
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6"
@@ -188,16 +189,14 @@ const LeaveRequestForm = () => {
 
         {/* Submit */}
         <div className="md:col-span-2 flex justify-end">
-          <button
+          <Button
             type="submit"
-            disabled={loading || !canApplyLeave}
-            className={`w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg shadow-md text-white transition-colors ${loading || !canApplyLeave
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-              }`}
+            isLoading={loading}
+            variant="primary"
+            className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base shadow-md"
           >
-            {loading ? "Submitting..." : (!canApplyLeave ? "Insufficient Leave Balance" : "Submit Leave")}
-          </button>
+            Submit Leave
+          </Button>
         </div>
       </form>
     </div>

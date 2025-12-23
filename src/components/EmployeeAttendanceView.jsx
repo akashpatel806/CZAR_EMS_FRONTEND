@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { User, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import Button from './Button';
 import axios from 'axios';
 import { useAuth } from '../hooks/useAuth';
 import { API_BASE_URL, getStatusColor, getStatusIcon, generateCalendarDates, formatDecimalHours } from '../utils/attendanceUtils';
@@ -53,18 +54,19 @@ function EmployeeAttendanceView() {
 
     return (
         <div className="p-3 sm:p-4 md:p-8 bg-gray-50 min-h-screen">
-            <div className="bg-white shadow-xl rounded-xl sm:rounded-2xl overflow-hidden max-w-5xl mx-auto">
+            <div className="bg-white shadow-xl rounded-xl sm:rounded-2xl overflow-hidden">
                 <div className="p-4 sm:p-5 md:p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
                     <div className="w-full sm:w-auto">
                         <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">Personal Attendance Log</h2>
                         <p className="text-xs sm:text-sm mt-1 opacity-90">Daily detailed work hours for {userName}.</p>
                     </div>
-                    <button
+                    <Button
+                        variant="ghost"
                         onClick={() => setViewMode(viewMode === 'calendar' ? 'table' : 'calendar')}
-                        className="w-full sm:w-auto px-4 py-2 bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm font-medium rounded-lg transition backdrop-blur-sm border border-white/30"
+                        className="w-full sm:w-auto bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm font-medium rounded-lg transition backdrop-blur-sm border border-white/30"
                     >
                         {viewMode === 'calendar' ? 'View Details' : 'View Calendar'}
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="p-4 sm:p-5 md:p-6">
@@ -75,9 +77,9 @@ function EmployeeAttendanceView() {
                         </div>
 
                         <div className="flex items-center space-x-2 sm:space-x-4 bg-gray-100 rounded-lg p-1 w-full sm:w-auto justify-center">
-                            <button onClick={() => changeMonth(-1)} className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-200 text-gray-700"><ChevronLeft size={18} className="sm:w-5 sm:h-5" /></button>
+                            <Button variant="ghost" size="icon" onClick={() => changeMonth(-1)} className="rounded-lg hover:bg-gray-200 text-gray-700 p-1.5 sm:p-2"><ChevronLeft size={18} className="sm:w-5 sm:h-5" /></Button>
                             <h3 className="text-sm sm:text-lg font-semibold text-gray-800 min-w-[120px] sm:min-w-[140px] text-center">{displayDate}</h3>
-                            <button onClick={() => changeMonth(1)} className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-200 text-gray-700"><ChevronRight size={18} className="sm:w-5 sm:h-5" /></button>
+                            <Button variant="ghost" size="icon" onClick={() => changeMonth(1)} className="rounded-lg hover:bg-gray-200 text-gray-700 p-1.5 sm:p-2"><ChevronRight size={18} className="sm:w-5 sm:h-5" /></Button>
                         </div>
                     </div>
 

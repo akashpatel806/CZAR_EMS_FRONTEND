@@ -1,11 +1,12 @@
 // src/components/MonthYearPicker.jsx
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import Button from './Button';
 
 const MONTHS = [
-    { name: 'Jan', value: '01' }, { name: 'Feb', value: '02' }, { name: 'Mar', value: '03' }, 
-    { name: 'Apr', value: '04' }, { name: 'May', value: '05' }, { name: 'Jun', value: '06' }, 
-    { name: 'Jul', value: '07' }, { name: 'Aug', value: '08' }, { name: 'Sep', value: '09' }, 
-    { name: 'Oct', value: '10' }, { name: 'Nov', value: '11' }, { name: 'Dec', value: '12' }, 
+    { name: 'Jan', value: '01' }, { name: 'Feb', value: '02' }, { name: 'Mar', value: '03' },
+    { name: 'Apr', value: '04' }, { name: 'May', value: '05' }, { name: 'Jun', value: '06' },
+    { name: 'Jul', value: '07' }, { name: 'Aug', value: '08' }, { name: 'Sep', value: '09' },
+    { name: 'Oct', value: '10' }, { name: 'Nov', value: '11' }, { name: 'Dec', value: '12' },
 ];
 
 const MonthYearPicker = ({ currentMonthYear, onChange, onClose }) => {
@@ -32,7 +33,7 @@ const MonthYearPicker = ({ currentMonthYear, onChange, onClose }) => {
 
     const handleMonthClick = useCallback((monthValue) => {
         onChange(`${monthValue}-${displayYear}`);
-        onClose(); 
+        onClose();
     }, [displayYear, onChange, onClose]);
 
     return (
@@ -41,13 +42,15 @@ const MonthYearPicker = ({ currentMonthYear, onChange, onClose }) => {
                 <h4 className="text-sm font-bold text-gray-700 mb-2">Month</h4>
                 <div className="grid grid-cols-3 gap-2">
                     {MONTHS.map((month) => (
-                        <button
+                        <Button
                             key={month.value}
+                            variant={month.value === currentMonth ? 'primary' : 'secondary'}
+                            size="sm"
                             onClick={() => handleMonthClick(month.value)}
-                            className={`p-1.5 py-1 text-[10px] rounded-md transition ${month.value === currentMonth ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-blue-50'}`}
+                            className={`text-[10px] ${month.value === currentMonth ? '' : 'bg-gray-100 text-gray-700 hover:bg-blue-50 border-transparent'}`}
                         >
                             {month.name}
-                        </button>
+                        </Button>
                     ))}
                 </div>
             </div>
