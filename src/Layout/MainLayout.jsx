@@ -25,7 +25,7 @@ export default function MainLayout() {
       {/* Main content shifted right by sidebar width ONLY on desktop */}
       <div className="flex-1 flex flex-col min-w-0 ml-0 md:ml-64 transition-all duration-300">
         <Navbar onMenuClick={toggleSidebar} />
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 overflow-auto">
           <Outlet />
         </main>
       </div>

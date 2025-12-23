@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
+import Button from "../../components/Button";
 import { Filter, Eye } from "lucide-react";
 import SalarySlip from "../SalarySlips/SalarySlip";
+import Button from "../../components/Button";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -390,36 +392,46 @@ const ProfilePage = () => {
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 p-4 sm:p-6 border-t bg-gray-50">
         {role === "admin" && (
-          <button
+          <Button
             onClick={handleEditProfile}
-            className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white text-sm sm:text-base rounded-lg hover:bg-blue-700 transition shadow-sm"
+            variant="primary"
+            className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base shadow-sm"
           >
             ✏️ Edit Profile
-          </button>
+          </Button>
         )}
-        <button
+        <Button
+<<<<<<< HEAD
+          variant="success"
           onClick={() => setIsChangingPassword(true)}
-          className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white text-sm sm:text-base rounded-lg hover:bg-green-700 transition shadow-sm"
+          className="w-full sm:w-auto"
+=======
+          onClick={() => setIsChangingPassword(true)}
+          variant="primary"
+          className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base shadow-sm"
+>>>>>>> 6fd2509b2415913a43422bb4593e059b967ece63
         >
           🔒 Change Password
-        </button>
+        </Button>
       </div>
 
       {/* Change Password Modal */}
       {isChangingPassword && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-lg p-5 sm:p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full p-5 sm:p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
             {/* Close Button */}
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={handleCancelPassword}
-              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 hover:bg-transparent"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
+            </Button>
 
-            <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-green-700 border-b pb-2 pr-8">
+            <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-blue-700 border-b pb-2 pr-8">
               Change Password
             </h3>
 
@@ -435,12 +447,14 @@ const ProfilePage = () => {
                     value={passwordData.currentPassword}
                     onChange={handlePasswordChange}
                     placeholder="Enter your current password"
-                    className="border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500 transition w-full"
+                    className="border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition w-full"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => togglePasswordVisibility('current')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 h-full w-auto hover:bg-transparent"
                   >
                     {showPasswords.current ? (
                       <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -452,7 +466,7 @@ const ProfilePage = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -469,10 +483,12 @@ const ProfilePage = () => {
                     placeholder="Enter new password (min 6 chars)"
                     className="border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500 transition w-full"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => togglePasswordVisibility('new')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 h-full w-auto hover:bg-transparent"
                   >
                     {showPasswords.new ? (
                       <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -484,7 +500,7 @@ const ProfilePage = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -501,10 +517,12 @@ const ProfilePage = () => {
                     placeholder="Confirm your new password"
                     className="border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500 transition w-full"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => togglePasswordVisibility('confirm')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 h-full w-auto hover:bg-transparent"
                   >
                     {showPasswords.confirm ? (
                       <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -516,18 +534,19 @@ const ProfilePage = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
 
             <div className="flex justify-end gap-2 sm:gap-3 mt-6 sm:mt-8">
-              <button
+              <Button
                 onClick={handleChangePassword}
-                className="w-full sm:w-auto px-4 sm:px-5 py-2 bg-green-600 text-white text-sm sm:text-base rounded-lg hover:bg-green-700 transition"
+                variant="primary"
+                className="w-full sm:w-auto px-4 sm:px-5 py-2 text-sm sm:text-base"
               >
                 Change Password
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -538,7 +557,7 @@ const ProfilePage = () => {
       {/* Edit Profile Modal */}
       {isEditingProfile && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-lg p-5 sm:p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full p-5 sm:p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-blue-700 border-b pb-2">
               Edit Profile
             </h3>
@@ -588,18 +607,20 @@ const ProfilePage = () => {
             </div>
 
             <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 mt-6 sm:mt-8">
-              <button
+              <Button
                 onClick={handleCancelProfile}
-                className="w-full sm:w-auto px-4 sm:px-5 py-2 border border-gray-300 text-sm sm:text-base rounded-lg hover:bg-gray-100 transition"
+                variant="secondary"
+                className="w-full sm:w-auto px-4 sm:px-5 py-2 text-sm sm:text-base"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleSaveProfile}
-                className="w-full sm:w-auto px-4 sm:px-5 py-2 bg-blue-600 text-white text-sm sm:text-base rounded-lg hover:bg-blue-700 transition"
+                variant="primary"
+                className="w-full sm:w-auto px-4 sm:px-5 py-2 text-sm sm:text-base"
               >
                 Save Changes
-              </button>
+              </Button>
             </div>
           </div>
         </div>

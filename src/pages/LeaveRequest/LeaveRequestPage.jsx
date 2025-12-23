@@ -5,6 +5,7 @@ import LeaveRequestTable from "./LeaveRequestTable";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
+import Button from "../../components/Button";
 
 const LeaveRequestPage = () => {
   const { role, token } = useAuth();
@@ -89,24 +90,26 @@ const LeaveRequestPage = () => {
 
           {/* Toggle Buttons */}
           <div className="flex gap-3 w-full sm:w-auto">
-            <button
+            <Button
               onClick={() => setActiveTab("form")}
+              variant={activeTab === "form" ? "white" : "primary"}
               className={`flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-medium transition-all text-center ${activeTab === "form"
-                ? "bg-white text-blue-700 shadow-md"
-                : "bg-blue-500 hover:bg-blue-700 text-white"
+                ? "bg-white text-blue-700 shadow-md hover:bg-white"
+                : ""
                 }`}
             >
               ➕ Submit Leave
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setActiveTab("list")}
+              variant={activeTab === "list" ? "white" : "primary"}
               className={`flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-medium transition-all text-center ${activeTab === "list"
-                ? "bg-white text-blue-700 shadow-md"
-                : "bg-blue-500 hover:bg-blue-700 text-white"
+                ? "bg-white text-blue-700 shadow-md hover:bg-white"
+                : ""
                 }`}
             >
               📋 View Requests
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -134,12 +137,13 @@ const LeaveRequestPage = () => {
               Review and approve or reject employee leave requests.
             </p>
           </div>
-          <button
+          <Button
+            variant="ghost"
             className="px-4 py-2 bg-white text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition w-full sm:w-auto"
             onClick={() => navigate("/all-requests")}
           >
             📋 View All Requests
-          </button>
+          </Button>
         </div>
 
         {/* Leave Requests Table */}
@@ -157,8 +161,8 @@ const LeaveRequestPage = () => {
                     "Leave Type",
                     "Reason Type",
                     "From Date",
-                    "From Time",
                     "To Date",
+                    "From Time",
                     "To Time",
                     "Reason",
                     "Action",
@@ -184,32 +188,36 @@ const LeaveRequestPage = () => {
                       {new Date(req.fromDate).toLocaleDateString()}
                     </td>
                     <td className="p-3 whitespace-nowrap">
-                      {req.fromTime || "N/A"}
+                      {new Date(req.toDate).toLocaleDateString()}
                     </td>
                     <td className="p-3 whitespace-nowrap">
-                      {new Date(req.toDate).toLocaleDateString()}
+                      {req.fromTime || "N/A"}
                     </td>
                     <td className="p-3 whitespace-nowrap">
                       {req.toTime || "N/A"}
                     </td>
-                    <td className="p-3 max-w-[300px] cursor-pointer" onClick={() => setSelectedReason(req.reason)}>
+                    <td className="p-3 cursor-pointer" onClick={() => setSelectedReason(req.reason)}>
                       <div className="line-clamp-3 hover:text-blue-600 transition-colors" title="Click to view full reason">
                         {req.reason}
                       </div>
                     </td>
                     <td className="p-3 flex gap-2 whitespace-nowrap">
-                      <button
+                      <Button
                         onClick={() => handleReview(req._id, "Approved")}
-                        className="px-3 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700"
+                        variant="success"
+                        size="sm"
+                        className="px-3 py-1 text-xs"
                       >
                         Approve
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => handleReview(req._id, "Rejected")}
-                        className="px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700"
+                        variant="danger"
+                        size="sm"
+                        className="px-3 py-1 text-xs"
                       >
                         Reject
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -225,15 +233,17 @@ const LeaveRequestPage = () => {
             onClick={() => setSelectedReason(null)}
           >
             <div
-              className="bg-white rounded-lg p-6 max-w-lg w-full shadow-2xl relative"
+              className="bg-white rounded-lg p-6 w-full shadow-2xl relative"
               onClick={(e) => e.stopPropagation()}
             >
-              <button
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 h-8 w-8 text-2xl"
                 onClick={() => setSelectedReason(null)}
               >
                 &times;
-              </button>
+              </Button>
               <h3 className="text-xl font-bold mb-4 text-gray-800">
                 Full Reason
               </h3>

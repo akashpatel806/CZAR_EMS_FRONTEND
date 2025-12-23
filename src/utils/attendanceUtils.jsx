@@ -22,7 +22,7 @@ export const getStatusColor = (status) => {
 };
 
 export const getStatusIcon = (status) => {
-    if (status === 'Present') return <CheckCircle size={20} className="text-green-500" />;
+    if (status === 'Present' || status === 'Site Visit') return <CheckCircle size={20} className="text-green-500" />;
     if (status === 'Absent') return <XCircle size={20} className="text-red-500" />;
     if (status === 'Missed Punch' || status === 'Leave') return <CalendarIcon size={20} className="text-yellow-500" />;
     if (status === 'Weekend') return <CalendarIcon size={20} className="text-purple-500" />;
@@ -54,7 +54,7 @@ export const generateCalendarDates = (year, month, attendanceArray) => {
         if (record) {
             status = record.status;
             // If it's a leave and leaveType is siteVisit, change status to "Site Visit"
-            if (status === 'Leave' && record.leaveType && record.leaveType.toLowerCase() === 'sitevisit') {
+            if ((status === 'Leave' || status === 'Absent') && record.leaveType && (record.leaveType.toLowerCase() === 'sitevisit' || record.leaveType.toLowerCase() === 'site visit')) {
                 status = 'Site Visit';
             }
         }

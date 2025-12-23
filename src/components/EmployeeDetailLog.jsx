@@ -1,40 +1,119 @@
 // src/components/EmployeeDetailLog.jsx
+<<<<<<< HEAD
+import React, { useMemo, useState } from 'react';
+import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import axios from 'axios';
+import { getStatusColor, getStatusIcon, generateCalendarDates, formatDecimalHours, API_BASE_URL } from '../utils/attendanceUtils'; // Updated Path
+=======
 import React, { useMemo } from 'react';
 import { Clock, ChevronLeft } from 'lucide-react';
 import { getStatusColor, getStatusIcon, generateCalendarDates, formatDecimalHours } from '../utils/attendanceUtils'; // Updated Path
+import Button from "./Button";
+>>>>>>> 6fd2509b2415913a43422bb4593e059b967ece63
 
 const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
-    const { month, year, attendance, name, employeeId } = employeeRecord;
-    const [viewMode, setViewMode] = React.useState('calendar'); // 'calendar' or 'table'
+    const { name, employeeId } = employeeRecord;
+    const [viewMode, setViewMode] = useState('calendar'); // 'calendar' or 'table'
+    const [currentMonth, setCurrentMonth] = useState(parseInt(employeeRecord.month));
+    const [currentYear, setCurrentYear] = useState(parseInt(employeeRecord.year));
+    const [attendance, setAttendance] = useState(employeeRecord.attendance || []);
+    const [loading, setLoading] = useState(false);
 
-    const monthIndex = month - 1;
-    const monthYearText = new Date(year, monthIndex).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    const monthIndex = currentMonth - 1;
+    const monthYearText = new Date(currentYear, monthIndex).toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
-    const calendarDates = useMemo(() => generateCalendarDates(year, monthIndex, attendance), [year, monthIndex, attendance]);
+    const fetchNewMonthData = async (m, y) => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${API_BASE_URL}/attendance/view`, {
+                params: { month: m, year: y, search: employeeId },
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            // The API returns an array. Find the record for this employee.
+            const record = response.data.find(r => r.employeeId === employeeId);
+            if (record) {
+                setAttendance(record.attendance || []);
+            } else {
+                setAttendance([]);
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            setAttendance([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handlePrevMonth = () => {
+        let newMonth = currentMonth - 1;
+        let newYear = currentYear;
+        if (newMonth < 1) {
+            newMonth = 12;
+            newYear -= 1;
+        }
+        setCurrentMonth(newMonth);
+        setCurrentYear(newYear);
+        fetchNewMonthData(newMonth, newYear);
+    };
+
+    const handleNextMonth = () => {
+        let newMonth = currentMonth + 1;
+        let newYear = currentYear;
+        if (newMonth > 12) {
+            newMonth = 1;
+            newYear += 1;
+        }
+        setCurrentMonth(newMonth);
+        setCurrentYear(newYear);
+        fetchNewMonthData(newMonth, newYear);
+    };
+
+    const calendarDates = useMemo(() => generateCalendarDates(currentYear, monthIndex, attendance), [currentYear, monthIndex, attendance]);
 
     return (
-        <div className="bg-white shadow-lg rounded-xl max-w-7xl mx-auto p-4 sm:p-6">
+        <div className="bg-white shadow-lg rounded-xl p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 border-b pb-4 gap-3">
-                <button onClick={onBack} className="flex items-center text-indigo-600 hover:text-indigo-800 font-semibold transition text-sm sm:text-base">
+                <Button onClick={onBack} variant="ghost" className="flex items-center text-indigo-600 hover:text-indigo-800 font-semibold transition text-sm sm:text-base">
                     <ChevronLeft size={20} className="mr-1" /> Back to Summary
-                </button>
+                </Button>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
                     <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
                         Attendance Log for {name} ({employeeId})
                     </h2>
-                    <button
+                    <Button
                         onClick={() => setViewMode(viewMode === 'calendar' ? 'table' : 'calendar')}
-                        className="px-3 sm:px-4 py-2 bg-indigo-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-indigo-700 transition w-full sm:w-auto"
+                        variant="primary"
+                        className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium w-full sm:w-auto"
                     >
                         {viewMode === 'calendar' ? 'View Details' : 'View Calendar'}
-                    </button>
+                    </Button>
                 </div>
             </div>
 
-            <div className="flex justify-center items-center mb-6 sm:mb-8 p-3 sm:p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 flex items-center">
-                    <Clock size={18} className="mr-2 text-blue-600 sm:w-5 sm:h-5" />{monthYearText}
+            <div className="flex justify-center items-center mb-6 sm:mb-8 p-3 sm:p-4 bg-gray-50 rounded-lg gap-2 sm:gap-6">
+                <button
+                    onClick={handlePrevMonth}
+                    disabled={loading}
+                    className="p-1 sm:p-2 rounded-full hover:bg-gray-200 text-gray-600 disabled:opacity-50 transition-colors"
+                    title="Previous Month"
+                >
+                    <ChevronLeft size={24} />
+                </button>
+
+                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 flex items-center min-w-[150px] sm:min-w-[200px] justify-center">
+                    <Clock size={18} className="mr-2 text-blue-600 sm:w-5 sm:h-5" />
+                    {loading ? "Loading..." : monthYearText}
                 </h3>
+
+                <button
+                    onClick={handleNextMonth}
+                    disabled={loading}
+                    className="p-1 sm:p-2 rounded-full hover:bg-gray-200 text-gray-600 disabled:opacity-50 transition-colors"
+                    title="Next Month"
+                >
+                    <ChevronRight size={24} />
+                </button>
             </div>
 
             {viewMode === 'calendar' ? (
@@ -54,7 +133,7 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
                                     <span className="font-semibold text-[10px] sm:text-xs">{dayData.day}</span>
                                     {dayData.status !== 'Padding' && (
                                         <span className="text-[8px] sm:text-xs mt-0.5 sm:mt-1 font-mono text-gray-600">
-                                            {dayData.details?.totalHours > 0 ? formatDecimalHours(dayData.details.totalHours) : dayData.status.slice(0, 3)}
+                                            {dayData.status === 'Site Visit' ? 'Site Visit' : (dayData.status === 'Leave' ? `Leave (${dayData.details.leaveType || ''})` : (dayData.details?.totalHours > 0 ? formatDecimalHours(dayData.details.totalHours) : dayData.status))}
                                         </span>
                                     )}
                                 </div>
@@ -80,7 +159,7 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {attendance && attendance.length > 0 ? (
                                     attendance.map((record, index) => {
-                                        const isSunday = new Date(year, month - 1, record.day).getDay() === 0;
+                                        const isSunday = new Date(currentYear, currentMonth - 1, record.day).getDay() === 0;
                                         const displayStatus = (isSunday && (record.status === 'Absent' || record.status === 'Missed Punch')) ? 'Weekend' : record.status;
                                         const isWeekend = displayStatus === 'Weekend';
                                         return (
@@ -90,7 +169,7 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
                                                     <div className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full w-fit border ${getStatusColor(displayStatus)}`}>
                                                         <span className="hidden sm:inline">{getStatusIcon(displayStatus)}</span>
                                                         <span className="text-[10px] sm:text-xs">
-                                                            {displayStatus}{record.leaveType ? ` (${record.leaveType})` : ''}
+                                                            {displayStatus}{(record.leaveType && displayStatus !== 'Site Visit') ? ` (${record.leaveType})` : ''}
                                                         </span>
                                                     </div>
                                                 </td>
