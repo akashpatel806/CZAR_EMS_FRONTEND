@@ -66,7 +66,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
         <div className="text-center mb-6">
           <img src="/czar_logo.svg" alt="Logo" className="mx-auto w-20 mb-2" />
-          <h1 className="text-2xl font-bold text-gray-800">Sign In</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Login In</h1>
           <p className="text-gray-500 text-sm mt-1">
             Enter your credentials to access your account
           </p>
