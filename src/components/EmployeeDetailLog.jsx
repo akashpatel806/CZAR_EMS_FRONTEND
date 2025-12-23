@@ -91,7 +91,9 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
                                                 <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 whitespace-nowrap text-xs sm:text-sm font-bold text-black-600">
                                                     <div className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full w-fit border ${getStatusColor(displayStatus)}`}>
                                                         <span className="hidden sm:inline">{getStatusIcon(displayStatus)}</span>
-                                                        <span className="text-[10px] sm:text-xs">{displayStatus}</span>
+                                                        <span className="text-[10px] sm:text-xs">
+                                                            {displayStatus}{record.leaveType ? ` (${record.leaveType})` : ''}
+                                                        </span>
                                                     </div>
                                                 </td>
                                                 <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 hidden sm:table-cell">{record.inTime || '-'}</td>

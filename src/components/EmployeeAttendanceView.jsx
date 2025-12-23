@@ -95,7 +95,10 @@ function EmployeeAttendanceView() {
                                             <div key={idx} className={`h-12 sm:h-14 md:h-16 flex flex-col items-center justify-center rounded-lg text-xs sm:text-sm p-0.5 sm:p-1 
                                                 ${dayData.status === 'Padding' ? 'invisible' : `border ${getStatusColor(dayData.status)}`}`}>
                                                 <span className="font-bold text-xs sm:text-sm">{dayData.day}</span>
-                                                <span className="text-[9px] sm:text-[10px] md:text-xs opacity-75">{dayData.status === 'Present' ? formatDecimalHours(dayData.details.totalHours) : dayData.status}</span>
+                                                <span className="text-[9px] sm:text-[10px] md:text-xs opacity-75">
+                                                    {dayData.status === 'Present' ? formatDecimalHours(dayData.details.totalHours) : dayData.status}
+                                                    {dayData.details?.leaveType && dayData.status !== 'Site Visit' ? ` (${dayData.details.leaveType})` : ''}
+                                                </span>
                                             </div>
                                         ))}
                                     </div>

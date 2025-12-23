@@ -262,10 +262,10 @@ const AllLeaveRequests = () => {
         prev.map((req) => (req._id === id ? res.data.leaveRequest : req))
       );
 
-      // ✅ If approved, update available leaves
+      // ✅ If approved, update available leaves (skip for site visit)
       if (status === "Approved") {
         const req = leaveRequests.find((r) => r._id === id);
-        if (req) {
+        if (req && req.leaveReasonType?.toLowerCase() !== "site visit") {
           // Calculate number of days
           const fromDate = new Date(req.fromDate);
           const toDate = new Date(req.toDate);
@@ -280,8 +280,8 @@ const AllLeaveRequests = () => {
 
           // Update employee's available leaves
           await axiosInstance.put(
-            `/admin/update/${req.employeeId._id}`,
-            { availableLeaves: newLeaves },
+            `/admin/update-employee/${req.employeeId.employeeId}`,
+            { allocatedLeaves: newLeaves },
             { headers: { Authorization: `Bearer ${token}` } }
           );
         }
@@ -386,7 +386,7 @@ const AllLeaveRequests = () => {
                   className="border-t hover:bg-gray-50 transition duration-150"
                 >
                   <td className="p-3 whitespace-nowrap">
-                    {req.employeeId?.userId?.name || req.employeeId?.name || "Unknown"} <br />
+                    {req.employeeId?.name || req.employeeId?.userId?.name || "Unknown"} <br />
                     <span className="text-xs text-gray-400">
                       {req.employeeId?.department || ""}
                     </span>

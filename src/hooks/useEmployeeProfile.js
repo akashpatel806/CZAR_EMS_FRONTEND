@@ -33,7 +33,7 @@ export const useEmployeeProfile = () => {
 // ✅ Add New Employee
 export const addNewEmployee = async (formData) => {
   try {
-    const res = await axiosInstance.post("/admin/employees", formData);
+    const res = await axiosInstance.post("/admin/add-employee", formData);
     toast.success(res.data.message || "Employee created successfully");
     return res.data;
   } catch (error) {

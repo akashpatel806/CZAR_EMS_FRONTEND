@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLeaveRequest } from "../../hooks/useLeaveRequest"; // ✅ import your hook
 import { useEmployeeProfile } from "../../hooks/useEmployeeProfile"; // ✅ import profile hook
 import Button from "../../components/Button";
@@ -17,6 +17,19 @@ const LeaveRequestForm = () => {
   const { submitLeave, loading } = useLeaveRequest(); // ✅ use the custom hook
   const { profile, refreshProfile } = useEmployeeProfile(); // ✅ get employee profile for availableLeaves
 
+  const toTimeRef = useRef(null);
+
+  // Dynamically set min attribute for toTime input
+  useEffect(() => {
+    if (toTimeRef.current) {
+      if (formData.fromDate === formData.toDate && formData.fromTime) {
+        toTimeRef.current.min = formData.fromTime;
+      } else {
+        toTimeRef.current.min = "";
+      }
+    }
+  }, [formData.fromDate, formData.toDate, formData.fromTime]);
+
   // ✅ Calculate number of leave days requested
   const calculateLeaveDays = (fromDate, toDate) => {
     if (!fromDate || !toDate) return 0;
@@ -30,7 +43,7 @@ const LeaveRequestForm = () => {
   const requestedDays = calculateLeaveDays(formData.fromDate, formData.toDate);
   const availableLeaves = profile?.availableLeaves || 0;
   const isInsufficientBalance = requestedDays > availableLeaves;
-  const canApplyLeave = !isInsufficientBalance;
+  const canApplyLeave = formData.leaveReasonType === 'siteVisit' || !isInsufficientBalance;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -114,6 +127,7 @@ const LeaveRequestForm = () => {
             onChange={(e) =>
               setFormData({ ...formData, toDate: e.target.value })
             }
+            min={formData.fromDate}
             required
             className="w-full p-2.5 sm:p-3 text-sm sm:text-base border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
@@ -125,9 +139,17 @@ const LeaveRequestForm = () => {
           <input
             type="time"
             value={formData.fromTime}
-            onChange={(e) =>
-              setFormData({ ...formData, fromTime: e.target.value })
-            }
+            onChange={(e) => {
+              const newFromTime = e.target.value;
+              setFormData((prev) => {
+                const updated = { ...prev, fromTime: newFromTime };
+                // Clear toTime if it's now invalid
+                if (prev.fromDate === prev.toDate && prev.toTime && prev.toTime < newFromTime) {
+                  updated.toTime = "";
+                }
+                return updated;
+              });
+            }}
             className="w-full p-2.5 sm:p-3 text-sm sm:text-base border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>
@@ -136,11 +158,16 @@ const LeaveRequestForm = () => {
         <div>
           <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-gray-700">To Time</label>
           <input
+            ref={toTimeRef}
             type="time"
             value={formData.toTime}
-            onChange={(e) =>
-              setFormData({ ...formData, toTime: e.target.value })
-            }
+            onChange={(e) => {
+              const newToTime = e.target.value;
+              // Only allow if dates are different or toTime is after fromTime
+              if (formData.fromDate !== formData.toDate || !formData.fromTime || newToTime >= formData.fromTime) {
+                setFormData({ ...formData, toTime: newToTime });
+              }
+            }}
             className="w-full p-2.5 sm:p-3 text-sm sm:text-base border rounded-lg bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>

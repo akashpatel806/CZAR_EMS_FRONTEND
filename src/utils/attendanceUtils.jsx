@@ -19,9 +19,10 @@ export const API_BASE_URL = getApiBaseUrl();
 
 export const getStatusColor = (status) => {
     if (status === 'Present') return 'bg-green-100 text-green-700 border-green-400';
+    if (status === 'Site Visit') return 'bg-green-100 text-green-700 border-green-400';
     if (status === 'Absent') return 'bg-red-100 text-red-700 border-red-400';
     if (status === 'Missed Punch') return 'bg-yellow-100 text-yellow-700 border-yellow-400';
-    if (status === 'Leave') return 'bg-orange-100 text-orange-700 border-orange-400';
+    if (status === 'Leave') return 'bg-pink-100 text-pink-700 border-pink-400';
     if (status === 'Weekend') return 'bg-purple-100 text-purple-700 border-purple-400';
     if (status === 'Holiday') return 'bg-blue-100 text-blue-700 border-blue-400';
     return 'bg-gray-100 text-gray-700 border-gray-300';
@@ -59,6 +60,10 @@ export const generateCalendarDates = (year, month, attendanceArray) => {
         let status = 'Absent';
         if (record) {
             status = record.status;
+            // If it's a leave and leaveType is siteVisit, change status to "Site Visit"
+            if (status === 'Leave' && record.leaveType && record.leaveType.toLowerCase() === 'sitevisit') {
+                status = 'Site Visit';
+            }
         }
 
 
