@@ -4,6 +4,8 @@ import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/Button";
+import { Filter, Eye } from "lucide-react";
+import SalarySlip from "../SalarySlips/SalarySlip";
 
 const ProfilePage = () => {
   const navigate = useNavigate();

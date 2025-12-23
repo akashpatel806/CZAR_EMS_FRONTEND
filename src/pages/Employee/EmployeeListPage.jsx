@@ -300,7 +300,17 @@ const EmployeeListPage = () => {
                   <td className="p-3 text-gray-700 whitespace-nowrap">{emp.workEmail}</td>
                   <td className="p-3 text-gray-700 whitespace-nowrap">{emp.department}</td>
                   <td className="p-3 text-gray-700 whitespace-nowrap">{emp.position}</td>
-
+                  <td className="p-3 whitespace-nowrap">
+                    <Button
+                      onClick={() => openModal(emp)}
+                      variant="primary"
+                      size="sm"
+                      className="flex items-center gap-1 px-3 py-1 text-xs"
+                    >
+                      <Edit size={14} />
+                      Edit
+                    </Button>
+                  </td>
                   <td className="p-3 text-gray-700 whitespace-nowrap">
                     {new Date(emp.dateOfJoining).toLocaleDateString("en-US", {
                       year: "numeric",
@@ -341,6 +351,164 @@ const EmployeeListPage = () => {
 
       {/* Summary and Pagination Footer */}
       {filteredEmployees.length > 0 && (
+        <div className="mt-4 text-sm text-gray-500 text-center">
+          Showing {filteredEmployees.length} employee
+          {filteredEmployees.length !== 1 ? "s" : ""}
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800">Edit Employee</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeModal}
+                className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition"
+              >
+                <X size={24} />
+              </Button>
+            </div>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone
+                </label>
+                <input
+                  type="text"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Personal Email
+                </label>
+                <input
+                  type="email"
+                  value={formData.personalEmail}
+                  onChange={(e) =>
+                    setFormData({ ...formData, personalEmail: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) =>
+                    setFormData({ ...formData, dateOfBirth: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date of Joining
+                </label>
+                <input
+                  type="date"
+                  value={formData.dateOfJoining}
+                  onChange={(e) =>
+                    setFormData({ ...formData, dateOfJoining: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Allocated Leaves
+                </label>
+                <input
+                  type="number"
+                  value={formData.allocatedLeaves}
+                  onChange={(e) =>
+                    setFormData({ ...formData, allocatedLeaves: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Department
+                </label>
+                <input
+                  type="text"
+                  value={formData.department}
+                  onChange={(e) =>
+                    setFormData({ ...formData, department: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Position
+                </label>
+                <input
+                  type="text"
+                  value={formData.position}
+                  onChange={(e) =>
+                    setFormData({ ...formData, position: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role
+                </label>
+                <select
+                  value={formData.role}
+                  onChange={(e) =>
+                    setFormData({ ...formData, role: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Employee">Employee</option>
+                  <option value="Admin">Admin</option>
+                </select>
+              </div>
+              <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={closeModal}
+                  className="px-6 py-2.5 font-medium transition"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="px-6 py-2.5 font-medium shadow-sm transition"
+                >
+                  Update Employee
+                </Button>
         <div className="mt-4 pt-4 border-t border-gray-100">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <span className="text-sm text-gray-500">
@@ -374,7 +542,6 @@ const EmployeeListPage = () => {
       )}
 
       {/* Edit Modal */}
-
       {
         isEditModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

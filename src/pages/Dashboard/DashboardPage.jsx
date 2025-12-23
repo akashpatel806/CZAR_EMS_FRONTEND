@@ -19,7 +19,6 @@ const DashboardPage = () => {
     attendanceSummary: { present: 0, absent: 0 },
   });
 
-
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [employeesOnLeave, setEmployeesOnLeave] = useState([]);
   const [expandedReasons, setExpandedReasons] = useState({});

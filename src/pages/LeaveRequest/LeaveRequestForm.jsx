@@ -191,13 +191,11 @@ const LeaveRequestForm = () => {
         <div className="md:col-span-2 flex justify-end">
           <Button
             type="submit"
-            disabled={loading || !canApplyLeave}
-            className={`w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg shadow-md text-white transition-colors ${loading || !canApplyLeave
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-              }`}
+            isLoading={loading}
+            variant="primary"
+            className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base shadow-md"
           >
-            {loading ? "Submitting..." : (!canApplyLeave ? "Insufficient Leave Balance" : "Submit Leave")}
+            Submit Leave
           </Button>
         </div>
       </form>
