@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import { useAuth } from "../../context/AuthContext";
 import axiosInstance from "../../api/axiosInstance";
+import { useNavigate } from "react-router-dom";
+import Button from "../../components/Button";
 
 const DashboardPage = () => {
   const { profile: employeeProfile, loading } = useEmployeeProfile();
   const { role } = useAuth();
+  const navigate = useNavigate();
 
 
   const [adminStats, setAdminStats] = useState({
@@ -15,6 +18,10 @@ const DashboardPage = () => {
     upcomingBirthdays: [],
     attendanceSummary: { present: 0, absent: 0 },
   });
+
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [employeesOnLeave, setEmployeesOnLeave] = useState([]);
+  const [expandedReasons, setExpandedReasons] = useState({});
 
   const [employeeDashboard, setEmployeeDashboard] = useState({
     attendanceStatus: "present",
@@ -35,6 +42,37 @@ const DashboardPage = () => {
     };
     if (role === "admin") fetchAdminData();
   }, [role]);
+
+  // ✅ Fetch employees on leave today
+  const fetchEmployeesOnLeave = async () => {
+    try {
+      const response = await axiosInstance.get("/admin/leave-requests");
+      const allRequests = response.data || [];
+      console.log("📋 All requests fetched:", allRequests.length);
+      console.log("📋 Sample request:", allRequests[0]);
+
+      // Filter for approved leaves that are active today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      console.log("📅 Today's date:", today.toISOString());
+
+      const activeLeaves = allRequests.filter(request => {
+        if (request.status !== "Approved") return false;
+
+        const fromDate = new Date(request.fromDate);
+        const toDate = new Date(request.toDate);
+        fromDate.setHours(0, 0, 0, 0);
+        toDate.setHours(0, 0, 0, 0);
+
+        return today >= fromDate && today <= toDate;
+      });
+
+      setEmployeesOnLeave(activeLeaves);
+    } catch (err) {
+      console.error("Error fetching employees on leave:", err);
+      setEmployeesOnLeave([]);
+    }
+  };
 
   if (loading) {
     return (
@@ -89,6 +127,14 @@ const DashboardPage = () => {
           ].map((item, i) => (
             <div
               key={i}
+              onClick={() => {
+                if (item.title === "Total Employees") {
+                  navigate("/admin/all-employees");
+                } else if (item.title === "On Leave Today") {
+                  setShowLeaveModal(true);
+                  fetchEmployeesOnLeave();
+                }
+              }}
               className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-lg transform hover:scale-105 transition cursor-pointer"
             >
               <div className="flex justify-between items-center">
@@ -172,6 +218,60 @@ const DashboardPage = () => {
             </ul>
           )}
         </div>
+
+        {/* Modal for Employees on Leave */}
+        {showLeaveModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold text-gray-800">Employees on Leave Today</h2>
+                  <Button
+                    onClick={() => setShowLeaveModal(false)}
+                    variant="ghost"
+                    size="icon"
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                {employeesOnLeave.length === 0 ? (
+                  <p className="text-gray-500">No employees are on leave today.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {employeesOnLeave.map((leave, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-800">{leave.employeeName}</h3>
+                            <p className="text-sm text-gray-600">{leave.leaveType}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(leave.fromDate).toLocaleDateString()} - {new Date(leave.toDate).toLocaleDateString()}
+                            </p>
+                            {leave.reason && (
+                              <div className="mt-2">
+                                <button
+                                  onClick={() => setExpandedReasons(prev => ({ ...prev, [index]: !prev[index] }))}
+                                  className="text-blue-600 text-sm hover:underline"
+                                >
+                                  {expandedReasons[index] ? 'Hide Reason' : 'Show Reason'}
+                                </button>
+                                {expandedReasons[index] && (
+                                  <p className="text-sm text-gray-700 mt-1">{leave.reason}</p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-green-600 font-semibold text-sm">Approved</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

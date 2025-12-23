@@ -5,6 +5,7 @@ import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import { Filter, Eye } from "lucide-react";
 import SalarySlip from "../SalarySlips/SalarySlip";
+import Button from "../../components/Button";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -397,12 +398,13 @@ const ProfilePage = () => {
             ✏️ Edit Profile
           </button>
         )}
-        <button
+        <Button
+          variant="success"
           onClick={() => setIsChangingPassword(true)}
-          className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white text-sm sm:text-base rounded-lg hover:bg-green-700 transition shadow-sm"
+          className="w-full sm:w-auto"
         >
           🔒 Change Password
-        </button>
+        </Button>
       </div>
 
       {/* Change Password Modal */}

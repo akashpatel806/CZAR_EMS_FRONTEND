@@ -157,8 +157,8 @@ const LeaveRequestPage = () => {
                     "Leave Type",
                     "Reason Type",
                     "From Date",
-                    "From Time",
                     "To Date",
+                    "From Time",
                     "To Time",
                     "Reason",
                     "Action",
@@ -184,10 +184,10 @@ const LeaveRequestPage = () => {
                       {new Date(req.fromDate).toLocaleDateString()}
                     </td>
                     <td className="p-3 whitespace-nowrap">
-                      {req.fromTime || "N/A"}
+                      {new Date(req.toDate).toLocaleDateString()}
                     </td>
                     <td className="p-3 whitespace-nowrap">
-                      {new Date(req.toDate).toLocaleDateString()}
+                      {req.fromTime || "N/A"}
                     </td>
                     <td className="p-3 whitespace-nowrap">
                       {req.toTime || "N/A"}

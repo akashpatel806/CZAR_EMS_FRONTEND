@@ -215,27 +215,29 @@ function AdminAttendanceManager() {
                             {loading ? (
                                 <tr><td colSpan="5" className="p-4 sm:p-6 text-center text-sm">Loading...</td></tr>
                             ) : paginatedEmployees.length > 0 ? (
-                                paginatedEmployees.map((record) => (
-                                    <tr key={record._id} className="hover:bg-gray-50">
-                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm">
-                                            <div className="flex flex-col">
-                                                <span>{getEmployeeName(record.employeeId) || record.name || 'Unknown'}</span>
-                                                <span className="text-gray-500 text-[10px] sm:hidden">{record.employeeId}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-500 text-xs sm:text-sm hidden sm:table-cell">{record.employeeId}</td>
-                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm">
-                                            <div className="flex flex-col">
-                                                <span>{formatExcatTime(record.totalMonthlyHours || 0)}</span>
-                                                <span className="text-[10px] text-gray-500 md:hidden">OT: {formatExcatTime(record.totalMonthlyOvertime || 0)}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm hidden md:table-cell">{formatExcatTime(record.totalMonthlyOvertime || 0)}</td>
-                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-                                            <button onClick={() => setSelectedEmployeeRecord(record)} className="text-indigo-600 hover:text-indigo-800 font-medium text-xs sm:text-sm whitespace-nowrap">View Log</button>
-                                        </td>
-                                    </tr>
-                                ))
+                                paginatedEmployees.map((record) => {
+                                    return (
+                                        <tr key={record._id} className="hover:bg-gray-50">
+                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm">
+                                                <div className="flex flex-col">
+                                                    <span>{getEmployeeName(record.employeeId) || record.name || 'Unknown'}</span>
+                                                    <span className="text-gray-500 text-[10px] sm:hidden">{record.employeeId}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-500 text-xs sm:text-sm hidden sm:table-cell">{record.employeeId}</td>
+                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm">
+                                                <div className="flex flex-col">
+                                                    <span>{formatExcatTime(record.totalMonthlyHours || 0)}</span>
+                                                    <span className="text-[10px] text-gray-500 md:hidden">OT: {formatExcatTime(record.totalMonthlyOvertime || 0)}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm hidden md:table-cell">{formatExcatTime(record.totalMonthlyOvertime || 0)}</td>
+                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+                                                <button onClick={() => setSelectedEmployeeRecord(record)} className="text-indigo-600 hover:text-indigo-800 font-medium text-xs sm:text-sm whitespace-nowrap">View Log</button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             ) : (
                                 <tr><td colSpan="5" className="p-4 sm:p-6 text-center text-gray-500 text-sm">No data available for this month.</td></tr>
                             )}
