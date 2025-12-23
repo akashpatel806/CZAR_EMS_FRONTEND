@@ -1,8 +1,15 @@
 // src/components/EmployeeDetailLog.jsx
+<<<<<<< HEAD
 import React, { useMemo, useState } from 'react';
 import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import { getStatusColor, getStatusIcon, generateCalendarDates, formatDecimalHours, API_BASE_URL } from '../utils/attendanceUtils'; // Updated Path
+=======
+import React, { useMemo } from 'react';
+import { Clock, ChevronLeft } from 'lucide-react';
+import { getStatusColor, getStatusIcon, generateCalendarDates, formatDecimalHours } from '../utils/attendanceUtils'; // Updated Path
+import Button from "./Button";
+>>>>>>> 6fd2509b2415913a43422bb4593e059b967ece63
 
 const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
     const { name, employeeId } = employeeRecord;
@@ -65,21 +72,22 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
     const calendarDates = useMemo(() => generateCalendarDates(currentYear, monthIndex, attendance), [currentYear, monthIndex, attendance]);
 
     return (
-        <div className="bg-white shadow-lg rounded-xl max-w-7xl mx-auto p-4 sm:p-6">
+        <div className="bg-white shadow-lg rounded-xl p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 border-b pb-4 gap-3">
-                <button onClick={onBack} className="flex items-center text-indigo-600 hover:text-indigo-800 font-semibold transition text-sm sm:text-base">
+                <Button onClick={onBack} variant="ghost" className="flex items-center text-indigo-600 hover:text-indigo-800 font-semibold transition text-sm sm:text-base">
                     <ChevronLeft size={20} className="mr-1" /> Back to Summary
-                </button>
+                </Button>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
                     <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
                         Attendance Log for {name} ({employeeId})
                     </h2>
-                    <button
+                    <Button
                         onClick={() => setViewMode(viewMode === 'calendar' ? 'table' : 'calendar')}
-                        className="px-3 sm:px-4 py-2 bg-indigo-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-indigo-700 transition w-full sm:w-auto"
+                        variant="primary"
+                        className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium w-full sm:w-auto"
                     >
                         {viewMode === 'calendar' ? 'View Details' : 'View Calendar'}
-                    </button>
+                    </Button>
                 </div>
             </div>
 
