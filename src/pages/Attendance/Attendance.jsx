@@ -3,6 +3,7 @@ import { useAuth } from '../../hooks/useAuth'; // Updated Path
 import AdminAttendanceManager from '../../components/AdminAttendanceManager'; // Updated Path
 import EmployeeAttendanceView from '../../components/EmployeeAttendanceView'; // Updated Path
 import { getStatusColor } from '../../utils/attendanceUtils';
+import Button from '../../components/Button';
 
 export default function AttendancePage() {
     const { role, isAuthenticated } = useAuth();
