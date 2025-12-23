@@ -231,7 +231,6 @@ const EmployeeListPage = () => {
     dateOfJoining: "",
     allocatedLeaves: "",
     department: "",
-    department: "",
     position: "",
     role: "",
   });
@@ -291,7 +290,6 @@ const EmployeeListPage = () => {
       dateOfJoining: employee.dateOfJoining ? new Date(employee.dateOfJoining).toISOString().split('T')[0] : "",
       allocatedLeaves: employee.allocatedLeaves || employee.availableLeaves || "",
       department: employee.department || "",
-      department: employee.department || "",
       position: employee.position || "",
       role: employee.role || "Employee",
     });
@@ -308,7 +306,6 @@ const EmployeeListPage = () => {
       dateOfBirth: "",
       dateOfJoining: "",
       allocatedLeaves: "",
-      department: "",
       department: "",
       position: "",
       role: "",

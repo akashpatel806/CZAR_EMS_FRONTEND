@@ -41,16 +41,9 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 // Dynamically determine BASE_URL based on current hostname
+// Relative URL for Nginx proxy
 const getBaseUrl = () => {
-  const hostname = window.location.hostname;
-
-  // If accessing via IP address (network), use the same IP for API
-  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    return `http://${hostname}:5002`;
-  }
-
-  // Default to localhost
-  return 'http://localhost:5002';
+  return '';
 };
 
 const BASE_URL = getBaseUrl();
