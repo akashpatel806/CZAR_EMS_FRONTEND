@@ -65,7 +65,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
         <div className="text-center mb-6">
           <img src="/czar_logo.svg" alt="Logo" className="mx-auto w-20 mb-2" />
-          <h1 className="text-2xl font-bold text-gray-800">Sign In</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Login In</h1>
           <p className="text-gray-500 text-sm mt-1">
             Enter your credentials to access your account
           </p>
@@ -111,9 +111,8 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full text-white font-semibold py-2.5 rounded-lg shadow transition-all ${
-              loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-            }`}
+            className={`w-full text-white font-semibold py-2.5 rounded-lg shadow transition-all ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+              }`}
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
@@ -121,11 +120,10 @@ export default function LoginPage() {
 
         {message && (
           <div
-            className={`mt-4 text-center text-sm px-3 py-2 rounded-lg ${
-              messageType === "success"
-                ? "bg-green-100 text-green-700 border border-green-300"
-                : "bg-red-100 text-red-700 border border-red-300"
-            }`}
+            className={`mt-4 text-center text-sm px-3 py-2 rounded-lg ${messageType === "success"
+              ? "bg-green-100 text-green-700 border border-green-300"
+              : "bg-red-100 text-red-700 border border-red-300"
+              }`}
           >
             {message}
           </div>
