@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../Layout/MainLayout";
 import DashboardPage from "../pages/Dashboard/DashboardPage";
@@ -13,6 +12,7 @@ import PrivateRoute from "./PrivateRoute";
 import { AuthProvider } from "../context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import AllLeaveRequests from "../pages/LeaveRequest/AllLeaveRequest"
+
 
 // ✅ Admin Pages
 import AddEmployeePage from "../pages/Employee/AddEmployeePage";
@@ -39,62 +39,62 @@ export default function AppRoutes() {
         />
         <ErrorBoundary>
 
-        <Routes>
-          {/* 🌐 Public Routes */}
-          <Route path="/login" element={<Login />} />
+          <Routes>
+            {/* 🌐 Public Routes */}
+            <Route path="/login" element={<Login />} />
 
-          {/* 🔒 Protected App Routes (uses MainLayout for all roles) */}
-          <Route
-            path="/*"
-            element={
-              <PrivateRoute>
-                <MainLayout />
-              </PrivateRoute>
-            }
-          >
-            {/* Shared Pages */}
-            <Route path="" element={<DashboardPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="leave-request" element={<LeaveRequestPage />} />
-            <Route path="holiday-calendar" element={<HolidayCalendarPage />} />
-            <Route path="attendance" element={<Attendance />} />
-            <Route path="all-requests" element={<AllLeaveRequests/>}/>
-            <Route path="salary-slips" element={<SalarySlip />} />
-
-            {/* 👑 Admin-only Pages */}
+            {/* 🔒 Protected App Routes (uses MainLayout for all roles) */}
             <Route
-              path="admin/add-employee"
+              path="/*"
               element={
-                <PrivateRoute allowedRoles={["admin"]}>
-                  <AddEmployeePage />
+                <PrivateRoute>
+                  <MainLayout />
                 </PrivateRoute>
               }
-            />
-            <Route
-              path="admin/manage-holidays"
-              element={
-                <PrivateRoute allowedRoles={["admin"]}>
-                  <HolidayCalendarPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="admin/all-employees"
-              element={
-                <PrivateRoute allowedRoles={["admin"]}>
-                  <EmployeeListPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="*"
-              element={<ErrorComponent message="Page not found" />}
-            />
-          </Route>
+            >
+              {/* Shared Pages */}
+              <Route path="" element={<DashboardPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="leave-request" element={<LeaveRequestPage />} />
+              <Route path="holiday-calendar" element={<HolidayCalendarPage />} />
+              <Route path="attendance" element={<Attendance />} />
+              <Route path="all-requests" element={<AllLeaveRequests />} />
+              <Route path="salary-slips" element={<SalarySlip />} />
 
-          {/* 🔁 Redirect unknown routes to login */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
+              {/* 👑 Admin-only Pages */}
+              <Route
+                path="admin/add-employee"
+                element={
+                  <PrivateRoute allowedRoles={["admin"]}>
+                    <AddEmployeePage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="admin/manage-holidays"
+                element={
+                  <PrivateRoute allowedRoles={["admin"]}>
+                    <HolidayCalendarPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="admin/all-employees"
+                element={
+                  <PrivateRoute allowedRoles={["admin"]}>
+                    <EmployeeListPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="*"
+                element={<ErrorComponent message="Page not found" />}
+              />
+            </Route>
+
+            {/* 🔁 Redirect unknown routes to login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
         </ErrorBoundary>
 
       </BrowserRouter>
