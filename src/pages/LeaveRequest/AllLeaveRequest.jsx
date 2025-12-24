@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/Button";
@@ -6,6 +7,7 @@ import Button from "../../components/Button";
 
 const AllLeaveRequests = () => {
   const { role, token } = useAuth();
+  const navigate = useNavigate();
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [month, setMonth] = useState("");
@@ -13,7 +15,7 @@ const AllLeaveRequests = () => {
   const [loading, setLoading] = useState(true);
   const [selectedReason, setSelectedReason] = useState(null);
 
-  const hasPending = filtered.some(req => req.status === "Pending");
+  const hasPending = (filtered || []).some(req => req?.status === "Pending");
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -40,7 +42,10 @@ const AllLeaveRequests = () => {
 
   // ✅ Filter logic
   useEffect(() => {
-    if (!leaveRequests.length) return;
+    if (!leaveRequests || !leaveRequests.length) {
+      setFiltered([]);
+      return;
+    }
 
     let filteredData = [...leaveRequests];
 
@@ -117,7 +122,7 @@ const AllLeaveRequests = () => {
   }
 
   // ✅ No requests case
-  if (leaveRequests.length === 0) {
+  if (!leaveRequests || leaveRequests.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-screen text-gray-600">
         <div className="bg-white shadow-md p-8 rounded-xl border border-gray-200 text-center">
@@ -141,6 +146,13 @@ const AllLeaveRequests = () => {
           <h1 className="text-2xl font-bold">All Leave Requests</h1>
           <p className="text-blue-100">View and filter all leave requests.</p>
         </div>
+        <Button
+          variant="ghost"
+          className="px-4 py-2 bg-white text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition w-full sm:w-auto"
+          onClick={() => navigate("/leave-request")}
+        >
+          ⬅️ Back to Pending
+        </Button>
       </div>
 
       {/* Filters */}

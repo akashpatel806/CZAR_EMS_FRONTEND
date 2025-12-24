@@ -11,6 +11,10 @@ const DashboardPage = () => {
   const navigate = useNavigate();
 
 
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [employeesOnLeave, setEmployeesOnLeave] = useState([]);
+  const [expandedReasons, setExpandedReasons] = useState({});
+
   const [adminStats, setAdminStats] = useState({
     totalEmployees: 0,
     onLeaveToday: 0,
@@ -18,18 +22,6 @@ const DashboardPage = () => {
     upcomingBirthdays: [],
     attendanceSummary: { present: 0, absent: 0 },
   });
-
-  const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [employeesOnLeave, setEmployeesOnLeave] = useState([]);
-  const [expandedReasons, setExpandedReasons] = useState({});
-<<<<<<< HEAD
-
-  const [employeeDashboard, setEmployeeDashboard] = useState({
-    attendanceStatus: "present",
-    attendanceSummary: { present: 0, absent: 0 },
-  });
-=======
->>>>>>> 6fd2509b2415913a43422bb4593e059b967ece63
 
   // ✅ Fetch admin dashboard data (only if role = admin)
   useEffect(() => {
@@ -96,14 +88,12 @@ const DashboardPage = () => {
 
   // ✅ Employee Summary (same as your current logic)
   const { leaveSummary = {}, leaveRequests = [], attendanceStatus = "present" } = employeeProfile || {};
-  const summary =
-    leaveSummary && Object.keys(leaveSummary).length > 0
-      ? leaveSummary
-      : {
-        pending: leaveRequests.filter((r) => r.status === "Pending").length,
-        approved: leaveRequests.filter((r) => r.status === "Approved").length,
-        rejected: leaveRequests.filter((r) => r.status === "Rejected").length,
-      };
+  const summary = {
+    pending: (leaveRequests || []).filter((r) => r?.status === "Pending").length,
+    approved: (leaveRequests || []).filter((r) => r?.status === "Approved" && r?.leaveReasonType?.toLowerCase() !== "sitevisit").length,
+    rejected: (leaveRequests || []).filter((r) => r?.status === "Rejected").length,
+    siteVisits: (leaveRequests || []).filter((r) => r?.status === "Approved" && r?.leaveReasonType?.toLowerCase() === "sitevisit").length,
+  };
 
   // Calculate approved days from leave requests
   const approvedDays = leaveRequests.filter((r) => r.status === "Approved" && (!r.leaveReasonType || r.leaveReasonType.toLowerCase() !== "sitevisit")).reduce((sum, r) => sum + (r.days || 0), 0);
@@ -159,7 +149,7 @@ const DashboardPage = () => {
           <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">
             Pending Leave Requests
           </h3>
-          {leaveRequests.length === 0 ? (
+          {(!leaveRequests || leaveRequests.length === 0) ? (
             <p className="text-gray-500 text-xs sm:text-sm">No pending leave requests.</p>
           ) : (
             <div className="overflow-x-auto -mx-4 sm:mx-0">
@@ -206,7 +196,7 @@ const DashboardPage = () => {
           <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">
             Upcoming Birthdays 🎂
           </h3>
-          {upcomingBirthdays.length === 0 ? (
+          {(!upcomingBirthdays || upcomingBirthdays.length === 0) ? (
             <p className="text-gray-500 text-xs sm:text-sm">No upcoming birthdays.</p>
           ) : (
             <ul className="space-y-2 sm:space-y-3">
@@ -223,58 +213,6 @@ const DashboardPage = () => {
           )}
         </div>
 
-<<<<<<< HEAD
-        {/* Modal for Employees on Leave */}
-        {showLeaveModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-gray-800">Employees on Leave Today</h2>
-                  <Button
-                    onClick={() => setShowLeaveModal(false)}
-                    variant="ghost"
-                    size="icon"
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    ✕
-                  </Button>
-                </div>
-                {employeesOnLeave.length === 0 ? (
-                  <p className="text-gray-500">No employees are on leave today.</p>
-                ) : (
-                  <div className="space-y-4">
-                    {employeesOnLeave.map((leave, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-800">{leave.employeeName}</h3>
-                            <p className="text-sm text-gray-600">{leave.leaveType}</p>
-                            <p className="text-sm text-gray-500">
-                              {new Date(leave.fromDate).toLocaleDateString()} - {new Date(leave.toDate).toLocaleDateString()}
-                            </p>
-                            {leave.reason && (
-                              <div className="mt-2">
-                                <button
-                                  onClick={() => setExpandedReasons(prev => ({ ...prev, [index]: !prev[index] }))}
-                                  className="text-blue-600 text-sm hover:underline"
-                                >
-                                  {expandedReasons[index] ? 'Hide Reason' : 'Show Reason'}
-                                </button>
-                                {expandedReasons[index] && (
-                                  <p className="text-sm text-gray-700 mt-1">{leave.reason}</p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          <span className="text-green-600 font-semibold text-sm">Approved</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-=======
         {/* On Leave Today Modal */}
         {showLeaveModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
@@ -296,7 +234,7 @@ const DashboardPage = () => {
               </div>
 
               <div className="p-4 sm:p-6">
-                {employeesOnLeave.length === 0 ? (
+                {(!employeesOnLeave || employeesOnLeave.length === 0) ? (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">🏖️</div>
                     <p className="text-gray-500 text-lg">No employees on leave today</p>
@@ -392,7 +330,6 @@ const DashboardPage = () => {
                   Close
                 </Button>
               </div>
->>>>>>> 6fd2509b2415913a43422bb4593e059b967ece63
             </div>
           </div>
         )}
@@ -413,21 +350,40 @@ const DashboardPage = () => {
 
 
 
-      {/* Leave Balance */}
-      <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-lg border border-gray-100">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-gray-700">
-              Allocated Leave
-            </h3>
-            <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-600">
-              {employeeProfile.allocatedLeaves || 0} days
-            </p>
-            <p className="text-gray-400 mt-1 text-xs sm:text-sm">
-              Allocated leave days for year
-            </p>
+      {/* Leave Balance Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-lg border border-gray-100 border-l-4 border-blue-500">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-700">
+                Allocated Leave
+              </h3>
+              <p className="text-3xl sm:text-4xl font-bold text-blue-600">
+                {employeeProfile.allocatedLeaves || 0} days
+              </p>
+              <p className="text-gray-400 mt-1 text-xs sm:text-sm">
+                Total leave days for year
+              </p>
+            </div>
+            <div className="text-4xl sm:text-5xl opacity-10">📅</div>
           </div>
-          <div className="text-4xl sm:text-5xl md:text-6xl opacity-10">📅</div>
+        </div>
+
+        <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-lg border border-gray-100">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-700">
+                Available Leave
+              </h3>
+              <p className="text-3xl sm:text-4xl font-bold text-emerald-600">
+                {Math.max(0, (employeeProfile.allocatedLeaves || 0) - approvedDays)} days
+              </p>
+              <p className="text-gray-400 mt-1 text-xs sm:text-sm">
+                Remaining leave balance
+              </p>
+            </div>
+            <div className="text-4xl sm:text-5xl opacity-10">✅</div>
+          </div>
         </div>
       </div>
 
@@ -495,5 +451,6 @@ const DashboardPage = () => {
     </div>
   );
 };
+
 
 export default DashboardPage;

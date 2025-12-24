@@ -285,7 +285,7 @@ const HolidayCalendarPage = () => {
           style={{ position: "fixed" }}
         >
           <div
-            className="relative bg-white rounded-2xl shadow-2xl w-full p-5 sm:p-6 border border-gray-200 max-h-[90vh] overflow-y-auto"
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-5 sm:p-6 border border-gray-200 max-h-[90vh] overflow-y-auto"
             style={{ zIndex: 60 }}
           >
             {/* Close Button */}

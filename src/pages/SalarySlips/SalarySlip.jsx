@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { Filter, Eye } from "lucide-react";
+import { BASE_URL } from "../../utils/attendanceUtils";
 
 const SalarySlip = () => {
   const [salarySlips, setSalarySlips] = useState([]);
@@ -112,7 +113,7 @@ const SalarySlip = () => {
                     </div>
 
                     <a
-                      href={`http://localhost:5002/uploads/documents/${slip.filename}`}
+                      href={`${BASE_URL}/uploads/documents/${slip.filename}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-purple-600 hover:text-purple-800"

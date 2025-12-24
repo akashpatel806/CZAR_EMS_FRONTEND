@@ -6,7 +6,7 @@ import MonthYearPicker from './MonthYearPicker'; // Sibling import
 import UploadModal from './UploadModal';         // Sibling import
 import EmployeeDetailLog from './EmployeeDetailLog'; // Sibling import
 import useDebounce from '../hooks/useDebounce'; // Custom hook
-import { API_BASE_URL, getStatusIcon, getStatusColor } from '../utils/attendanceUtils.jsx'; // Up one level to utils
+import { API_BASE_URL, getStatusIcon, getStatusColor, calculateNetWorkingDays } from '../utils/attendanceUtils.jsx'; // Up one level to utils
 
 function AdminAttendanceManager() {
     const today = new Date();
@@ -26,6 +26,12 @@ function AdminAttendanceManager() {
     const [itemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const [netWorkingDays, setNetWorkingDays] = useState(0);
+
+    useEffect(() => {
+        const [m, y] = currentMonthYear.split('-');
+        setNetWorkingDays(calculateNetWorkingDays(y, m, attendanceData));
+    }, [currentMonthYear, attendanceData]);
 
     const fetchAttendanceData = async () => {
         setLoading(true);
@@ -107,7 +113,7 @@ function AdminAttendanceManager() {
     const formatExcatTime = (time) => {
         const hours = Math.floor(time);
         const minutes = Math.round((time - hours) * 60);
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        return `${hours}h ${minutes.toString().padStart(2, '0')}min`;
     };
 
     const handleDeleteMonth = async () => {
@@ -199,8 +205,9 @@ function AdminAttendanceManager() {
                         </Button>
                     )}
                 </div>
-                <div className="mb-4">
+                <div className="mb-4 flex gap-4">
                     <span className="text-sm text-gray-700">Total Records: {filteredAttendanceData.length}</span>
+                    <span className="text-sm text-gray-700">| Total Working Days: <span className="font-bold text-indigo-600">{netWorkingDays}</span></span>
                 </div>
                 <div className="overflow-x-auto border border-gray-200 rounded-xl shadow-md bg-white">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -208,6 +215,7 @@ function AdminAttendanceManager() {
                             <tr>
                                 <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Name</th>
                                 <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">ID</th>
+                                <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Working Days</th>
                                 <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Hours</th>
                                 <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Overtime</th>
                                 <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Action</th>
@@ -217,7 +225,6 @@ function AdminAttendanceManager() {
                             {loading ? (
                                 <tr><td colSpan="5" className="p-4 sm:p-6 text-center text-sm">Loading...</td></tr>
                             ) : paginatedEmployees.length > 0 ? (
-<<<<<<< HEAD
                                 paginatedEmployees.map((record) => {
                                     return (
                                         <tr key={record._id} className="hover:bg-gray-50">
@@ -228,6 +235,9 @@ function AdminAttendanceManager() {
                                                 </div>
                                             </td>
                                             <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-500 text-xs sm:text-sm hidden sm:table-cell">{record.employeeId}</td>
+                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-700 font-semibold text-xs sm:text-sm text-left">
+                                                {(record.attendance || []).filter(day => day.status === 'Present' || day.status === 'Site Visit').length} / {netWorkingDays}
+                                            </td>
                                             <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm">
                                                 <div className="flex flex-col">
                                                     <span>{formatExcatTime(record.totalMonthlyHours || 0)}</span>
@@ -241,29 +251,6 @@ function AdminAttendanceManager() {
                                         </tr>
                                     );
                                 })
-=======
-                                paginatedEmployees.map((record) => (
-                                    <tr key={record._id} className="hover:bg-gray-50">
-                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm">
-                                            <div className="flex flex-col">
-                                                <span>{getEmployeeName(record.employeeId) || record.name || 'Unknown'}</span>
-                                                <span className="text-gray-500 text-[10px] sm:hidden">{record.employeeId}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-500 text-xs sm:text-sm hidden sm:table-cell">{record.employeeId}</td>
-                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm">
-                                            <div className="flex flex-col">
-                                                <span>{formatExcatTime(record.totalMonthlyHours || 0)}</span>
-                                                <span className="text-[10px] text-gray-500 md:hidden">OT: {formatExcatTime(record.totalMonthlyOvertime || 0)}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm hidden md:table-cell">{formatExcatTime(record.totalMonthlyOvertime || 0)}</td>
-                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-                                            <Button variant="ghost" size="sm" onClick={() => setSelectedEmployeeRecord(record)} className="text-indigo-600 hover:text-indigo-800 font-medium text-xs sm:text-sm whitespace-nowrap hover:bg-indigo-50">View Log</Button>
-                                        </td>
-                                    </tr>
-                                ))
->>>>>>> 6fd2509b2415913a43422bb4593e059b967ece63
                             ) : (
                                 <tr><td colSpan="5" className="p-4 sm:p-6 text-center text-gray-500 text-sm">No data available for this month.</td></tr>
                             )}

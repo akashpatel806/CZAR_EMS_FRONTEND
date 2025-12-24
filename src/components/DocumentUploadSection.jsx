@@ -88,6 +88,7 @@ const DocumentUploadSection = ({
                 <option value="aadhaar">Aadhaar Card</option>
                 <option value="pan">PAN Card</option>
                 <option value="bank">Bank Passbook</option>
+                <option value="other">Other Document</option>
               </select>
             </div>
           )}
@@ -247,6 +248,7 @@ const DocumentUploadSection = ({
                   aadhaar: 'Aadhaar Card',
                   pan: 'PAN Card',
                   bank: 'Bank Passbook',
+                  other: 'Other Document',
                 };
                 return (
                   <div
