@@ -5,7 +5,15 @@ import { CheckCircle, XCircle, Calendar as CalendarIcon } from 'lucide-react';
 // Dynamically determine API base URL based on current hostname
 // Relative URL for Nginx proxy
 const getApiBaseUrl = () => {
-    return '/api';
+    const hostname = window.location.hostname;
+
+    // If accessing via IP address (network), use the same IP for API
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+        return `http://${hostname}:5002/api`;
+    }
+
+    // Default to localhost
+    return 'http://localhost:5002/api';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
@@ -89,4 +97,62 @@ export const formatDecimalHours = (decimalHours) => {
     const formattedMinutes = String(minutes).padStart(2, '0');
 
     return `${formattedHours}:${formattedMinutes}`;
+};
+
+export const formatLongTime = (decimalHours) => {
+    if (decimalHours === undefined || decimalHours === null || decimalHours === 0) return '0h 00min';
+    const num = parseFloat(decimalHours);
+    if (isNaN(num)) return '0h 00min';
+
+    const hours = Math.floor(num);
+    const minutes = Math.round((num - hours) * 60);
+
+    return `${hours}h ${String(minutes).padStart(2, '0')}min`;
+};
+
+/**
+ * Calculates net working days for a month:
+ * Total Days - Sundays - Holidays = Working Days
+ * 
+ * @param {number|string} year 
+ * @param {number|string} month (1-12)
+ * @param {Array} attendanceRecords (optional, to extract holidays from records if present)
+ * @returns {number} netWorkingDays
+ */
+export const calculateNetWorkingDays = (year, month, attendanceRecords = []) => {
+    const y = parseInt(year);
+    const m = parseInt(month) - 1; // 0-indexed for Date constructor
+    const lastDay = new Date(y, m + 1, 0).getDate();
+
+    let sundays = 0;
+    const holidays = new Set(); // Use a Set to avoid double counting
+
+    for (let day = 1; day <= lastDay; day++) {
+        const date = new Date(y, m, day);
+        if (date.getDay() === 0) {
+            sundays++;
+        }
+    }
+
+    // Extract holidays from attendance records if they tags as "Holiday"
+    // The backend merges 'Holiday' status into the attendance array
+    if (attendanceRecords && attendanceRecords.length > 0) {
+        // We look at one employee's record (e.g. the first one or any that has full month data)
+        // to identify which days are holidays for everyone.
+        const firstRecord = attendanceRecords[0];
+        if (firstRecord && firstRecord.attendance) {
+            firstRecord.attendance.forEach(dayRec => {
+                if (dayRec.status === 'Holiday') {
+                    // Check if it's NOT a Sunday (to avoid double subtracting)
+                    const d = new Date(y, m, dayRec.day);
+                    if (d.getDay() !== 0) {
+                        holidays.add(dayRec.day);
+                    }
+                }
+            });
+        }
+    }
+
+    const netWorkingDays = lastDay - sundays - holidays.size;
+    return netWorkingDays;
 };

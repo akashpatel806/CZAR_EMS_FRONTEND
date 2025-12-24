@@ -1,15 +1,8 @@
-// src/components/EmployeeDetailLog.jsx
-<<<<<<< HEAD
 import React, { useMemo, useState } from 'react';
 import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
-import { getStatusColor, getStatusIcon, generateCalendarDates, formatDecimalHours, API_BASE_URL } from '../utils/attendanceUtils'; // Updated Path
-=======
-import React, { useMemo } from 'react';
-import { Clock, ChevronLeft } from 'lucide-react';
-import { getStatusColor, getStatusIcon, generateCalendarDates, formatDecimalHours } from '../utils/attendanceUtils'; // Updated Path
+import { getStatusColor, getStatusIcon, generateCalendarDates, formatDecimalHours, formatLongTime, API_BASE_URL } from '../utils/attendanceUtils'; // Updated Path
 import Button from "./Button";
->>>>>>> 6fd2509b2415913a43422bb4593e059b967ece63
 
 const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
     const { name, employeeId } = employeeRecord;
@@ -71,22 +64,41 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
 
     const calendarDates = useMemo(() => generateCalendarDates(currentYear, monthIndex, attendance), [currentYear, monthIndex, attendance]);
 
+    const totals = useMemo(() => {
+        return attendance.reduce((acc, rec) => ({
+            hours: acc.hours + (rec.totalHours || 0),
+            overtime: acc.overtime + (rec.overtime || 0)
+        }), { hours: 0, overtime: 0 });
+    }, [attendance]);
+
     return (
         <div className="bg-white shadow-lg rounded-xl p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 border-b pb-4 gap-3">
-                <Button onClick={onBack} variant="ghost" className="flex items-center text-indigo-600 hover:text-indigo-800 font-semibold transition text-sm sm:text-base">
-                    <ChevronLeft size={20} className="mr-1" /> Back to Summary
-                </Button>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
-                        Attendance Log for {name} ({employeeId})
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 border-b pb-4 gap-3 sm:gap-4">
+                {/* Left: Back Button - Compact on mobile */}
+                <div className="w-full sm:w-auto flex justify-start">
+                    <Button onClick={onBack} variant="ghost" className="flex items-center text-indigo-600 hover:text-indigo-800 font-bold transition text-xs sm:text-base p-0">
+                        <ChevronLeft size={18} className="mr-0.5 sm:mr-1" /> Summary
+                    </Button>
+                </div>
+
+                {/* Center: Name and ID - Better stacking */}
+                <div className="flex flex-row sm:flex-row items-baseline justify-center gap-2 sm:gap-4 flex-grow">
+                    <h2 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight text-center">
+                        {name}
                     </h2>
+                    <span className="text-gray-400 font-bold text-[10px] sm:text-lg whitespace-nowrap">
+                        ID: {employeeId}
+                    </span>
+                </div>
+
+                {/* Right: Toggle Mode Button - Full width on very small, auto otherwise */}
+                <div className="w-full sm:w-auto flex justify-end">
                     <Button
                         onClick={() => setViewMode(viewMode === 'calendar' ? 'table' : 'calendar')}
                         variant="primary"
-                        className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium w-full sm:w-auto"
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-sm font-bold shadow-md rounded-full w-full sm:w-auto transform active:scale-95 transition-transform"
                     >
-                        {viewMode === 'calendar' ? 'View Details' : 'View Calendar'}
+                        {viewMode === 'calendar' ? 'Details' : 'Calendar'}
                     </Button>
                 </div>
             </div>
@@ -101,10 +113,18 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
                     <ChevronLeft size={24} />
                 </button>
 
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 flex items-center min-w-[150px] sm:min-w-[200px] justify-center">
-                    <Clock size={18} className="mr-2 text-blue-600 sm:w-5 sm:h-5" />
-                    {loading ? "Loading..." : monthYearText}
-                </h3>
+                <div className="flex flex-col items-center min-w-[150px] sm:min-w-[200px] gap-1">
+                    <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 flex items-center justify-center">
+                        <Clock size={18} className="mr-2 text-blue-600 sm:w-5 sm:h-5" />
+                        {loading ? "Loading..." : monthYearText}
+                    </h3>
+                    {!loading && (
+                        <div className="flex gap-3 text-[10px] sm:text-xs text-gray-600 font-medium">
+                            <span>Hours: <span className="text-blue-600">{formatLongTime(totals.hours)}</span></span>
+                            <span>OT: <span className="text-indigo-600">{formatLongTime(totals.overtime)}</span></span>
+                        </div>
+                    )}
+                </div>
 
                 <button
                     onClick={handleNextMonth}
@@ -128,12 +148,24 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
                         <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
                             {calendarDates.map((dayData, index) => (
                                 <div key={index}
-                                    className={`h-12 sm:h-14 md:h-16 flex flex-col items-center justify-center rounded-lg text-xs sm:text-sm transition duration-100 p-0.5 sm:p-1 
-                                     ${dayData.status === 'Padding' ? 'bg-white text-gray-300' : `border ${getStatusColor(dayData.status)}`}`}>
+                                    className={`relative h-12 sm:h-14 md:h-16 flex flex-col items-center justify-center rounded-lg text-xs sm:text-sm transition duration-100 p-0.5 sm:p-1 cursor-help
+                                     ${dayData.status === 'Padding' ? 'bg-white text-gray-300' : `border ${getStatusColor(dayData.status)}`}`}
+                                    title={dayData.status === 'Holiday' ? (dayData.details?.holidayName || 'Public Holiday') : ''}>
+                                    {dayData.details?.overtime > 0 && (
+                                        <div
+                                            className="absolute top-1 right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full shadow-sm"
+                                            title={`Overtime: ${formatDecimalHours(dayData.details.overtime)}`}
+                                        />
+                                    )}
                                     <span className="font-semibold text-[10px] sm:text-xs">{dayData.day}</span>
                                     {dayData.status !== 'Padding' && (
-                                        <span className="text-[8px] sm:text-xs mt-0.5 sm:mt-1 font-mono text-gray-600">
-                                            {dayData.status === 'Site Visit' ? 'Site Visit' : (dayData.status === 'Leave' ? `Leave (${dayData.details.leaveType || ''})` : (dayData.details?.totalHours > 0 ? formatDecimalHours(dayData.details.totalHours) : dayData.status))}
+                                        <span className={`text-[7px] sm:text-[10px] md:text-xs mt-0.5 sm:mt-1 font-mono text-center px-0.5 leading-tight ${dayData.status === 'Holiday' ? 'font-bold' : 'text-gray-600 italic'}`}>
+                                            {dayData.status === 'Holiday' ?
+                                                <span className="truncate max-w-[40px] sm:max-w-none block" title={dayData.details.holidayName}>
+                                                    {dayData.details.holidayName || 'Holiday'}
+                                                </span>
+                                                : (dayData.status === 'Site Visit' ? 'Site Visit' : (dayData.status === 'Leave' ? `Leave (${dayData.details.leaveType || ''})` : (dayData.details?.totalHours > 0 ? formatDecimalHours(dayData.details.totalHours) : dayData.status)))
+                                            }
                                         </span>
                                     )}
                                 </div>
@@ -169,7 +201,7 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
                                                     <div className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full w-fit border ${getStatusColor(displayStatus)}`}>
                                                         <span className="hidden sm:inline">{getStatusIcon(displayStatus)}</span>
                                                         <span className="text-[10px] sm:text-xs">
-                                                            {displayStatus}{(record.leaveType && displayStatus !== 'Site Visit') ? ` (${record.leaveType})` : ''}
+                                                            {displayStatus}{(record.leaveType && displayStatus !== 'Site Visit') ? ` (${record.leaveType})` : (displayStatus === 'Holiday' && record.holidayName) ? ` (${record.holidayName})` : ''}
                                                         </span>
                                                     </div>
                                                 </td>

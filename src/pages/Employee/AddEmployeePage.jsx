@@ -220,11 +220,11 @@ const AddEmployeePage = () => {
             Employee ID <span className="text-red-500">*</span>
           </label>
           <input
-            type="text"
+            type="number"
             name="employeeId"
             value={formData.employeeId}
             onChange={handleChange}
-            placeholder="Ex: EMP001"
+            placeholder="Ex: 101"
             className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.employeeId ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
               }`}
           />
