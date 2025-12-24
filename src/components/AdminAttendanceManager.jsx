@@ -236,7 +236,7 @@ function AdminAttendanceManager() {
                                             </td>
                                             <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-500 text-xs sm:text-sm hidden sm:table-cell">{record.employeeId}</td>
                                             <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-700 font-semibold text-xs sm:text-sm text-left">
-                                                {record.attendance?.filter(day => day.status === 'Present' || day.status === 'Site Visit').length || 0} / {netWorkingDays}
+                                                {(record.attendance || []).filter(day => day.status === 'Present' || day.status === 'Site Visit').length} / {netWorkingDays}
                                             </td>
                                             <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm">
                                                 <div className="flex flex-col">

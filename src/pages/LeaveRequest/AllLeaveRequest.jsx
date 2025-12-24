@@ -15,7 +15,7 @@ const AllLeaveRequests = () => {
   const [loading, setLoading] = useState(true);
   const [selectedReason, setSelectedReason] = useState(null);
 
-  const hasPending = filtered.some(req => req.status === "Pending");
+  const hasPending = (filtered || []).some(req => req?.status === "Pending");
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -42,7 +42,10 @@ const AllLeaveRequests = () => {
 
   // ✅ Filter logic
   useEffect(() => {
-    if (!leaveRequests.length) return;
+    if (!leaveRequests || !leaveRequests.length) {
+      setFiltered([]);
+      return;
+    }
 
     let filteredData = [...leaveRequests];
 
@@ -119,7 +122,7 @@ const AllLeaveRequests = () => {
   }
 
   // ✅ No requests case
-  if (leaveRequests.length === 0) {
+  if (!leaveRequests || leaveRequests.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-screen text-gray-600">
         <div className="bg-white shadow-md p-8 rounded-xl border border-gray-200 text-center">

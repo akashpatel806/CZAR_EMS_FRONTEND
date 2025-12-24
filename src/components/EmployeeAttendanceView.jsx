@@ -99,7 +99,7 @@ function EmployeeAttendanceView() {
                                     <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
                                         {calendarGrid.map((dayData, idx) => (
                                             <div key={idx} className={`relative h-12 sm:h-14 md:h-16 flex flex-col items-center justify-center rounded-lg text-xs sm:text-sm p-0.5 sm:p-1 cursor-help
-                                               ${dayData.status === 'Padding' ? 'invisible' : `border ${getStatusColor(dayData.status)}`}`}
+                                                ${dayData.status === 'Padding' ? 'invisible' : `border ${getStatusColor(dayData.status)}`}`}
                                                 title={dayData.status === 'Holiday' ? (dayData.details?.holidayName || 'Public Holiday') : ''}>
                                                 {dayData.details?.overtime > 0 && (
                                                     <div
@@ -122,61 +122,71 @@ function EmployeeAttendanceView() {
                                     </div>
                                 </>
                             ) : (
-                                <div className="flex flex-col items-center justify-center py-8 sm:py-10 text-gray-500">
-                                    <CalendarIcon size={40} className="mb-3 sm:mb-4 text-gray-300 sm:w-12 sm:h-12" />
-                                    <p className="text-base sm:text-lg font-medium">No Attendance Data Available</p>
-                                    <p className="text-xs sm:text-sm">There is no attendance record for this month.</p>
+                                <div className="flex flex-col items-center justify-center py-8 sm:py-10 md:py-16 text-gray-500">
+                                    <CalendarIcon size={48} className="mb-3 sm:mb-4 text-gray-300 sm:w-16 sm:h-16" />
+                                    <p className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">No Attendance Data Available</p>
+                                    <p className="text-sm sm:text-base text-gray-500">There is no attendance record for {displayDate}.</p>
+                                    <p className="text-xs sm:text-sm text-gray-400 mt-2">Please check back later or contact your administrator.</p>
                                 </div>
                             )}
                         </div>
                     ) : (
                         <div className="overflow-x-auto border border-gray-200 rounded-lg -mx-4 sm:mx-0">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Date</th>
-                                        <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Status</th>
-                                        <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">In</th>
-                                        <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Out</th>
-                                        <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Total</th>
-                                        <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Over Time</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {loading ? <tr><td colSpan="6" className="p-4 sm:p-6 text-center text-sm">Loading...</td></tr> :
-                                        attendanceList.length > 0 ? (
-                                            attendanceList.map((record, index) => {
-                                                const isSunday = new Date(yearInt, monthInt - 1, record.day).getDay() === 0;
-                                                const displayStatus = (isSunday && (record.status === 'Absent' || record.status === 'Missed Punch')) ? 'Weekend' : record.status;
-                                                const isWeekend = displayStatus === 'Weekend';
-                                                return (
-                                                    <tr key={index} className={`hover:bg-gray-50 ${isWeekend ? 'bg-purple-100' : ''}`}>
-                                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-medium text-gray-900 text-xs sm:text-sm whitespace-nowrap">
-                                                            <div className="flex flex-col">
-                                                                <span>{record.day}-{monthInt}-{yearInt}</span>
-                                                                <span className="text-[10px] text-gray-500 sm:hidden">
-                                                                    {record.inTime || '-'} → {record.outTime || '-'}
-                                                                </span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-                                                            <div className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full w-fit border text-[10px] sm:text-xs ${getStatusColor(displayStatus)}`}>
-                                                                <span className="hidden sm:inline">{getStatusIcon(displayStatus)}</span>
-                                                                {displayStatus}{(record.leaveType && displayStatus !== 'Site Visit') ? ` (${record.leaveType})` : (displayStatus === 'Holiday' && record.holidayName) ? ` (${record.holidayName})` : ''}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-500 text-xs sm:text-sm hidden sm:table-cell">{record.inTime || '-'}</td>
-                                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-500 text-xs sm:text-sm hidden sm:table-cell">{record.outTime || '-'}</td>
-                                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm">{formatDecimalHours(record.totalHours)}</td>
-                                                        <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm hidden md:table-cell">{formatDecimalHours(record.overtime)}</td>
-                                                    </tr>
-                                                );
-                                            })
-                                        ) : (
-                                            <tr><td colSpan="6" className="p-4 sm:p-6 text-center text-gray-500 text-sm">No records found.</td></tr>
-                                        )}
-                                </tbody>
-                            </table>
+                            {myRecord ? (
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Date</th>
+                                            <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Status</th>
+                                            <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">In</th>
+                                            <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Out</th>
+                                            <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Total</th>
+                                            <th className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Over Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {loading ? <tr><td colSpan="6" className="p-4 sm:p-6 text-center text-sm">Loading...</td></tr> :
+                                            attendanceList.length > 0 ? (
+                                                attendanceList.map((record, index) => {
+                                                    const isSunday = new Date(yearInt, monthInt - 1, record.day).getDay() === 0;
+                                                    const displayStatus = (isSunday && (record.status === 'Absent' || record.status === 'Missed Punch')) ? 'Weekend' : record.status;
+                                                    const isWeekend = displayStatus === 'Weekend';
+                                                    return (
+                                                        <tr key={index} className={`hover:bg-gray-50 ${isWeekend ? 'bg-purple-100' : ''}`}>
+                                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-medium text-gray-900 text-xs sm:text-sm whitespace-nowrap">
+                                                                <div className="flex flex-col">
+                                                                    <span>{record.day}-{monthInt}-{yearInt}</span>
+                                                                    <span className="text-[10px] text-gray-500 sm:hidden">
+                                                                        {record.inTime || '-'} → {record.outTime || '-'}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+                                                                <div className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full w-fit border text-[10px] sm:text-xs ${getStatusColor(displayStatus)}`}>
+                                                                    <span className="hidden sm:inline">{getStatusIcon(displayStatus)}</span>
+                                                                    {displayStatus}{(record.leaveType && displayStatus !== 'Site Visit') ? ` (${record.leaveType})` : (displayStatus === 'Holiday' && record.holidayName) ? ` (${record.holidayName})` : ''}
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-500 text-xs sm:text-sm hidden sm:table-cell">{record.inTime || '-'}</td>
+                                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-gray-500 text-xs sm:text-sm hidden sm:table-cell">{record.outTime || '-'}</td>
+                                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm">{formatDecimalHours(record.totalHours)}</td>
+                                                            <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-bold text-gray-600 text-xs sm:text-sm hidden md:table-cell">{formatDecimalHours(record.overtime)}</td>
+                                                        </tr>
+                                                    );
+                                                })
+                                            ) : (
+                                                <tr><td colSpan="6" className="p-4 sm:p-6 text-center text-gray-500 text-sm">No records found.</td></tr>
+                                            )}
+                                    </tbody>
+                                </table>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-8 sm:py-10 md:py-16 text-gray-500">
+                                    <CalendarIcon size={48} className="mb-3 sm:mb-4 text-gray-300 sm:w-16 sm:h-16" />
+                                    <p className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">No Attendance Data Available</p>
+                                    <p className="text-sm sm:text-base text-gray-500">There is no attendance record for {displayDate}.</p>
+                                    <p className="text-xs sm:text-sm text-gray-400 mt-2">Please check back later or contact your administrator.</p>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

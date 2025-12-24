@@ -7,6 +7,7 @@ import Button from "../../components/Button";
 import { Filter, Eye, FileText } from "lucide-react";
 import SalarySlip from "../SalarySlips/SalarySlip";
 import MyDocuments from "./MyDocuments";
+import { BASE_URL } from "../../utils/attendanceUtils";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -234,7 +235,7 @@ const ProfilePage = () => {
         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex-shrink-0 shadow-md mx-auto sm:mx-0 relative">
           {profile.profilePhoto && (
             <img
-              src={`http://localhost:5002/uploads/${profile.profilePhoto}`}
+              src={`${BASE_URL}/uploads/${profile.profilePhoto}`}
               alt="profile"
               className="w-full h-full object-cover"
               onError={(e) => {

@@ -89,10 +89,10 @@ const DashboardPage = () => {
   // ✅ Employee Summary (same as your current logic)
   const { leaveSummary = {}, leaveRequests = [], attendanceStatus = "present" } = employeeProfile || {};
   const summary = {
-    pending: leaveRequests.filter((r) => r.status === "Pending").length,
-    approved: leaveRequests.filter((r) => r.status === "Approved" && r.leaveReasonType?.toLowerCase() !== "sitevisit").length,
-    rejected: leaveRequests.filter((r) => r.status === "Rejected").length,
-    siteVisits: leaveRequests.filter((r) => r.status === "Approved" && r.leaveReasonType?.toLowerCase() === "sitevisit").length,
+    pending: (leaveRequests || []).filter((r) => r?.status === "Pending").length,
+    approved: (leaveRequests || []).filter((r) => r?.status === "Approved" && r?.leaveReasonType?.toLowerCase() !== "sitevisit").length,
+    rejected: (leaveRequests || []).filter((r) => r?.status === "Rejected").length,
+    siteVisits: (leaveRequests || []).filter((r) => r?.status === "Approved" && r?.leaveReasonType?.toLowerCase() === "sitevisit").length,
   };
 
   // Calculate approved days from leave requests
@@ -149,7 +149,7 @@ const DashboardPage = () => {
           <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">
             Pending Leave Requests
           </h3>
-          {leaveRequests.length === 0 ? (
+          {(!leaveRequests || leaveRequests.length === 0) ? (
             <p className="text-gray-500 text-xs sm:text-sm">No pending leave requests.</p>
           ) : (
             <div className="overflow-x-auto -mx-4 sm:mx-0">
@@ -196,7 +196,7 @@ const DashboardPage = () => {
           <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">
             Upcoming Birthdays 🎂
           </h3>
-          {upcomingBirthdays.length === 0 ? (
+          {(!upcomingBirthdays || upcomingBirthdays.length === 0) ? (
             <p className="text-gray-500 text-xs sm:text-sm">No upcoming birthdays.</p>
           ) : (
             <ul className="space-y-2 sm:space-y-3">
@@ -234,7 +234,7 @@ const DashboardPage = () => {
               </div>
 
               <div className="p-4 sm:p-6">
-                {employeesOnLeave.length === 0 ? (
+                {(!employeesOnLeave || employeesOnLeave.length === 0) ? (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">🏖️</div>
                     <p className="text-gray-500 text-lg">No employees on leave today</p>

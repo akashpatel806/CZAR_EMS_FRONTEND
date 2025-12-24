@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { Eye, FileText } from "lucide-react";
+import { BASE_URL } from "../../utils/attendanceUtils";
 
 const MyDocuments = () => {
     const [documents, setDocuments] = useState([]);
@@ -66,7 +67,7 @@ const MyDocuments = () => {
                                 </div>
                             </div>
                             <a
-                                href={`http://localhost:5002/uploads/documents/${doc.filename}`}
+                                href={`${BASE_URL}/uploads/documents/${doc.filename}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"

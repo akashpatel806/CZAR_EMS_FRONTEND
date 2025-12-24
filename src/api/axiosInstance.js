@@ -8,20 +8,10 @@
 
 
 import axios from "axios";
+import { API_BASE_URL } from "../utils/attendanceUtils";
 
-// Dynamically determine base URL based on current hostname
-// Relative URL for Nginx proxy
-const getBaseUrl = () => {
-  const hostname = window.location.hostname;
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:5002/api';
-  }
-  return '/api';
-};
-
-let baseUrl = import.meta.env.VITE_API_URL || getBaseUrl();
 const axiosInstance = axios.create({
-  baseURL: baseUrl,
+  baseURL: API_BASE_URL,
 });
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");

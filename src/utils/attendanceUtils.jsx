@@ -2,21 +2,19 @@
 import React from 'react';
 import { CheckCircle, XCircle, Calendar as CalendarIcon } from 'lucide-react';
 
-// Dynamically determine API base URL based on current hostname
-// Relative URL for Nginx proxy
-const getApiBaseUrl = () => {
+// Dynamically determine Server base URL based on current hostname
+const getServerBaseUrl = () => {
     const hostname = window.location.hostname;
-
-    // If accessing via IP address (network), use the same IP for API
+    // If accessing via IP address (network), use the same IP for server
     if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-        return `http://${hostname}:5002/api`;
+        return `http://${hostname}:5002`;
     }
-
     // Default to localhost
-    return 'http://localhost:5002/api';
+    return 'http://localhost:5002';
 };
 
-export const API_BASE_URL = getApiBaseUrl();
+export const BASE_URL = getServerBaseUrl();
+export const API_BASE_URL = `${BASE_URL}/api`;
 
 export const getStatusColor = (status) => {
     if (status === 'Present') return 'bg-green-100 text-green-700 border-green-400';
