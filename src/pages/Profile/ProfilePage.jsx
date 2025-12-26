@@ -117,7 +117,7 @@ const ProfilePage = () => {
   if ((role === "employee" && loading) || (role === "admin" && isLoadingAdmin)) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-600">
-        Loading profile...
+        Loading profile...⏳
       </div>
     );
   }

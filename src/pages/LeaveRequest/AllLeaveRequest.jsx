@@ -280,11 +280,11 @@ const AllLeaveRequests = () => {
         {/* Reason Modal */}
         {selectedReason && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20"
             onClick={() => setSelectedReason(null)}
           >
             <div
-              className="bg-white rounded-lg p-6 w-full shadow-2xl relative"
+              className="bg-white rounded-lg p-6 w-full max-w-2xl shadow-2xl relative animate-in fade-in zoom-in duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               <Button
@@ -300,15 +300,6 @@ const AllLeaveRequests = () => {
               </h3>
               <div className="max-h-[60vh] overflow-y-auto text-gray-700 whitespace-pre-wrap leading-relaxed">
                 {selectedReason}
-              </div>
-              <div className="mt-6 text-right">
-                <Button
-                  variant="primary"
-                  onClick={() => setSelectedReason(null)}
-                  className="px-4 py-2 text-white rounded-lg hover:bg-blue-700 transition"
-                >
-                  Close
-                </Button>
               </div>
             </div>
           </div>

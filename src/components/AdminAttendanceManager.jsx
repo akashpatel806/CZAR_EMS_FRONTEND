@@ -163,7 +163,7 @@ function AdminAttendanceManager() {
             />
 
             <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl shadow-lg mb-4 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">Attendance Management</h2>
+                <h2 className="text-xl sm:text-2xl md:text-2xl font-bold">Attendance Management</h2>
                 <p className="text-xs sm:text-sm opacity-90 mt-1">Review and manage all employee attendance records.</p>
             </div>
 

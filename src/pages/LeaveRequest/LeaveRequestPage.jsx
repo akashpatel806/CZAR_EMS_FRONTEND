@@ -72,7 +72,7 @@ const LeaveRequestPage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-600">
-        Loading leave requests...
+        Loading leave requests...⏳
       </div>
     );
   }
@@ -89,27 +89,14 @@ const LeaveRequestPage = () => {
               <p className="text-blue-100">Submit and manage your leave requests.</p>
             </div>
 
-            {/* Toggle Buttons */}
-            <div className="flex gap-3 w-full sm:w-auto">
+            {/* Toggle Button */}
+            <div className="w-full sm:w-auto">
               <Button
-                onClick={() => setActiveTab("form")}
-                variant={activeTab === "form" ? "white" : "primary"}
-                className={`flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-medium transition-all text-center ${activeTab === "form"
-                  ? "bg-white text-blue-700 shadow-md hover:bg-white"
-                  : ""
-                  }`}
+                variant="ghost"
+                onClick={() => setActiveTab(activeTab === "form" ? "list" : "form")}
+                className="w-full sm:w-auto bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm font-medium rounded-lg transition backdrop-blur-sm border border-white/30"
               >
-                ➕ Submit Leave
-              </Button>
-              <Button
-                onClick={() => setActiveTab("list")}
-                variant={activeTab === "list" ? "white" : "primary"}
-                className={`flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-medium transition-all text-center ${activeTab === "list"
-                  ? "bg-white text-blue-700 shadow-md hover:bg-white"
-                  : ""
-                  }`}
-              >
-                📋 View Requests
+                {activeTab === "form" ? "📋 View Requests" : "➕ Submit Leave"}
               </Button>
             </div>
           </div>
