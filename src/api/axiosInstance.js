@@ -8,26 +8,10 @@
 
 
 import axios from "axios";
+import { API_BASE_URL } from "../utils/attendanceUtils";
 
-// Dynamically determine base URL based on current hostname
-const getBaseUrl = () => {
-  const hostname = window.location.hostname;
-
-  // If accessing via IP address (network), use the same IP for API
-  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    return `http://${hostname}:5002/api`;
-  }
-
-  // Default to localhost
-  return 'http://localhost:5002/api';
-};
-
-let baseUrl = import.meta.env.VITE_API_URL || getBaseUrl();
-if (!baseUrl.startsWith('http')) {
-  baseUrl = `http://${window.location.hostname}${baseUrl.replace(/^:/, ':')}`;
-}
 const axiosInstance = axios.create({
-  baseURL: baseUrl,
+  baseURL: API_BASE_URL,
 });
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");

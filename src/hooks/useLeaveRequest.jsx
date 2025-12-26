@@ -37,20 +37,13 @@
 
 
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import toast from "react-hot-toast";
 
 // Dynamically determine BASE_URL based on current hostname
+// Relative URL for Nginx proxy
 const getBaseUrl = () => {
-  const hostname = window.location.hostname;
-
-  // If accessing via IP address (network), use the same IP for API
-  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    return `http://${hostname}:5002`;
-  }
-
-  // Default to localhost
-  return 'http://localhost:5002';
+  return '';
 };
 
 const BASE_URL = getBaseUrl();
@@ -63,16 +56,13 @@ export const useLeaveRequest = () => {
   const getMyLeaveRequests = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BASE_URL}/api/employee/my-leave-requests`, {
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        },
-      });
+      const response = await axiosInstance.get("/employee/my-leave-requests");
 
-      setLeaveRequests(response.data);
+      setLeaveRequests(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Fetch Leave Requests Error:", error);
       toast.error(error.response?.data?.message || "Failed to fetch leave requests");
+      setLeaveRequests([]);
     } finally {
       setLoading(false);
     }
@@ -83,14 +73,9 @@ export const useLeaveRequest = () => {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        `${BASE_URL}/api/employee/leave-requests`,
-        formData,
-        {
-          headers: {
-            Authorization: localStorage.getItem("token"),
-          },
-        }
+      const response = await axiosInstance.post(
+        "/employee/leave-requests",
+        formData
       );
 
       toast.success(response.data.message || "Leave request submitted successfully!");

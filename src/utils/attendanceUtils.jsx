@@ -2,20 +2,19 @@
 import React from 'react';
 import { CheckCircle, XCircle, Calendar as CalendarIcon } from 'lucide-react';
 
-// Dynamically determine API base URL based on current hostname
-const getApiBaseUrl = () => {
+// Dynamically determine Server base URL based on current hostname
+const getServerBaseUrl = () => {
     const hostname = window.location.hostname;
-
-    // If accessing via IP address (network), use the same IP for API
+    // If accessing via IP address (network), use the same IP for server
     if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-        return `http://${hostname}:5002/api`;
+        return `http://${hostname}:5002`;
     }
-
     // Default to localhost
-    return 'http://localhost:5002/api';
+    return 'http://localhost:5002';
 };
 
-export const API_BASE_URL = getApiBaseUrl();
+export const BASE_URL = getServerBaseUrl();
+export const API_BASE_URL = `${BASE_URL}/api`;
 
 export const getStatusColor = (status) => {
     if (status === 'Present') return 'bg-green-100 text-green-700 border-green-400';
@@ -29,7 +28,7 @@ export const getStatusColor = (status) => {
 };
 
 export const getStatusIcon = (status) => {
-    if (status === 'Present') return <CheckCircle size={20} className="text-green-500" />;
+    if (status === 'Present' || status === 'Site Visit') return <CheckCircle size={20} className="text-green-500" />;
     if (status === 'Absent') return <XCircle size={20} className="text-red-500" />;
     if (status === 'Missed Punch' || status === 'Leave') return <CalendarIcon size={20} className="text-yellow-500" />;
     if (status === 'Weekend') return <CalendarIcon size={20} className="text-purple-500" />;
@@ -61,7 +60,7 @@ export const generateCalendarDates = (year, month, attendanceArray) => {
         if (record) {
             status = record.status;
             // If it's a leave and leaveType is siteVisit, change status to "Site Visit"
-            if (status === 'Leave' && record.leaveType && record.leaveType.toLowerCase() === 'sitevisit') {
+            if ((status === 'Leave' || status === 'Absent') && record.leaveType && (record.leaveType.toLowerCase() === 'sitevisit' || record.leaveType.toLowerCase() === 'site visit')) {
                 status = 'Site Visit';
             }
         }
@@ -96,4 +95,62 @@ export const formatDecimalHours = (decimalHours) => {
     const formattedMinutes = String(minutes).padStart(2, '0');
 
     return `${formattedHours}:${formattedMinutes}`;
+};
+
+export const formatLongTime = (decimalHours) => {
+    if (decimalHours === undefined || decimalHours === null || decimalHours === 0) return '0h 00min';
+    const num = parseFloat(decimalHours);
+    if (isNaN(num)) return '0h 00min';
+
+    const hours = Math.floor(num);
+    const minutes = Math.round((num - hours) * 60);
+
+    return `${hours}h ${String(minutes).padStart(2, '0')}min`;
+};
+
+/**
+ * Calculates net working days for a month:
+ * Total Days - Sundays - Holidays = Working Days
+ * 
+ * @param {number|string} year 
+ * @param {number|string} month (1-12)
+ * @param {Array} attendanceRecords (optional, to extract holidays from records if present)
+ * @returns {number} netWorkingDays
+ */
+export const calculateNetWorkingDays = (year, month, attendanceRecords = []) => {
+    const y = parseInt(year);
+    const m = parseInt(month) - 1; // 0-indexed for Date constructor
+    const lastDay = new Date(y, m + 1, 0).getDate();
+
+    let sundays = 0;
+    const holidays = new Set(); // Use a Set to avoid double counting
+
+    for (let day = 1; day <= lastDay; day++) {
+        const date = new Date(y, m, day);
+        if (date.getDay() === 0) {
+            sundays++;
+        }
+    }
+
+    // Extract holidays from attendance records if they tags as "Holiday"
+    // The backend merges 'Holiday' status into the attendance array
+    if (attendanceRecords && attendanceRecords.length > 0) {
+        // We look at one employee's record (e.g. the first one or any that has full month data)
+        // to identify which days are holidays for everyone.
+        const firstRecord = attendanceRecords[0];
+        if (firstRecord && firstRecord.attendance) {
+            firstRecord.attendance.forEach(dayRec => {
+                if (dayRec.status === 'Holiday') {
+                    // Check if it's NOT a Sunday (to avoid double subtracting)
+                    const d = new Date(y, m, dayRec.day);
+                    if (d.getDay() !== 0) {
+                        holidays.add(dayRec.day);
+                    }
+                }
+            });
+        }
+    }
+
+    const netWorkingDays = lastDay - sundays - holidays.size;
+    return netWorkingDays;
 };

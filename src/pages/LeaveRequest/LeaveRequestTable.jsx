@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { useLeaveRequest } from "../../hooks/useLeaveRequest"; // ✅ Import the custom hook
+import Button from "../../components/Button";
 
-const LeaveRequestTable = () => {
-  const { leaveRequests, loading } = useLeaveRequest(); // ✅ Fetch leave data here
+const LeaveRequestTable = ({ leaveRequests: propsLeaveRequests, loading: propsLoading }) => {
+  const { leaveRequests: hookLeaveRequests, loading: hookLoading } = useLeaveRequest();
+
+  const leaveRequests = propsLeaveRequests || hookLeaveRequests || [];
+  const loading = propsLoading !== undefined ? propsLoading : hookLoading;
   const [selectedReason, setSelectedReason] = useState(null);
 
   if (loading) {
@@ -46,7 +50,7 @@ const LeaveRequestTable = () => {
                     {new Date(r.toDate).toLocaleDateString()}
                   </td>
                   <td
-                    className="border p-3 max-w-[200px] cursor-pointer"
+                    className="border p-3 cursor-pointer"
                     onClick={() => setSelectedReason(r.reason)}
                   >
                     <div className="line-clamp-2 hover:text-blue-600 transition-colors" title="Click to view full reason">
@@ -88,15 +92,17 @@ const LeaveRequestTable = () => {
           onClick={() => setSelectedReason(null)}
         >
           <div
-            className="bg-white rounded-lg p-6 max-w-lg w-full shadow-2xl relative"
+            className="bg-white rounded-lg p-6 w-full shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 h-8 w-8 text-2xl"
               onClick={() => setSelectedReason(null)}
             >
               &times;
-            </button>
+            </Button>
             <h3 className="text-xl font-bold mb-4 text-gray-800">
               Full Reason
             </h3>
@@ -104,12 +110,13 @@ const LeaveRequestTable = () => {
               {selectedReason}
             </div>
             <div className="mt-6 text-right">
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              <Button
+                variant="primary"
                 onClick={() => setSelectedReason(null)}
+                className="px-4 py-2 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>

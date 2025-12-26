@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { addNewEmployee } from "../../hooks/useEmployeeProfile";
 import { useNavigate } from "react-router-dom";
+import Button from "../../components/Button";
 
 const AddEmployeePage = () => {
   const [formData, setFormData] = useState({
@@ -123,7 +124,7 @@ const AddEmployeePage = () => {
   };
 
   return (
-    <div className="max-w-full mx-auto bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 md:p-8 lg:p-10 mt-2">
+    <div className="mx-auto bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 md:p-8 lg:p-10 mt-2">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 pb-4 gap-4">
         <div>
@@ -134,12 +135,13 @@ const AddEmployeePage = () => {
             Fill in the employee details below.
           </p>
         </div>
-        <button
-          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base text-white transition bg-blue-900 hover:bg-blue-800 shadow-md"
+        <Button
+          variant="primary"
+          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 font-semibold text-sm sm:text-base shadow-md"
           onClick={() => navigate("/admin/all-employees")}
         >
           View All
-        </button>
+        </Button>
       </div>
 
       {/* Form */}
@@ -218,11 +220,11 @@ const AddEmployeePage = () => {
             Employee ID <span className="text-red-500">*</span>
           </label>
           <input
-            type="text"
+            type="number"
             name="employeeId"
             value={formData.employeeId}
             onChange={handleChange}
-            placeholder="Ex: EMP001"
+            placeholder="Ex: 101"
             className={`w-full border rounded-lg px-3 py-2 text-sm sm:text-base text-gray-700 focus:ring-2 focus:outline-none transition ${errors.employeeId ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
               }`}
           />
@@ -349,24 +351,23 @@ const AddEmployeePage = () => {
 
       {/* Submit Button */}
       <div className="mt-6 sm:mt-8 md:mt-10 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
-        <button
+        <Button
           type="button"
+          variant="secondary"
           onClick={() => navigate("/admin/all-employees")}
-          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base text-gray-700 transition border border-gray-300 hover:bg-gray-50 order-2 sm:order-1"
+          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 font-semibold text-sm sm:text-base order-2 sm:order-1"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           onClick={handleSubmit}
-          disabled={loading}
-          className={`w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base text-white transition order-1 sm:order-2 ${loading
-            ? "bg-blue-400 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700 shadow-md"
-            }`}
+          isLoading={loading}
+          variant="primary"
+          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 font-semibold text-sm sm:text-base order-1 sm:order-2 shadow-md"
         >
-          {loading ? "Adding..." : "Add Employee"}
-        </button>
+          Add Employee
+        </Button>
       </div>
     </div>
   );
