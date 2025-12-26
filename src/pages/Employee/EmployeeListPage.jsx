@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
-import { Search, UserPlus, Filter, Edit, X, Plus, Minus } from "lucide-react";
+import { Search, UserPlus, Filter, Edit, X, Plus, Minus, Upload } from "lucide-react";
 import useDebounce from "../../hooks/useDebounce";
 import useDocumentManagement from "../../hooks/useDocumentManagement";
 import DocumentUploadSection from "../../components/DocumentUploadSection";
@@ -33,6 +33,8 @@ const EmployeeListPage = () => {
     position: "",
     role: "",
   });
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const employeesPerPage = 10;
@@ -128,6 +130,8 @@ const EmployeeListPage = () => {
       position: employee.position || "",
       role: employee.role || "Employee",
     });
+    setProfilePhoto(null);
+    setProfilePhotoPreview(null);
     setActiveTab("edit");
     setIsEditModalOpen(true);
   };
@@ -135,22 +139,68 @@ const EmployeeListPage = () => {
   const closeEditModal = () => {
     setIsEditModalOpen(false);
     setSelectedEmployee(null);
+    setProfilePhoto(null);
+    setProfilePhotoPreview(null);
+  };
+
+  const handleProfilePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Only JPG and PNG files are allowed!');
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB!');
+        return;
+      }
+
+      setProfilePhoto(file);
+
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formDataToSend = new FormData();
+
+      // Append all form fields
+      Object.keys(formData).forEach(key => {
+        formDataToSend.append(key, formData[key]);
+      });
+
+      // Append profile photo if selected
+      if (profilePhoto) {
+        formDataToSend.append('profilePhoto', profilePhoto);
+      }
+
       await axiosInstance.put(
         `/admin/update-employee/${selectedEmployee.employeeId}`,
-        { ...formData, employeeId: parseInt(formData.employeeId) || formData.employeeId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
       );
       toast.success("Employee profile updated successfully");
       fetchEmployees();
       closeEditModal();
     } catch (err) {
       console.error("Error updating employee:", err);
-      toast.error("Failed to update employee");
+      toast.error(err.response?.data?.message || "Failed to update employee");
     }
   };
 
@@ -380,6 +430,46 @@ const EmployeeListPage = () => {
                     <option value="Employee">Employee</option>
                     <option value="Admin">Admin</option>
                   </select>
+                </div>
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Profile Photo (JPG, PNG only)
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer transition border border-gray-300">
+                      <Upload size={18} className="text-gray-600" />
+                      <span className="text-sm text-gray-700">Choose Photo</span>
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        onChange={handleProfilePhotoChange}
+                        className="hidden"
+                      />
+                    </label>
+                    {profilePhotoPreview && (
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={profilePhotoPreview}
+                          alt="Profile preview"
+                          className="w-16 h-16 rounded-full object-cover border-2 border-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfilePhoto(null);
+                            setProfilePhotoPreview(null);
+                          }}
+                          className="text-red-500 hover:text-red-700 text-sm"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                    {!profilePhotoPreview && profilePhoto && (
+                      <span className="text-sm text-gray-600">{profilePhoto.name}</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Maximum file size: 5MB</p>
                 </div>
                 <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
                   <button type="button" onClick={closeEditModal} className="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition">Cancel</button>
