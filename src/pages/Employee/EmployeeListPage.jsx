@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
-import { Search, UserPlus, Filter, Edit, X } from "lucide-react";
+import { Search, UserPlus, Filter, Edit, X, Plus, Minus, Upload } from "lucide-react";
 import useDebounce from "../../hooks/useDebounce";
 import useDocumentManagement from "../../hooks/useDocumentManagement";
 import DocumentUploadSection from "../../components/DocumentUploadSection";
@@ -38,6 +38,8 @@ const EmployeeListPage = () => {
     position: "",
     role: "Employee",
   });
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState(null);
 
   // Document Management Hook
   const {
@@ -70,6 +72,9 @@ const EmployeeListPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(res.data.employees || []);
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
     } catch (err) {
       console.error("Error fetching employees:", err);
       setError("Failed to fetch employee data.");
@@ -83,19 +88,24 @@ const EmployeeListPage = () => {
     fetchEmployees();
   }, [token, debouncedSearch]);
 
+  // Reset to first page on search or filter change
   useEffect(() => {
-    if (selectedEmployee && (activeTab === "documents" || activeTab === "salarySlips")) {
-      fetchDocs();
-    }
-  }, [selectedEmployee, activeTab, fetchDocs]);
+    setCurrentPage(1);
+  }, [debouncedSearch, filterDept]);
 
-  // Filtering & Pagination
+  // ✅ Get unique departments
   const departments = ["all", ...new Set(employees.map((emp) => emp.department))];
   const filteredEmployees = employees.filter((emp) => 
     filterDept === "all" || emp.department === filterDept
   );
 
-  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
+  // ✅ Apply department filter client-side
+  const filteredEmployees = employees.filter((emp) => {
+    const matchesDept = filterDept === "all" || emp.department === filterDept;
+    return matchesDept;
+  });
+
+  // Pagination calculations
   const indexOfLastEmployee = currentPage * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
   const paginatedEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
@@ -109,64 +119,114 @@ const EmployeeListPage = () => {
       personalEmail: employee.personalEmail || "",
       dateOfBirth: employee.dateOfBirth ? new Date(employee.dateOfBirth).toISOString().split('T')[0] : "",
       dateOfJoining: employee.dateOfJoining ? new Date(employee.dateOfJoining).toISOString().split('T')[0] : "",
-      allocatedLeaves: employee.allocatedLeaves || employee.availableLeaves || "",
+      allocatedLeaves: employee.allocatedLeaves || "",
       department: employee.department || "",
       position: employee.position || "",
       role: employee.role || "Employee",
     });
+    setProfilePhoto(null);
+    setProfilePhotoPreview(null);
+    setActiveTab("edit");
     setIsEditModalOpen(true);
   };
 
   const closeEditModal = () => {
     setIsEditModalOpen(false);
     setSelectedEmployee(null);
-    setActiveTab("edit");
+    setProfilePhoto(null);
+    setProfilePhotoPreview(null);
+  };
+
+  const handleProfilePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Only JPG and PNG files are allowed!');
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB!');
+        return;
+      }
+
+      setProfilePhoto(file);
+
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formDataToSend = new FormData();
+
+      // Append all form fields
+      Object.keys(formData).forEach(key => {
+        formDataToSend.append(key, formData[key]);
+      });
+
+      // Append profile photo if selected
+      if (profilePhoto) {
+        formDataToSend.append('profilePhoto', profilePhoto);
+      }
+
       await axiosInstance.put(
         `/admin/update-employee/${selectedEmployee.employeeId}`,
-        formData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
       );
       toast.success("Employee profile updated successfully");
       fetchEmployees();
       closeEditModal();
     } catch (err) {
-      toast.error("Failed to update employee");
+      console.error("Error updating employee:", err);
+      toast.error(err.response?.data?.message || "Failed to update employee");
     }
   };
 
-  if (loading) return (
-    <div className="flex flex-col justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-      <p>Loading employees...</p>
-    </div>
-  );
-
-  if (error) return (
-    <div className="flex justify-center items-center h-screen text-red-600 font-bold">{error}</div>
-  );
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-gray-500">Loading employees...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">👥 Employees</h2>
           <p className="text-gray-500 text-sm">{filteredEmployees.length} employees found</p>
         </div>
-        <Button onClick={() => navigate("/admin/add-employee")} variant="primary" className="flex items-center gap-2">
-          <UserPlus size={18} /> Add Employee
+        <Button
+          onClick={() => navigate("/admin/add-employee")}
+          variant="primary"
+          className="flex items-center gap-2 px-4 py-2 w-full sm:w-auto justify-center"
+        >
+          <UserPlus size={18} />
+          Add Employee
         </Button>
       </div>
 
-      {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           <input
             ref={searchInputRef}
             type="text"
@@ -177,114 +237,240 @@ const EmployeeListPage = () => {
           />
         </div>
         <div className="relative">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           <select
             className="pl-10 pr-8 py-2 border rounded-lg bg-white appearance-none"
             value={filterDept}
             onChange={(e) => setFilterDept(e.target.value)}
           >
-            {departments.map(dept => <option key={dept} value={dept}>{dept === "all" ? "All Departments" : dept}</option>)}
+            {departments.map((dept) => (
+              <option key={dept} value={dept}>{dept === "all" ? "All Departments" : dept}</option>
+            ))}
           </select>
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="p-3">ID</th>
-              <th className="p-3">Name</th>
-              <th className="p-3">Department</th>
-              <th className="p-3">Position</th>
-              <th className="p-3">Joining Date</th>
-              <th className="p-3">Actions</th>
+              {[
+                "Employee ID",
+                "Name",
+                "Work Email",
+                "Department",
+                "Position",
+                "Available Leave",
+                "Date of Joining",
+                "Actions",
+              ].map((head) => (
+                <th key={head} className="p-3 text-left font-semibold text-gray-700 whitespace-nowrap">{head}</th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {paginatedEmployees.length > 0 ? (
               paginatedEmployees.map((emp) => (
-                <tr key={emp._id} className="hover:bg-gray-50">
-                  <td className="p-3 font-mono text-xs">{emp.employeeId}</td>
-                  <td className="p-3 font-medium">{emp.name}</td>
-                  <td className="p-3">{emp.department}</td>
-                  <td className="p-3">{emp.position}</td>
-                  <td className="p-3">{new Date(emp.dateOfJoining).toLocaleDateString()}</td>
-                  <td className="p-3">
-                    <button onClick={() => openEditModal(emp)} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                <tr key={emp._id} className="hover:bg-gray-50 transition">
+                  <td className="p-3 font-mono text-xs text-gray-600 whitespace-nowrap">{emp.employeeId}</td>
+                  <td className="p-3 font-medium text-gray-900 capitalize whitespace-nowrap">{emp.name}</td>
+                  <td className="p-3 text-gray-700 whitespace-nowrap">{emp.workEmail}</td>
+                  <td className="p-3 text-gray-700 whitespace-nowrap">{emp.department}</td>
+                  <td className="p-3 text-gray-700 whitespace-nowrap">{emp.position}</td>
+                  <td className="p-3 text-gray-700 whitespace-nowrap font-medium text-emerald-600">
+                    {emp.availableLeaveBalance || 0} days
+                  </td>
+                  <td className="p-3 text-gray-700 whitespace-nowrap">
+                    {new Date(emp.dateOfJoining).toLocaleDateString("en-US", {
+                      year: "numeric", month: "short", day: "numeric",
+                    })}
+                  </td>
+                  <td className="p-3 whitespace-nowrap">
+                    <Button
+                      onClick={() => openEditModal(emp)}
+                      variant="primary"
+                      size="sm"
+                      className="flex items-center gap-1 px-3 py-1 text-xs"
+                    >
                       <Edit size={14} />
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))
             ) : (
-              <tr><td colSpan="6" className="p-10 text-center text-gray-400">No employees found.</td></tr>
+              <tr>
+                <td colSpan="8" className="text-center py-12">
+                  <div className="flex flex-col items-center">
+                    <div className="bg-gray-100 rounded-full p-4 mb-3">
+                      <Search className="text-gray-400" size={24} />
+                    </div>
+                    <p className="text-gray-500 font-medium">No employees found</p>
+                  </div>
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination Footer */}
-      {totalPages > 1 && (
-        <div className="flex justify-between items-center mt-6">
-          <span className="text-sm text-gray-500">Page {currentPage} of {totalPages}</span>
-          <div className="flex gap-2">
-            <Button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>Previous</Button>
-            <Button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>Next</Button>
+      <div className="mt-4 pt-4 border-t border-gray-100">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <span className="text-sm text-gray-500">
+            Showing {indexOfFirstEmployee + 1} to {Math.min(indexOfLastEmployee, filteredEmployees.length)} of {filteredEmployees.length} entries
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1 || totalPages <= 1}
+              className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-gray-700">Page {currentPage} of {totalPages}</span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages <= 1}
+              className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+            >
+              Next
+            </button>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Edit/Document Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6 border-b pb-4">
-              <div className="flex gap-2">
-                {["edit", "documents", "salarySlips"].map((tab) => (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex gap-4">
+                {["edit", "documents", "salarySlips"].map(tab => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium capitalize ${activeTab === tab ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600"}`}
+                    className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === tab ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                   >
-                    {tab.replace(/([A-Z])/g, ' $1')}
+                    {tab === "edit" ? "Edit Employee" : tab === "documents" ? "Employee Documents" : "Salary Slips"}
                   </button>
                 ))}
               </div>
-              <button onClick={closeEditModal} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
+              <button onClick={closeEditModal} className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition">
+                <X size={24} />
+              </button>
             </div>
 
-            {activeTab === "edit" ? (
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.keys(formData).map((key) => (
-                  <div key={key}>
-                    <label className="block text-xs font-semibold uppercase text-gray-500 mb-1">{key.replace(/([A-Z])/g, ' $1')}</label>
-                    {key === "role" ? (
-                      <select 
-                        value={formData[key]} 
-                        onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                        className="w-full p-2 border rounded-lg"
-                      >
-                        <option value="Employee">Employee</option>
-                        <option value="Admin">Admin</option>
-                      </select>
-                    ) : (
-                      <input
-                        type={key.includes("date") ? "date" : key === "allocatedLeaves" ? "number" : "text"}
-                        value={formData[key]}
-                        onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                        className="w-full p-2 border rounded-lg"
-                        required={key === "name"}
-                      />
-                    )}
+            {activeTab === "edit" && (
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {["name", "phone", "personalEmail", "dateOfBirth", "dateOfJoining"].map(field => (
+                  <div key={field}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
+                      {field.replace(/([A-Z])/g, ' $1').trim()}
+                    </label>
+                    <input
+                      type={field.includes("date") ? "date" : field === "personalEmail" ? "email" : "text"}
+                      value={formData[field]}
+                      onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required={field === "name"}
+                    />
                   </div>
                 ))}
-                <div className="col-span-full flex justify-end gap-3 mt-4">
-                  <Button variant="secondary" onClick={closeEditModal}>Cancel</Button>
-                  <Button type="submit">Update Profile</Button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Available Leave
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, allocatedLeaves: Math.max(0, Number(formData.allocatedLeaves) - 1) })}
+                      className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-gray-600"
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <div className="w-full px-3 py-2 border border-blue-50 bg-blue-50/50 rounded-lg text-center font-bold text-blue-700 text-lg">
+                      {Number(formData.allocatedLeaves) - (selectedEmployee?.approvedLeaveDays || 0)}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, allocatedLeaves: Number(formData.allocatedLeaves) + 1 })}
+                      className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-gray-600"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-1 text-center">
+                    Adjusting this updates total Allocated Leaves
+                  </p>
+                </div>
+                {["department", "position"].map(field => (
+                  <div key={field}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">{field}</label>
+                    <input
+                      type="text"
+                      value={formData[field]}
+                      onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                ))}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Employee">Employee</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                </div>
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Profile Photo (JPG, PNG only)
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer transition border border-gray-300">
+                      <Upload size={18} className="text-gray-600" />
+                      <span className="text-sm text-gray-700">Choose Photo</span>
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        onChange={handleProfilePhotoChange}
+                        className="hidden"
+                      />
+                    </label>
+                    {profilePhotoPreview && (
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={profilePhotoPreview}
+                          alt="Profile preview"
+                          className="w-16 h-16 rounded-full object-cover border-2 border-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfilePhoto(null);
+                            setProfilePhotoPreview(null);
+                          }}
+                          className="text-red-500 hover:text-red-700 text-sm"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                    {!profilePhotoPreview && profilePhoto && (
+                      <span className="text-sm text-gray-600">{profilePhoto.name}</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Maximum file size: 5MB</p>
+                </div>
+                <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+                  <button type="button" onClick={closeEditModal} className="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition">Cancel</button>
+                  <button type="submit" className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition">Update Employee</button>
                 </div>
               </form>
-            ) : (
+            )}
+
+            {(activeTab === "documents" || activeTab === "salarySlips") && (
               <DocumentUploadSection
                 selectedEmployee={selectedEmployee}
                 token={token}

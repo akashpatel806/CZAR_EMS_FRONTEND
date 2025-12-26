@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { useLeaveRequest } from "../../hooks/useLeaveRequest"; // ✅ Import the custom hook
 import Button from "../../components/Button";
 
-const LeaveRequestTable = () => {
-  const { leaveRequests, loading } = useLeaveRequest(); // ✅ Fetch leave data here
+const LeaveRequestTable = ({ leaveRequests: propsLeaveRequests, loading: propsLoading }) => {
+  const { leaveRequests: hookLeaveRequests, loading: hookLoading } = useLeaveRequest();
+
+  const leaveRequests = propsLeaveRequests || hookLeaveRequests || [];
+  const loading = propsLoading !== undefined ? propsLoading : hookLoading;
   const [selectedReason, setSelectedReason] = useState(null);
 
   if (loading) {
