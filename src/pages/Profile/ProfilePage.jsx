@@ -4,11 +4,8 @@ import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/Button";
-import { Filter, Eye, FileText } from "lucide-react";
-import { Filter, Eye, FileText } from "lucide-react";
+import { Filter, Eye, FileText, X } from "lucide-react";
 import SalarySlip from "../SalarySlips/SalarySlip";
-import MyDocuments from "./MyDocuments";
-import { BASE_URL } from "../../utils/attendanceUtils";
 import MyDocuments from "./MyDocuments";
 import { BASE_URL } from "../../utils/attendanceUtils";
 
@@ -42,7 +39,6 @@ const ProfilePage = () => {
   const [isLoadingSalarySlips, setIsLoadingSalarySlips] = useState(false);
   const [selectedYear, setSelectedYear] = useState('all');
   const [isViewingSalarySlips, setIsViewingSalarySlips] = useState(false);
-  const [isViewingDocuments, setIsViewingDocuments] = useState(false);
   const [isViewingDocuments, setIsViewingDocuments] = useState(false);
 
   // Group salary slips by year
@@ -412,11 +408,9 @@ const ProfilePage = () => {
                 variant="ghost"
                 size="icon"
                 onClick={handleCancelPassword}
-                className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 hover:bg-transparent"
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X size={24} />
               </Button>
               <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-blue-700 border-b pb-2">
                 Change Password
@@ -490,7 +484,6 @@ const ProfilePage = () => {
                 </div>
               </div>
               <div className="flex justify-end gap-3 mt-8">
-                <Button onClick={handleCancelPassword} variant="secondary">Cancel</Button>
                 <Button onClick={handleChangePassword} variant="primary">Update Password</Button>
               </div>
             </div>
@@ -501,6 +494,14 @@ const ProfilePage = () => {
         {isEditingProfile && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-xl p-5 sm:p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCancelProfile}
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={24} />
+              </Button>
               <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-blue-700 border-b pb-2">
                 Edit Profile
               </h3>
@@ -537,7 +538,6 @@ const ProfilePage = () => {
                 </div>
               </div>
               <div className="flex justify-end gap-3 mt-8">
-                <Button onClick={handleCancelProfile} variant="secondary">Cancel</Button>
                 <Button onClick={handleSaveProfile} variant="primary">Save Changes</Button>
               </div>
             </div>

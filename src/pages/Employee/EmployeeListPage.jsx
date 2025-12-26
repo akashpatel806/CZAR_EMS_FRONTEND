@@ -110,7 +110,6 @@ const EmployeeListPage = () => {
 
   const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
 
-
   // Pagination calculations
   const indexOfLastEmployee = currentPage * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
