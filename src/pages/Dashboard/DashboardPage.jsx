@@ -64,7 +64,7 @@ const DashboardPage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-600">
-        Loading dashboard...
+        Loading dashboard...⏳
       </div>
     );
   }
@@ -178,18 +178,17 @@ const DashboardPage = () => {
 
           {/* Modal for Employees On Leave Today */}
           {showLeaveModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowLeaveModal(false)}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
-                >
-                  <X size={24} />
-                </Button>
-                <div className="p-6 border-b flex justify-between items-center pr-12">
-                  <h3 className="text-xl font-bold">On Leave Today ({employeesOnLeave.length})</h3>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="fixed inset-0 bg-black/20" onClick={() => setShowLeaveModal(false)}></div>
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative z-10 animate-in fade-in zoom-in duration-200">
+                <div className="p-4 border-b flex justify-between items-center bg-white">
+                  <h3 className="text-lg font-bold text-gray-800">Employees On Leave Today ({employeesOnLeave.length})</h3>
+                  <button
+                    onClick={() => setShowLeaveModal(false)}
+                    className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
                 </div>
                 <div className="p-6 overflow-y-auto">
                   {employeesOnLeave.length === 0 ? (
@@ -246,15 +245,15 @@ const DashboardPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <p className="text-gray-500 text-sm">Allocated Leave</p>
+            <p className="text-gray-500 text-bold">Allocated Leave</p>
             <p className="text-3xl font-bold text-blue-600">{allocatedLeaves} days</p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <p className="text-gray-500 text-sm">Used (Approved)</p>
+            <p className="text-gray-500 text-bold">Approved</p>
             <p className="text-3xl font-bold text-green-600">{totalApprovedDays} days</p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <p className="text-gray-500 text-sm">Unpaid Leave</p>
+            <p className="text-gray-500 text-bold">Unpaid Leave</p>
             <p className="text-3xl font-bold text-red-600">
               {Math.max(0, totalApprovedDays - allocatedLeaves)} days
             </p>
