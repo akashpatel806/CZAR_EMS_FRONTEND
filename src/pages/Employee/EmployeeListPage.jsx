@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
-import { Search, UserPlus, Filter, Edit, X, Plus, Minus, Upload } from "lucide-react";
+import { Search, UserPlus, Filter, Edit, Trash2, X, Plus, Minus, Upload } from "lucide-react";
 import useDebounce from "../../hooks/useDebounce";
 import useDocumentManagement from "../../hooks/useDocumentManagement";
 import DocumentUploadSection from "../../components/DocumentUploadSection";
@@ -35,6 +35,9 @@ const EmployeeListPage = () => {
   });
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [profilePhotoPreview, setProfilePhotoPreview] = useState(null);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const employeesPerPage = 10;
@@ -134,6 +137,31 @@ const EmployeeListPage = () => {
     setProfilePhotoPreview(null);
     setActiveTab("edit");
     setIsEditModalOpen(true);
+  };
+
+  const openDeleteModal = (employee) => {
+    setEmployeeToDelete(employee);
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setEmployeeToDelete(null);
+  };
+
+  const handleDeleteEmployee = async () => {
+    if (!employeeToDelete) return;
+    try {
+      await axiosInstance.delete(`/admin/employee/${employeeToDelete._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Employee deleted successfully");
+      fetchEmployees();
+      closeDeleteModal();
+    } catch (err) {
+      console.error("Error deleting employee:", err);
+      toast.error(err.response?.data?.message || "Failed to delete employee");
+    }
   };
 
   const closeEditModal = () => {
@@ -294,14 +322,24 @@ const EmployeeListPage = () => {
                     })}
                   </td>
                   <td className="p-3 whitespace-nowrap">
-                    <Button
-                      onClick={() => openEditModal(emp)}
-                      variant="primary"
-                      size="sm"
-                      className="flex items-center gap-1 px-3 py-1 text-xs"
-                    >
-                      <Edit size={14} />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => openEditModal(emp)}
+                        variant="primary"
+                        size="sm"
+                        className="flex items-center gap-1 px-3 py-1 text-xs"
+                      >
+                        <Edit size={14} />
+                      </Button>
+                      <Button
+                        onClick={() => openDeleteModal(emp)}
+                        variant="destructive"
+                        size="sm"
+                        className="flex items-center gap-1 px-3 py-1 text-xs bg-red-500 hover:bg-red-600"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -503,6 +541,33 @@ const EmployeeListPage = () => {
                 showOnlySalarySlips={activeTab === "salarySlips"}
               />
             )}
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && employeeToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Delete Employee</h3>
+              <button
+                onClick={closeDeleteModal}
+                className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to delete <span className="font-medium text-gray-900">{employeeToDelete.name}</span>?
+            </p>
+            <div className="flex justify-center pt-4 border-t border-gray-200">
+              <button
+                onClick={handleDeleteEmployee}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium shadow-sm transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
