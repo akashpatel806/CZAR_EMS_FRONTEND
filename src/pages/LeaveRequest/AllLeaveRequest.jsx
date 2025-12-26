@@ -139,6 +139,20 @@ const AllLeaveRequests = () => {
 
   // ✅ Main UI when data exists
   return (
+<<<<<<< HEAD
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+      <div className="space-y-6 md:space-y-8">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-xl shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">All Leave Requests</h1>
+            <p className="text-blue-100">View and filter all leave requests.</p>
+          </div>
+          <Button
+            variant="ghost"
+            className="px-4 py-2 bg-white text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition w-full sm:w-auto"
+            onClick={() => navigate("/leave-request")}
+=======
     <div className="space-y-6 md:space-y-8">
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-xl shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -283,33 +297,168 @@ const AllLeaveRequests = () => {
           <div
             className="bg-white rounded-lg p-6 w-full shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
+>>>>>>> 0b2fcbe107bef81acabe4f383b26c0b38281aa92
           >
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 h-8 w-8 text-2xl"
-              onClick={() => setSelectedReason(null)}
+            ⬅️ Back to Pending
+          </Button>
+        </div>
+
+        {/* Filters */}
+        {leaveRequests.length > 0 && (
+          <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl shadow-md border border-gray-200">
+            <input
+              type="month"
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:w-auto focus:ring-2 focus:ring-indigo-500 outline-none"
+              onChange={(e) => {
+                const monthNum = e.target.value.split("-")[1];
+                setMonth(monthNum);
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Search by employee name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:flex-1 focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
+        )}
+
+        {/* Table */}
+        {filtered.length === 0 ? (
+          <div className="text-center text-gray-500 py-10">
+            No matching leave requests found for your filter.
+          </div>
+        ) : (
+          <div className="overflow-x-auto bg-white shadow-md rounded-xl border border-gray-200">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+                <tr>
+                  {[
+                    "empname",
+                    "deptartment(dept)",
+                    "Leave Type",
+                    "Leave Reason Type",
+                    "From date",
+                    "To date",
+                    "From Time",
+                    "To Time",
+                    "Reason",
+                    "Status",
+                  ].map((head) => (
+                    <th key={head} className="p-3 text-left whitespace-nowrap">
+                      {head}
+                    </th>
+                  ))}
+                  {role === "admin" && hasPending && <th className="p-3 text-left whitespace-nowrap">Action</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((req) => (
+                  <tr
+                    key={req._id}
+                    className="border-t hover:bg-gray-50 transition duration-150"
+                  >
+                    <td className="p-3 whitespace-nowrap">
+                      {req.employeeId?.name || req.employeeId?.userId?.name || "Unknown"}
+                    </td>
+                    <td className="p-3 whitespace-nowrap">
+                      {req.employeeId?.department || ""}
+                    </td>
+                    <td className="p-3 capitalize whitespace-nowrap">{req.leaveType}</td>
+                    <td className="p-3 capitalize whitespace-nowrap">{req.leaveReasonType}</td>
+                    <td className="p-3 whitespace-nowrap">
+                      {new Date(req.fromDate).toLocaleDateString()}
+                    </td>
+                    <td className="p-3 whitespace-nowrap">
+                      {new Date(req.toDate).toLocaleDateString()}
+                    </td>
+                    <td className="p-3 whitespace-nowrap">{req.fromTime || "N/A"}</td>
+                    <td className="p-3 whitespace-nowrap">{req.toTime || "N/A"}</td>
+                    <td
+                      className="p-3 cursor-pointer"
+                      onClick={() => setSelectedReason(req.reason)}
+                    >
+                      <div className="line-clamp-2 hover:text-blue-600 transition-colors" title="Click to view full reason">
+                        {req.reason}
+                      </div>
+                    </td>
+                    <td className="p-3 whitespace-nowrap">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${req.status === "Approved"
+                          ? "bg-green-100 text-green-700"
+                          : req.status === "Rejected"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-yellow-100 text-yellow-700"
+                          }`}
+                      >
+                        {req.status}
+                      </span>
+                    </td>
+                    {role === "admin" && req.status === "Pending" && (
+                      <td className="p-3 flex gap-2 whitespace-nowrap">
+                        <Button
+                          onClick={() => handleReview(req._id, "Approved")}
+                          variant="success"
+                          size="sm"
+                          className="px-3 py-1 text-xs"
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          onClick={() => handleReview(req._id, "Rejected")}
+                          variant="danger"
+                          size="sm"
+                          className="px-3 py-1 text-xs"
+                        >
+                          Reject
+                        </Button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Reason Modal */}
+        {selectedReason && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+            onClick={() => setSelectedReason(null)}
+          >
+            <div
+              className="bg-white rounded-lg p-6 w-full shadow-2xl relative"
+              onClick={(e) => e.stopPropagation()}
             >
-              &times;
-            </Button>
-            <h3 className="text-xl font-bold mb-4 text-gray-800">
-              Full Reason
-            </h3>
-            <div className="max-h-[60vh] overflow-y-auto text-gray-700 whitespace-pre-wrap leading-relaxed">
-              {selectedReason}
-            </div>
-            <div className="mt-6 text-right">
               <Button
-                variant="primary"
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 h-8 w-8 text-2xl"
                 onClick={() => setSelectedReason(null)}
-                className="px-4 py-2 text-white rounded-lg hover:bg-blue-700 transition"
               >
-                Close
+                &times;
               </Button>
+              <h3 className="text-xl font-bold mb-4 text-gray-800">
+                Full Reason
+              </h3>
+              <div className="max-h-[60vh] overflow-y-auto text-gray-700 whitespace-pre-wrap leading-relaxed">
+                {selectedReason}
+              </div>
+              <div className="mt-6 text-right">
+                <Button
+                  variant="primary"
+                  onClick={() => setSelectedReason(null)}
+                  className="px-4 py-2 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  Close
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

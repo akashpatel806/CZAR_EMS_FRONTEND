@@ -10,9 +10,11 @@ import toast from "react-hot-toast";
 import Button from "../../components/Button";
 
 const EmployeeListPage = () => {
-  const { token, user, role } = useAuth();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
+
+  // States
   const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -22,6 +24,9 @@ const EmployeeListPage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [activeTab, setActiveTab] = useState("edit");
+  const [currentPage, setCurrentPage] = useState(1);
+  const employeesPerPage = 10;
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -31,7 +36,7 @@ const EmployeeListPage = () => {
     allocatedLeaves: "",
     department: "",
     position: "",
-    role: "",
+    role: "Employee",
   });
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [profilePhotoPreview, setProfilePhotoPreview] = useState(null);
@@ -54,8 +59,6 @@ const EmployeeListPage = () => {
     setSalaryFromMonth,
     salaryToMonth,
     setSalaryToMonth,
-    isDocumentPreviewOpen,
-    previewDocument,
     fileInputRef,
     fetchDocs,
     handleFileUpload,
@@ -63,18 +66,10 @@ const EmployeeListPage = () => {
     handleDragLeave,
     handleDrop,
     handleViewDocument,
-    closeDocumentPreview,
     handleDeleteDocument,
   } = useDocumentManagement(selectedEmployee, token, activeTab === "salarySlips");
 
-  // Fetch documents when employee is selected or tab changes
-  useEffect(() => {
-    if (selectedEmployee && (activeTab === "documents" || activeTab === "salarySlips")) {
-      fetchDocs();
-    }
-  }, [selectedEmployee, activeTab, fetchDocs]);
-
-  // ✅ Fetch employees from backend with search
+  // Fetch employees
   const fetchEmployees = async () => {
     setLoading(true);
     try {
@@ -113,13 +108,15 @@ const EmployeeListPage = () => {
     return matchesDept;
   });
 
+  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
+
+
   // Pagination calculations
   const indexOfLastEmployee = currentPage * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
   const paginatedEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
-  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
 
-  // ✅ Handle edit modal
+  // Handlers
   const openEditModal = (employee) => {
     setSelectedEmployee(employee);
     setFormData({
@@ -246,9 +243,7 @@ const EmployeeListPage = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">👥 Employees</h2>
-          <p className="text-gray-500 text-sm mt-1">
-            {filteredEmployees.length} of {employees.length} employees
-          </p>
+          <p className="text-gray-500 text-sm">{filteredEmployees.length} employees found</p>
         </div>
         <Button
           onClick={() => navigate("/admin/add-employee")}
@@ -266,18 +261,18 @@ const EmployeeListPage = () => {
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search by name, ID, or email..."
+            placeholder="Search employees..."
+            className="w-full pl-10 pr-4 py-2 border rounded-lg"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="relative">
           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           <select
+            className="pl-10 pr-8 py-2 border rounded-lg bg-white appearance-none"
             value={filterDept}
             onChange={(e) => setFilterDept(e.target.value)}
-            className="w-full sm:w-auto pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
           >
             {departments.map((dept) => (
               <option key={dept} value={dept}>{dept === "all" ? "All Departments" : dept}</option>
@@ -287,8 +282,8 @@ const EmployeeListPage = () => {
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-gray-50 border-b">
             <tr>
               {[
                 "Employee ID",
