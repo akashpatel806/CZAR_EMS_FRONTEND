@@ -12,7 +12,7 @@ const LeaveRequestTable = ({ leaveRequests: propsLeaveRequests, loading: propsLo
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64 text-gray-500">
-        Loading leave requests...
+        Loading leave requests...⏳
       </div>
     );
   }
@@ -106,7 +106,7 @@ const LeaveRequestTable = ({ leaveRequests: propsLeaveRequests, loading: propsLo
             <h3 className="text-xl font-bold mb-4 text-gray-800">
               Full Reason
             </h3>
-            <div className="max-h-[60vh] overflow-y-auto text-gray-700 whitespace-pre-wrap leading-relaxed">
+            <div className=" overflow-y-auto text-gray-700 whitespace-pre-wrap leading-relaxed">
               {selectedReason}
             </div>
             <div className="mt-6 text-right">

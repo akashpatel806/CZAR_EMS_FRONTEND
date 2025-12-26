@@ -4,6 +4,8 @@ import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 import Button from "../../components/Button";
+import { X } from "lucide-react";
+
 
 const HolidayCalendarPage = () => {
   const { role, token } = useAuth();
@@ -163,7 +165,7 @@ const HolidayCalendarPage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-600">
-        Loading holidays...
+        Loading holidays...⏳
       </div>
     );
   }
@@ -175,7 +177,7 @@ const HolidayCalendarPage = () => {
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 sm:p-5 md:p-6 rounded-xl shadow-lg mb-6 md:mb-10 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
           <div className="text-center sm:text-left w-full sm:w-auto">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Holiday Calendar</h1>
+            <h1 className="text-xl sm:text-2xl md:text-2xl font-bold">Holiday Calendar</h1>
             <p className="text-sm sm:text-base text-blue-100 mt-1">
               View all upcoming holidays and plan your leaves effectively.
             </p>
@@ -293,9 +295,9 @@ const HolidayCalendarPage = () => {
               variant="ghost"
               size="icon"
               onClick={closeModal}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl sm:text-2xl w-8 h-8 flex items-center justify-center hover:bg-transparent"
+              className="absolute top-3 right-3 text-indigo-900/40 hover:text-indigo-900 transition-colors"
             >
-              ✖
+              <X size={24} strokeWidth={2.5} />
             </Button>
 
             <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-blue-700 border-b pb-2 pr-8">
@@ -373,14 +375,6 @@ const HolidayCalendarPage = () => {
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={closeModal}
-                  className="w-full sm:w-auto px-4 py-2 sm:py-2.5 text-sm sm:text-base font-medium transition-colors"
-                >
-                  Cancel
-                </Button>
                 <Button
                   type="submit"
                   variant="primary"
