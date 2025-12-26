@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import { useAuth } from "../../context/AuthContext";
 import axiosInstance from "../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import Button from "../../components/Button";
+// import Button from "../../components/Button";
 
 const DashboardPage = () => {
   const { profile: employeeProfile, loading } = useEmployeeProfile();

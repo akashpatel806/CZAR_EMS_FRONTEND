@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import LeaveRequestForm from "./LeaveRequestForm";
 import LeaveRequestTable from "./LeaveRequestTable";
 import { useNavigate } from "react-router-dom";

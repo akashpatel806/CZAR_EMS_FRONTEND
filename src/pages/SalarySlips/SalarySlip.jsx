@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
-import { Filter, Eye } from "lucide-react";
+import { Filter } from "lucide-react";
 import { BASE_URL } from "../../utils/attendanceUtils";
 
 const SalarySlip = () => {
@@ -8,14 +8,7 @@ const SalarySlip = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState('');
 
-  // Helper function to get month name from number
-  const getMonthName = (monthNum) => {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[monthNum - 1] || 'Invalid Month';
-  };
+
 
   // Helper function to get abbreviated month name from number
   const getAbbreviatedMonth = (monthNum) => {
