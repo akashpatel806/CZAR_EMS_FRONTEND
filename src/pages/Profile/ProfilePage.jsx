@@ -428,8 +428,10 @@ const ProfilePage = () => {
                     placeholder="Enter current password"
                     className="border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => togglePasswordVisibility('current')}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"
                   >
@@ -448,8 +450,10 @@ const ProfilePage = () => {
                     placeholder="Enter new password"
                     className="border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => togglePasswordVisibility('new')}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"
                   >
@@ -468,8 +472,10 @@ const ProfilePage = () => {
                     placeholder="Confirm new password"
                     className="border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => togglePasswordVisibility('confirm')}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"
                   >
