@@ -37,7 +37,7 @@
 
 
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import toast from "react-hot-toast";
 
 // Dynamically determine BASE_URL based on current hostname
@@ -56,16 +56,13 @@ export const useLeaveRequest = () => {
   const getMyLeaveRequests = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BASE_URL}/api/employee/my-leave-requests`, {
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        },
-      });
+      const response = await axiosInstance.get("/employee/my-leave-requests");
 
-      setLeaveRequests(response.data);
+      setLeaveRequests(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Fetch Leave Requests Error:", error);
       toast.error(error.response?.data?.message || "Failed to fetch leave requests");
+      setLeaveRequests([]);
     } finally {
       setLoading(false);
     }
@@ -76,14 +73,9 @@ export const useLeaveRequest = () => {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        `${BASE_URL}/api/employee/leave-requests`,
-        formData,
-        {
-          headers: {
-            Authorization: localStorage.getItem("token"),
-          },
-        }
+      const response = await axiosInstance.post(
+        "/employee/leave-requests",
+        formData
       );
 
       toast.success(response.data.message || "Leave request submitted successfully!");

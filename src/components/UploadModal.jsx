@@ -31,14 +31,47 @@ const UploadModal = ({ isOpen, onClose, defaultMonthYear, onUploadSuccess }) => 
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`${API_BASE_URL}/attendance/upload-attendance`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/attendance/upload-attendance`, formData, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+
+            // Show success message with details
+            let successMessage = `Upload successful! ${response.data.count} employees processed.`;
+
+            const warnings = [];
+
+            if (response.data.invalidRows && response.data.invalidRows.length > 0) {
+                warnings.push(`\n\n⚠️ ${response.data.invalidRows.length} rows with invalid employee IDs:\n${response.data.invalidRows.map(e => `${e.employeeId} - ${e.name} (${e.reason})`).join('\n')}`);
+            }
+
+            if (response.data.missingEmployees && response.data.missingEmployees.length > 0) {
+                warnings.push(`\n\n⚠️ ${response.data.missingEmployees.length} employees not found in database:\n${response.data.missingEmployees.map(e => `${e.employeeId} - ${e.name}`).join('\n')}`);
+            }
+
+            if (warnings.length > 0) {
+                alert(successMessage + warnings.join(''));
+            } else {
+                alert(successMessage);
+            }
+
             onUploadSuccess(`${selectedMonth}-${selectedYear}`);
             onClose();
         } catch (error) {
-            console.error(error);
-            alert('Upload failed. Check console for details.');
+            console.error('Upload error:', error);
+
+            // Display detailed error message
+            let errorMessage = 'Upload failed. ';
+            if (error.response?.data?.message) {
+                errorMessage += error.response.data.message;
+            } else if (error.response?.data?.error) {
+                errorMessage += error.response.data.error;
+            } else if (error.message) {
+                errorMessage += error.message;
+            } else {
+                errorMessage += 'Unknown error occurred.';
+            }
+
+            alert(errorMessage);
         } finally {
             setUploading(false);
         }
