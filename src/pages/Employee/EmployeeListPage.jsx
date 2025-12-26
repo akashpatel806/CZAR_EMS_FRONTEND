@@ -102,8 +102,16 @@ const EmployeeListPage = () => {
     return matchesDept;
   });
 
+<<<<<<< HEAD
   const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
 
+=======
+  // ✅ Apply department filter client-side
+  const filteredEmployees = employees.filter((emp) => {
+    const matchesDept = filterDept === "all" || emp.department === filterDept;
+    return matchesDept;
+  });
+>>>>>>> 0b2fcbe107bef81acabe4f383b26c0b38281aa92
 
   // Pagination calculations
   const indexOfLastEmployee = currentPage * employeesPerPage;

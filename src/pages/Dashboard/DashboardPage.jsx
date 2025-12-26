@@ -15,6 +15,10 @@ const DashboardPage = () => {
   const [employeesOnLeave, setEmployeesOnLeave] = useState([]);
   const [expandedReasons, setExpandedReasons] = useState({});
 
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [employeesOnLeave, setEmployeesOnLeave] = useState([]);
+  const [expandedReasons, setExpandedReasons] = useState({});
+
   const [adminStats, setAdminStats] = useState({
     totalEmployees: 0,
     onLeaveToday: 0,
@@ -88,6 +92,12 @@ const DashboardPage = () => {
 
   // ✅ Employee Summary (same as your current logic)
   const { leaveSummary = {}, leaveRequests = [], attendanceStatus = "present" } = employeeProfile || {};
+  const summary = {
+    pending: (leaveRequests || []).filter((r) => r?.status === "Pending").length,
+    approved: (leaveRequests || []).filter((r) => r?.status === "Approved" && r?.leaveReasonType?.toLowerCase() !== "sitevisit").length,
+    rejected: (leaveRequests || []).filter((r) => r?.status === "Rejected").length,
+    siteVisits: (leaveRequests || []).filter((r) => r?.status === "Approved" && r?.leaveReasonType?.toLowerCase() === "sitevisit").length,
+  };
   const summary = {
     pending: (leaveRequests || []).filter((r) => r?.status === "Pending").length,
     approved: (leaveRequests || []).filter((r) => r?.status === "Approved" && r?.leaveReasonType?.toLowerCase() !== "sitevisit").length,
@@ -457,6 +467,7 @@ const DashboardPage = () => {
   );
 
 };
+
 
 
 export default DashboardPage;

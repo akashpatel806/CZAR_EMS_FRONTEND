@@ -5,7 +5,10 @@ import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/Button";
 import { Filter, Eye, FileText } from "lucide-react";
+import { Filter, Eye, FileText } from "lucide-react";
 import SalarySlip from "../SalarySlips/SalarySlip";
+import MyDocuments from "./MyDocuments";
+import { BASE_URL } from "../../utils/attendanceUtils";
 import MyDocuments from "./MyDocuments";
 import { BASE_URL } from "../../utils/attendanceUtils";
 
@@ -39,6 +42,7 @@ const ProfilePage = () => {
   const [isLoadingSalarySlips, setIsLoadingSalarySlips] = useState(false);
   const [selectedYear, setSelectedYear] = useState('all');
   const [isViewingSalarySlips, setIsViewingSalarySlips] = useState(false);
+  const [isViewingDocuments, setIsViewingDocuments] = useState(false);
   const [isViewingDocuments, setIsViewingDocuments] = useState(false);
 
   // Group salary slips by year
