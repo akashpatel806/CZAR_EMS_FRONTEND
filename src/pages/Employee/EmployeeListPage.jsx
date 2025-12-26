@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
-import { Search, UserPlus, Filter, Edit, X, Plus, Minus } from "lucide-react";
+import { Search, UserPlus, Filter, Edit, Trash2, X, Plus, Minus, Upload } from "lucide-react";
 import useDebounce from "../../hooks/useDebounce";
 import useDocumentManagement from "../../hooks/useDocumentManagement";
 import DocumentUploadSection from "../../components/DocumentUploadSection";
@@ -33,6 +33,11 @@ const EmployeeListPage = () => {
     position: "",
     role: "",
   });
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState(null);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const employeesPerPage = 10;
@@ -128,29 +133,102 @@ const EmployeeListPage = () => {
       position: employee.position || "",
       role: employee.role || "Employee",
     });
+    setProfilePhoto(null);
+    setProfilePhotoPreview(null);
     setActiveTab("edit");
     setIsEditModalOpen(true);
+  };
+
+  const openDeleteModal = (employee) => {
+    setEmployeeToDelete(employee);
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setEmployeeToDelete(null);
+  };
+
+  const handleDeleteEmployee = async () => {
+    if (!employeeToDelete) return;
+    try {
+      await axiosInstance.delete(`/admin/employee/${employeeToDelete._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Employee deleted successfully");
+      fetchEmployees();
+      closeDeleteModal();
+    } catch (err) {
+      console.error("Error deleting employee:", err);
+      toast.error(err.response?.data?.message || "Failed to delete employee");
+    }
   };
 
   const closeEditModal = () => {
     setIsEditModalOpen(false);
     setSelectedEmployee(null);
+    setProfilePhoto(null);
+    setProfilePhotoPreview(null);
+  };
+
+  const handleProfilePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Only JPG and PNG files are allowed!');
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB!');
+        return;
+      }
+
+      setProfilePhoto(file);
+
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formDataToSend = new FormData();
+
+      // Append all form fields
+      Object.keys(formData).forEach(key => {
+        formDataToSend.append(key, formData[key]);
+      });
+
+      // Append profile photo if selected
+      if (profilePhoto) {
+        formDataToSend.append('profilePhoto', profilePhoto);
+      }
+
       await axiosInstance.put(
         `/admin/update-employee/${selectedEmployee.employeeId}`,
-        { ...formData, employeeId: parseInt(formData.employeeId) || formData.employeeId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
       );
       toast.success("Employee profile updated successfully");
       fetchEmployees();
       closeEditModal();
     } catch (err) {
       console.error("Error updating employee:", err);
-      toast.error("Failed to update employee");
+      toast.error(err.response?.data?.message || "Failed to update employee");
     }
   };
 
@@ -244,14 +322,24 @@ const EmployeeListPage = () => {
                     })}
                   </td>
                   <td className="p-3 whitespace-nowrap">
-                    <Button
-                      onClick={() => openEditModal(emp)}
-                      variant="primary"
-                      size="sm"
-                      className="flex items-center gap-1 px-3 py-1 text-xs"
-                    >
-                      <Edit size={14} />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => openEditModal(emp)}
+                        variant="primary"
+                        size="sm"
+                        className="flex items-center gap-1 px-3 py-1 text-xs"
+                      >
+                        <Edit size={14} />
+                      </Button>
+                      <Button
+                        onClick={() => openDeleteModal(emp)}
+                        variant="destructive"
+                        size="sm"
+                        className="flex items-center gap-1 px-3 py-1 text-xs bg-red-500 hover:bg-red-600"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -381,6 +469,46 @@ const EmployeeListPage = () => {
                     <option value="Admin">Admin</option>
                   </select>
                 </div>
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Profile Photo (JPG, PNG only)
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer transition border border-gray-300">
+                      <Upload size={18} className="text-gray-600" />
+                      <span className="text-sm text-gray-700">Choose Photo</span>
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        onChange={handleProfilePhotoChange}
+                        className="hidden"
+                      />
+                    </label>
+                    {profilePhotoPreview && (
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={profilePhotoPreview}
+                          alt="Profile preview"
+                          className="w-16 h-16 rounded-full object-cover border-2 border-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfilePhoto(null);
+                            setProfilePhotoPreview(null);
+                          }}
+                          className="text-red-500 hover:text-red-700 text-sm"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                    {!profilePhotoPreview && profilePhoto && (
+                      <span className="text-sm text-gray-600">{profilePhoto.name}</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Maximum file size: 5MB</p>
+                </div>
                 <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
                   <button type="button" onClick={closeEditModal} className="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition">Cancel</button>
                   <button type="submit" className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition">Update Employee</button>
@@ -413,6 +541,33 @@ const EmployeeListPage = () => {
                 showOnlySalarySlips={activeTab === "salarySlips"}
               />
             )}
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && employeeToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Delete Employee</h3>
+              <button
+                onClick={closeDeleteModal}
+                className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to delete <span className="font-medium text-gray-900">{employeeToDelete.name}</span>?
+            </p>
+            <div className="flex justify-center pt-4 border-t border-gray-200">
+              <button
+                onClick={handleDeleteEmployee}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium shadow-sm transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
