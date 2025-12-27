@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Upload, X } from 'lucide-react';
 import Button from './Button';
 import axios from 'axios';

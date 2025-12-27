@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useLeaveRequest } from "../../hooks/useLeaveRequest"; // ✅ Import the custom hook
 import Button from "../../components/Button";
 

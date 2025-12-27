@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { addNewEmployee } from "../../hooks/useEmployeeProfile";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";

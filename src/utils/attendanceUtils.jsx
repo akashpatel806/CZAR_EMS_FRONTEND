@@ -1,5 +1,3 @@
-// src/utils/attendanceUtils.js
-import React from 'react';
 import { CheckCircle, XCircle, Calendar as CalendarIcon } from 'lucide-react';
 
 // Dynamically determine Server base URL based on current hostname

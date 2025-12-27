@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLeaveRequest } from "../../hooks/useLeaveRequest"; // ✅ import your hook
 import { useEmployeeProfile } from "../../hooks/useEmployeeProfile"; // ✅ import profile hook
 import Button from "../../components/Button";

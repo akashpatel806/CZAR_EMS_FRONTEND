@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/Button";
-import { Filter, Eye, FileText, X } from "lucide-react";
+import { Eye, FileText, X } from "lucide-react";
 import SalarySlip from "../SalarySlips/SalarySlip";
 import MyDocuments from "./MyDocuments";
 import { BASE_URL } from "../../utils/attendanceUtils";
 
 const ProfilePage = () => {
-  const navigate = useNavigate();
   const { profile: employeeProfile, loading } = useEmployeeProfile();
   const { user, role, token } = useAuth();
 

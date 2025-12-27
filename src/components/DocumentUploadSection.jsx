@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import axiosInstance from '../api/axiosInstance';
+import { useState } from 'react';
 import { Upload, Trash2, Eye, Filter } from 'lucide-react';
 
 const DocumentUploadSection = ({
-  selectedEmployee,
-  token,
   documents,
   salarySlips,
   currentUploadType,
@@ -22,7 +19,6 @@ const DocumentUploadSection = ({
   handleDrop,
   handleViewDocument,
   handleDeleteDocument,
-  fetchDocs,
   showOnlySalarySlips,
 }) => {
   const [selectedYear, setSelectedYear] = useState('');
