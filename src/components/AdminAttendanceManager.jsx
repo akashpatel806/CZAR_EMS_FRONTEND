@@ -5,6 +5,7 @@ import Button from './Button';
 import MonthYearPicker from './MonthYearPicker'; // Sibling import
 import UploadModal from './UploadModal';         // Sibling import
 import EmployeeDetailLog from './EmployeeDetailLog'; // Sibling import
+import ConfirmationModal from './ConfirmationModal'; // New confirmation modal
 import useDebounce from '../hooks/useDebounce'; // Custom hook
 import { API_BASE_URL, getStatusIcon, getStatusColor, calculateNetWorkingDays } from '../utils/attendanceUtils.jsx'; // Up one level to utils
 
@@ -14,6 +15,7 @@ function AdminAttendanceManager() {
 
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const pickerRef = useRef(null);
 
     const [attendanceData, setAttendanceData] = useState([]);
@@ -116,10 +118,12 @@ function AdminAttendanceManager() {
         return `${hours}h ${minutes.toString().padStart(2, '0')}min`;
     };
 
+    const handleDeleteMonthClick = () => {
+        setIsDeleteModalOpen(true);
+    };
+
     const handleDeleteMonth = async () => {
-        if (!window.confirm(`Are you sure you want to delete ALL attendance data for ${displayDate}? This action cannot be undone.`)) {
-            return;
-        }
+        setIsDeleteModalOpen(false); // Close modal first
 
         try {
             const token = localStorage.getItem('token');
@@ -162,6 +166,18 @@ function AdminAttendanceManager() {
                 onUploadSuccess={(newVal) => { setIsUploadModalOpen(false); setCurrentMonthYear(newVal); fetchAttendanceData(); }}
             />
 
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteMonth}
+                title="Delete Month Data"
+                message={`Are you sure you want to delete ALL attendance data for ${displayDate}?`}
+                confirmText="Delete"
+                cancelText="Cancel"
+                variant="danger"
+                showCancelButton={false}
+            />
+
             <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl shadow-lg mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-2xl md:text-2xl font-bold">Attendance Management</h2>
                 <p className="text-xs sm:text-sm opacity-90 mt-1">Review and manage all employee attendance records.</p>
@@ -198,7 +214,7 @@ function AdminAttendanceManager() {
                     {attendanceData.length > 0 && (
                         <Button
                             variant="danger"
-                            onClick={handleDeleteMonth}
+                            onClick={handleDeleteMonthClick}
                             className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 flex items-center transition w-full sm:w-auto justify-center"
                         >
                             <span className="font-semibold text-xs sm:text-sm">Delete Month Data</span>
