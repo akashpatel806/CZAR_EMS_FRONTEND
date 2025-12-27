@@ -67,7 +67,7 @@ const MyDocuments = () => {
                                 </div>
                             </div>
                             <a
-                                href={`${BASE_URL}/uploads/documents/${doc.filename}`}
+                                href={`${BASE_URL}/employee/documents/view/${doc._id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"

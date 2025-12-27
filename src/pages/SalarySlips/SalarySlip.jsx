@@ -106,7 +106,7 @@ const SalarySlip = () => {
                     </div>
 
                     <a
-                      href={`${BASE_URL}/uploads/documents/${slip.filename}`}
+                      href={`${BASE_URL}/employee/documents/view/${slip._id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-purple-600 hover:text-purple-800"
