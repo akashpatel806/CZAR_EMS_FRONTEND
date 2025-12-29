@@ -91,6 +91,13 @@ const EmployeeListPage = () => {
     fetchEmployees();
   }, [token, debouncedSearch]);
 
+  // Fetch documents when tab changes
+  useEffect(() => {
+    if (selectedEmployee && (activeTab === "documents" || activeTab === "salarySlips")) {
+      fetchDocs();
+    }
+  }, [activeTab, selectedEmployee]);
+
   // Reset to first page on search or filter change
   useEffect(() => {
     setCurrentPage(1);
@@ -276,7 +283,7 @@ const EmployeeListPage = () => {
           <thead className="bg-gray-50 border-b">
             <tr>
               {[
-                "Employee ID", "Name", "Work Email", "Department", 
+                "Employee ID", "Name", "Work Email", "Department",
                 "Position", "Available Leave", "Date of Joining", "Actions",
               ].map((head) => (
                 <th key={head} className="p-3 text-left font-semibold text-gray-700 whitespace-nowrap">{head}</th>
