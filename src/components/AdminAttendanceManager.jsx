@@ -44,7 +44,10 @@ function AdminAttendanceManager() {
                 params: { month, year, search: debouncedSearch },
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            setAttendanceData(response.data);
+            // Filter out sparse records (e.g. only holidays/leaves) to prevent displaying "0 hours" entries
+            // Only show records with significant data (more than 15 days)
+            const validRecords = response.data.filter(record => record.attendance && record.attendance.length > 15);
+            setAttendanceData(validRecords);
         } catch (error) {
             console.error("Error fetching data:", error);
             setAttendanceData([]);

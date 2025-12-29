@@ -30,7 +30,14 @@ function EmployeeAttendanceView() {
                 });
 
                 if (response.data && response.data.length > 0) {
-                    setMyRecord(response.data[0]);
+                    const record = response.data[0];
+                    // Only show calendar if we have significant data (e.g. > 15 days)
+                    // This prevents sparse records (like single holiday/leave) from showing a mostly empty calendar
+                    if (record.attendance && record.attendance.length > 15) {
+                        setMyRecord(record);
+                    } else {
+                        setMyRecord(null);
+                    }
                 } else {
                     setMyRecord(null);
                 }

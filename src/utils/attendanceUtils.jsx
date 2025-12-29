@@ -54,7 +54,7 @@ export const generateCalendarDates = (year, month, attendanceArray) => {
         const dayOfWeek = new Date(year, month, i).getDay();
         const record = recordsMap[i];
 
-        let status = 'Absent';
+        let status = '-';
         if (record) {
             status = record.status;
             // If it's a leave and leaveType is siteVisit, change status to "Site Visit"
@@ -64,7 +64,7 @@ export const generateCalendarDates = (year, month, attendanceArray) => {
         }
 
 
-        if (dayOfWeek === 0 && (status === 'Absent' || status === 'Missed Punch')) {
+        if (dayOfWeek === 0 && (status === 'Absent' || status === 'Missed Punch' || status === '-')) {
             status = 'Weekend';
         }
 
