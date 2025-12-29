@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { Filter } from "lucide-react";
-import { BASE_URL } from "../../utils/attendanceUtils";
+
 
 const SalarySlip = () => {
   const [salarySlips, setSalarySlips] = useState([]);
@@ -105,14 +105,24 @@ const SalarySlip = () => {
                       </div>
                     </div>
 
-                    <a
-                      href={`${BASE_URL}/employee/documents/view/${slip._id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-purple-600 hover:text-purple-800"
+                    <button
+                      onClick={async () => {
+                        try {
+                          const response = await axiosInstance.get(`/employee/documents/view/${slip._id}`, {
+                            responseType: 'blob'
+                          });
+                          const blob = new Blob([response.data], { type: 'application/pdf' });
+                          const url = window.URL.createObjectURL(blob);
+                          window.open(url, '_blank');
+                        } catch (error) {
+                          console.error("Error viewing slip:", error);
+                          alert("Failed to view salary slip");
+                        }
+                      }}
+                      className="text-purple-600 hover:text-purple-800 font-medium text-sm hover:underline"
                     >
                       View Slip
-                    </a>
+                    </button>
                   </div>
                 ))}
               </div>
