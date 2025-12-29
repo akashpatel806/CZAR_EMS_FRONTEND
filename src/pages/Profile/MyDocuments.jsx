@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { Eye, FileText } from "lucide-react";
-import { BASE_URL } from "../../utils/attendanceUtils";
+
 
 const MyDocuments = () => {
     const [documents, setDocuments] = useState([]);
@@ -31,6 +31,22 @@ const MyDocuments = () => {
             other: 'Other Document'
         };
         return labels[type] || type.charAt(0).toUpperCase() + type.slice(1);
+    };
+
+    const handleViewDocument = async (docId) => {
+        try {
+            const response = await axiosInstance.get(`/employee/documents/view/${docId}`, {
+                responseType: 'blob'
+            });
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        } catch (error) {
+            console.error("Error viewing document:", error);
+            // Assuming toast is available via react-hot-toast or similar, if not installed I'll use alert or console
+            // Ideally import toast if project uses it. The project uses react-hot-toast in other files.
+            alert("Failed to view document");
+        }
     };
 
     return (
@@ -66,15 +82,13 @@ const MyDocuments = () => {
                                     </p>
                                 </div>
                             </div>
-                            <a
-                                href={`${BASE_URL}/employee/documents/view/${doc._id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            <button
+                                onClick={() => handleViewDocument(doc._id)}
                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
                                 title="View Document"
                             >
                                 <Eye size={20} />
-                            </a>
+                            </button>
                         </div>
                     ))}
                 </div>
