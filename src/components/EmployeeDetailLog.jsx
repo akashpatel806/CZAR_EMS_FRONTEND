@@ -139,7 +139,7 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
             {viewMode === 'calendar' ? (
                 <>
                     <h4 className="text-base sm:text-lg font-bold text-gray-700 mb-3 mt-4 sm:mt-6">Monthly Calendar View</h4>
-                    {attendance && attendance.length > 0 ? (
+                    {attendance && attendance.length > 15 ? (
                         <div className="border border-gray-200 rounded-lg p-2 sm:p-4 mb-6 sm:mb-8">
                             <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center font-medium text-gray-500 uppercase text-[10px] sm:text-xs mb-2">
                                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
@@ -187,7 +187,7 @@ const EmployeeDetailLog = ({ employeeRecord, onBack }) => {
             ) : (
                 <>
                     <h4 className="text-base sm:text-lg font-bold text-gray-700 mb-3">Detail Log</h4>
-                    {attendance && attendance.length > 0 ? (
+                    {attendance && attendance.length > 15 ? (
                         <div className="overflow-x-auto border border-gray-200 rounded-lg">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
