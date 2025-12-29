@@ -88,7 +88,7 @@ const UploadModal = ({ isOpen, onClose, defaultMonthYear, onUploadSuccess }) => 
                 </div>
 
                 <div className="mb-8">
-                    <input type="file" accept=".xlsx, .csv" onChange={e => { setFile(e.target.files[0]); setError(''); }} className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                    <input type="file" accept=".pdf" onChange={e => { setFile(e.target.files[0]); setError(''); }} className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
                     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
                 </div>
 
