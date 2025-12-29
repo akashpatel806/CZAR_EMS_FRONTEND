@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import { getStatusColor, getStatusIcon, generateCalendarDates, formatDecimalHours, formatLongTime, API_BASE_URL } from '../utils/attendanceUtils'; // Updated Path

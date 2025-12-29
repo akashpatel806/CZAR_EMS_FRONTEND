@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
@@ -10,9 +10,11 @@ import toast from "react-hot-toast";
 import Button from "../../components/Button";
 
 const EmployeeListPage = () => {
-  const { token, user, role } = useAuth();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
+
+  // States
   const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -22,6 +24,9 @@ const EmployeeListPage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [activeTab, setActiveTab] = useState("edit");
+  const [currentPage, setCurrentPage] = useState(1);
+  const employeesPerPage = 10;
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -31,16 +36,13 @@ const EmployeeListPage = () => {
     allocatedLeaves: "",
     department: "",
     position: "",
-    role: "",
+    role: "Employee",
   });
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [profilePhotoPreview, setProfilePhotoPreview] = useState(null);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const employeesPerPage = 10;
 
   // Use the document management hook
   const {
@@ -54,8 +56,6 @@ const EmployeeListPage = () => {
     setSalaryFromMonth,
     salaryToMonth,
     setSalaryToMonth,
-    isDocumentPreviewOpen,
-    previewDocument,
     fileInputRef,
     fetchDocs,
     handleFileUpload,
@@ -63,18 +63,10 @@ const EmployeeListPage = () => {
     handleDragLeave,
     handleDrop,
     handleViewDocument,
-    closeDocumentPreview,
     handleDeleteDocument,
   } = useDocumentManagement(selectedEmployee, token, activeTab === "salarySlips");
 
-  // Fetch documents when employee is selected or tab changes
-  useEffect(() => {
-    if (selectedEmployee && (activeTab === "documents" || activeTab === "salarySlips")) {
-      fetchDocs();
-    }
-  }, [selectedEmployee, activeTab, fetchDocs]);
-
-  // ✅ Fetch employees from backend with search
+  // Fetch employees
   const fetchEmployees = async () => {
     setLoading(true);
     try {
@@ -99,27 +91,35 @@ const EmployeeListPage = () => {
     fetchEmployees();
   }, [token, debouncedSearch]);
 
+  // Fetch documents when tab changes
+  useEffect(() => {
+    if (selectedEmployee && (activeTab === "documents" || activeTab === "salarySlips")) {
+      fetchDocs();
+    }
+  }, [activeTab, selectedEmployee]);
+
   // Reset to first page on search or filter change
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearch, filterDept]);
 
-  // ✅ Get unique departments
+  // Get unique departments
   const departments = ["all", ...new Set(employees.map((emp) => emp.department))];
 
-  // ✅ Apply department filter client-side
+  // Apply department filter client-side
   const filteredEmployees = employees.filter((emp) => {
     const matchesDept = filterDept === "all" || emp.department === filterDept;
     return matchesDept;
   });
 
+  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
+
   // Pagination calculations
   const indexOfLastEmployee = currentPage * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
   const paginatedEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
-  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
 
-  // ✅ Handle edit modal
+  // Handlers
   const openEditModal = (employee) => {
     setSelectedEmployee(employee);
     setFormData({
@@ -174,14 +174,12 @@ const EmployeeListPage = () => {
   const handleProfilePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!validTypes.includes(file.type)) {
         toast.error('Only JPG and PNG files are allowed!');
         return;
       }
 
-      // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('File size must be less than 5MB!');
         return;
@@ -189,7 +187,6 @@ const EmployeeListPage = () => {
 
       setProfilePhoto(file);
 
-      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePhotoPreview(reader.result);
@@ -202,13 +199,10 @@ const EmployeeListPage = () => {
     e.preventDefault();
     try {
       const formDataToSend = new FormData();
-
-      // Append all form fields
       Object.keys(formData).forEach(key => {
         formDataToSend.append(key, formData[key]);
       });
 
-      // Append profile photo if selected
       if (profilePhoto) {
         formDataToSend.append('profilePhoto', profilePhoto);
       }
@@ -246,9 +240,7 @@ const EmployeeListPage = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">👥 Employees</h2>
-          <p className="text-gray-500 text-sm mt-1">
-            {filteredEmployees.length} of {employees.length} employees
-          </p>
+          <p className="text-gray-500 text-sm">{filteredEmployees.length} employees found</p>
         </div>
         <Button
           onClick={() => navigate("/admin/add-employee")}
@@ -266,18 +258,18 @@ const EmployeeListPage = () => {
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search by name, ID, or email..."
+            placeholder="Search employees..."
+            className="w-full pl-10 pr-4 py-2 border rounded-lg"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="relative">
           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           <select
+            className="pl-10 pr-8 py-2 border rounded-lg bg-white appearance-none"
             value={filterDept}
             onChange={(e) => setFilterDept(e.target.value)}
-            className="w-full sm:w-auto pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
           >
             {departments.map((dept) => (
               <option key={dept} value={dept}>{dept === "all" ? "All Departments" : dept}</option>
@@ -287,18 +279,12 @@ const EmployeeListPage = () => {
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-gray-50 border-b">
             <tr>
               {[
-                "Employee ID",
-                "Name",
-                "Work Email",
-                "Department",
-                "Position",
-                "Available Leave",
-                "Date of Joining",
-                "Actions",
+                "Employee ID", "Name", "Work Email", "Department",
+                "Position", "Available Leave", "Date of Joining", "Actions",
               ].map((head) => (
                 <th key={head} className="p-3 text-left font-semibold text-gray-700 whitespace-nowrap">{head}</th>
               ))}
@@ -323,20 +309,10 @@ const EmployeeListPage = () => {
                   </td>
                   <td className="p-3 whitespace-nowrap">
                     <div className="flex gap-2">
-                      <Button
-                        onClick={() => openEditModal(emp)}
-                        variant="primary"
-                        size="sm"
-                        className="flex items-center gap-1 px-3 py-1 text-xs"
-                      >
+                      <Button onClick={() => openEditModal(emp)} variant="primary" size="sm" className="flex items-center gap-1 px-3 py-1 text-xs">
                         <Edit size={14} />
                       </Button>
-                      <Button
-                        onClick={() => openDeleteModal(emp)}
-                        variant="destructive"
-                        size="sm"
-                        className="flex items-center gap-1 px-3 py-1 text-xs bg-red-500 hover:bg-red-600"
-                      >
+                      <Button onClick={() => openDeleteModal(emp)} variant="destructive" size="sm" className="flex items-center gap-1 px-3 py-1 text-xs bg-red-500 hover:bg-red-600">
                         <Trash2 size={14} />
                       </Button>
                     </div>
@@ -421,9 +397,7 @@ const EmployeeListPage = () => {
                   </div>
                 ))}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Available Leave
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Available Leave</label>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -443,9 +417,6 @@ const EmployeeListPage = () => {
                       <Plus size={16} />
                     </button>
                   </div>
-                  <p className="text-[10px] text-gray-400 mt-1 text-center">
-                    Adjusting this updates total Allocated Leaves
-                  </p>
                 </div>
                 {["department", "position"].map(field => (
                   <div key={field}>
@@ -470,44 +441,20 @@ const EmployeeListPage = () => {
                   </select>
                 </div>
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Profile Photo (JPG, PNG only)
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo (JPG, PNG only)</label>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer transition border border-gray-300">
                       <Upload size={18} className="text-gray-600" />
                       <span className="text-sm text-gray-700">Choose Photo</span>
-                      <input
-                        type="file"
-                        accept=".jpg,.jpeg,.png"
-                        onChange={handleProfilePhotoChange}
-                        className="hidden"
-                      />
+                      <input type="file" accept=".jpg,.jpeg,.png" onChange={handleProfilePhotoChange} className="hidden" />
                     </label>
                     {profilePhotoPreview && (
                       <div className="flex items-center gap-3">
-                        <img
-                          src={profilePhotoPreview}
-                          alt="Profile preview"
-                          className="w-16 h-16 rounded-full object-cover border-2 border-blue-500"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setProfilePhoto(null);
-                            setProfilePhotoPreview(null);
-                          }}
-                          className="text-red-500 hover:text-red-700 text-sm"
-                        >
-                          Remove
-                        </button>
+                        <img src={profilePhotoPreview} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-blue-500" />
+                        <button type="button" onClick={() => { setProfilePhoto(null); setProfilePhotoPreview(null); }} className="text-red-500 hover:text-red-700 text-sm">Remove</button>
                       </div>
                     )}
-                    {!profilePhotoPreview && profilePhoto && (
-                      <span className="text-sm text-gray-600">{profilePhoto.name}</span>
-                    )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Maximum file size: 5MB</p>
                 </div>
                 <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
                   <button type="button" onClick={closeEditModal} className="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition">Cancel</button>
@@ -550,23 +497,13 @@ const EmployeeListPage = () => {
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Delete Employee</h3>
-              <button
-                onClick={closeDeleteModal}
-                className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition"
-              >
+              <button onClick={closeDeleteModal} className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition">
                 <X size={20} />
               </button>
             </div>
-            <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to delete <span className="font-medium text-gray-900">{employeeToDelete.name}</span>?
-            </p>
+            <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete <span className="font-medium text-gray-900">{employeeToDelete.name}</span>?</p>
             <div className="flex justify-center pt-4 border-t border-gray-200">
-              <button
-                onClick={handleDeleteEmployee}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium shadow-sm transition"
-              >
-                Delete
-              </button>
+              <button onClick={handleDeleteEmployee} className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium shadow-sm transition">Delete</button>
             </div>
           </div>
         </div>

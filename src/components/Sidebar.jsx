@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Button from "./Button";
@@ -27,7 +26,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
     >
       <div className="p-6 flex flex-col h-full">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-bold text-blue-600">CZAR EMS</h2>
+          <h2 className="text-3xl font-bold text-blue-600 item-center">EMS</h2>
           {/* Close button for mobile */}
           <Button onClick={closeSidebar} variant="ghost" size="icon" className="md:hidden text-gray-500 text-2xl">
             ×

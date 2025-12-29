@@ -1,21 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
-import { Filter, Eye } from "lucide-react";
-import { BASE_URL } from "../../utils/attendanceUtils";
+import { Filter } from "lucide-react";
+
 
 const SalarySlip = () => {
   const [salarySlips, setSalarySlips] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState('');
 
-  // Helper function to get month name from number
-  const getMonthName = (monthNum) => {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[monthNum - 1] || 'Invalid Month';
-  };
+
 
   // Helper function to get abbreviated month name from number
   const getAbbreviatedMonth = (monthNum) => {
@@ -112,14 +105,24 @@ const SalarySlip = () => {
                       </div>
                     </div>
 
-                    <a
-                      href={`${BASE_URL}/uploads/documents/${slip.filename}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-purple-600 hover:text-purple-800"
+                    <button
+                      onClick={async () => {
+                        try {
+                          const response = await axiosInstance.get(`/employee/documents/view/${slip._id}`, {
+                            responseType: 'blob'
+                          });
+                          const blob = new Blob([response.data], { type: 'application/pdf' });
+                          const url = window.URL.createObjectURL(blob);
+                          window.open(url, '_blank');
+                        } catch (error) {
+                          console.error("Error viewing slip:", error);
+                          alert("Failed to view salary slip");
+                        }
+                      }}
+                      className="text-purple-600 hover:text-purple-800 font-medium text-sm hover:underline"
                     >
                       View Slip
-                    </a>
+                    </button>
                   </div>
                 ))}
               </div>

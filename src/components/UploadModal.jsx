@@ -17,11 +17,16 @@ const UploadModal = ({ isOpen, onClose, defaultMonthYear, onUploadSuccess }) => 
     const [selectedYear, setSelectedYear] = useState(defaultYear);
     const [file, setFile] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState('');
 
     if (!isOpen) return null;
 
     const handleFileUpload = async () => {
-        if (!file) return alert('Please select a file.');
+        if (!file) {
+            setError('Please select a file.');
+            return;
+        }
+        setError('');
         setUploading(true);
 
         const formData = new FormData();
@@ -34,25 +39,6 @@ const UploadModal = ({ isOpen, onClose, defaultMonthYear, onUploadSuccess }) => 
             const response = await axios.post(`${API_BASE_URL}/attendance/upload-attendance`, formData, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-
-            // Show success message with details
-            let successMessage = `Upload successful! ${response.data.count} employees processed.`;
-
-            const warnings = [];
-
-            if (response.data.invalidRows && response.data.invalidRows.length > 0) {
-                warnings.push(`\n\n⚠️ ${response.data.invalidRows.length} rows with invalid employee IDs:\n${response.data.invalidRows.map(e => `${e.employeeId} - ${e.name} (${e.reason})`).join('\n')}`);
-            }
-
-            if (response.data.missingEmployees && response.data.missingEmployees.length > 0) {
-                warnings.push(`\n\n⚠️ ${response.data.missingEmployees.length} employees not found in database:\n${response.data.missingEmployees.map(e => `${e.employeeId} - ${e.name}`).join('\n')}`);
-            }
-
-            if (warnings.length > 0) {
-                alert(successMessage + warnings.join(''));
-            } else {
-                alert(successMessage);
-            }
 
             onUploadSuccess(`${selectedMonth}-${selectedYear}`);
             onClose();
@@ -71,7 +57,8 @@ const UploadModal = ({ isOpen, onClose, defaultMonthYear, onUploadSuccess }) => 
                 errorMessage += 'Unknown error occurred.';
             }
 
-            alert(errorMessage);
+            console.error(errorMessage);
+            setError(errorMessage);
         } finally {
             setUploading(false);
         }
@@ -101,7 +88,8 @@ const UploadModal = ({ isOpen, onClose, defaultMonthYear, onUploadSuccess }) => 
                 </div>
 
                 <div className="mb-8">
-                    <input type="file" accept=".xlsx, .csv" onChange={e => setFile(e.target.files[0])} className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                    <input type="file" accept=".pdf" onChange={e => { setFile(e.target.files[0]); setError(''); }} className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
                 </div>
 
                 <Button onClick={handleFileUpload} disabled={!file || uploading} isLoading={uploading} fullWidth variant="primary">

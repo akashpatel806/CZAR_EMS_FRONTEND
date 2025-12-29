@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../Layout/MainLayout";
 import DashboardPage from "../pages/Dashboard/DashboardPage";
@@ -13,6 +12,7 @@ import PrivateRoute from "./PrivateRoute";
 import { AuthProvider } from "../context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import AllLeaveRequests from "../pages/LeaveRequest/AllLeaveRequest"
+
 
 // ✅ Admin Pages
 import AddEmployeePage from "../pages/Employee/AddEmployeePage";

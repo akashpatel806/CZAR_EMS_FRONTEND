@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { User, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import Button from './Button';
 import axios from 'axios';
@@ -57,7 +57,7 @@ function EmployeeAttendanceView() {
             <div className="bg-white shadow-xl rounded-xl sm:rounded-2xl overflow-hidden">
                 <div className="p-4 sm:p-5 md:p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
                     <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
-                        <h2 className="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight">Personal Attendance</h2>
+                        <h2 className="text-lg sm:text-2xl md:text-2xl font-bold tracking-tight">Personal Attendance</h2>
                         <p className="text-[10px] sm:text-sm font-medium opacity-80 uppercase tracking-wider">{userName}</p>
                     </div>
                     <Button

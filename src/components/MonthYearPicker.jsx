@@ -1,5 +1,5 @@
 // src/components/MonthYearPicker.jsx
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import Button from './Button';
 
 const MONTHS = [
