@@ -8,6 +8,8 @@ import Attendance from "../pages/Attendance/Attendance";
 import SalarySlip from "../pages/SalarySlips/SalarySlip";
 import ErrorComponent from "../components/ErrorComponent";
 import Login from "../pages/Login/Login";
+import ForgotPassword from "../pages/Login/ForgotPassword";
+
 import PrivateRoute from "./PrivateRoute";
 import { AuthProvider } from "../context/AuthContext";
 import { NotificationProvider } from "../context/NotificationContext";
@@ -44,6 +46,7 @@ export default function AppRoutes() {
             <Routes>
               {/* 🌐 Public Routes */}
               <Route path="/login" element={<Login />} />
+
 
               {/* 🔒 Protected App Routes (uses MainLayout for all roles) */}
               <Route
